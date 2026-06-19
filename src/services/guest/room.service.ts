@@ -1,11 +1,11 @@
 import { RoomResponse } from "@constant/response/RoomResponse";
-import httpClient from "..";
+import httpPublic from "..";
 
 const BASE_URL = "/public/rooms";
 
 class GuestRoomService {
   static async getById(id: number): Promise<RoomResponse> {
-    const { data } = await httpClient.get(`${BASE_URL}/${id}`);
+    const { data } = await httpPublic.get(`${BASE_URL}/${id}`);
 
     return data;
   }

@@ -14,6 +14,12 @@ export const AxiosInstanceDefault = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+export const AxiosInstancePublic = axios.create({
+  baseURL: BASE_URL,
+  timeout: TIME_REQUEST,
+  headers: { "Content-Type": "application/json" },
+});
+
 AxiosInstanceDefault.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem("token");
@@ -113,6 +119,24 @@ const httpClient = {
   },
   delete<T = any>(url: string, config?: AxiosRequestConfig) {
     return AxiosInstanceDefault.delete<T, T>(url, config);
+  },
+};
+
+export const httpPublic = {
+  get<T = any>(url: string, config?: AxiosRequestConfig) {
+    return AxiosInstancePublic.get<T, T>(url, config);
+  },
+  post<T = any>(url: string, data?: any, config?: AxiosRequestConfig) {
+    return AxiosInstancePublic.post<T, T>(url, data, config);
+  },
+  put<T = any>(url: string, data?: any, config?: AxiosRequestConfig) {
+    return AxiosInstancePublic.put<T, T>(url, data, config);
+  },
+  patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig) {
+    return AxiosInstancePublic.patch<T, T>(url, data, config);
+  },
+  delete<T = any>(url: string, config?: AxiosRequestConfig) {
+    return AxiosInstancePublic.delete<T, T>(url, config);
   },
 };
 

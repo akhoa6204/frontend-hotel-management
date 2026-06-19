@@ -1,5 +1,5 @@
 import { PaymentCreationRequest } from "@constant/request/PaymentCreationRequest";
-import httpClient from "..";
+import httpPublic from "..";
 import { CheckoutLinkResponse } from "@constant/response/CheckoutLinkResponse";
 import { PaymentResponse } from "@constant/response/PaymentResponse";
 
@@ -9,7 +9,7 @@ class GuestPaymentService {
   static async create(
     request: PaymentCreationRequest,
   ): Promise<PaymentResponse> {
-    const { data } = await httpClient.post(BASE_URL, request);
+    const { data } = await httpPublic.post(BASE_URL, request);
 
     return data;
   }
@@ -17,7 +17,7 @@ class GuestPaymentService {
   static async createCheckoutLink(
     paymentId: number,
   ): Promise<CheckoutLinkResponse> {
-    const { data } = await httpClient.post(
+    const { data } = await httpPublic.post(
       `${BASE_URL}/${paymentId}/checkout-link`,
     );
 
@@ -25,7 +25,7 @@ class GuestPaymentService {
   }
 
   static async getById(paymentId: number): Promise<PaymentResponse> {
-    const { data } = await httpClient.get(`${BASE_URL}/${paymentId}`);
+    const { data } = await httpPublic.get(`${BASE_URL}/${paymentId}`);
 
     return data;
   }

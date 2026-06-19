@@ -1,5 +1,5 @@
 import { SearchFilter } from "@constant/internal/SearchFilter";
-import httpClient from "..";
+import httpPublic from "..";
 import { ApiResponse } from "@constant/response/ApiResponse";
 import { ReviewResponse } from "@constant/response/ReviewResponse";
 import { ReviewOverviewResponse } from "@constant/response/ReviewOverviewResponse";
@@ -12,7 +12,7 @@ export default class GuestReviewService {
   ): Promise<ApiResponse<ReviewResponse[]>> {
     try {
       const { roomTypeId, ...data } = params;
-      return await httpClient.get(`${BASE_URL}/room-types/${roomTypeId}`, {
+      return await httpPublic.get(`${BASE_URL}/room-types/${roomTypeId}`, {
         data,
       });
     } catch (e) {
@@ -23,7 +23,7 @@ export default class GuestReviewService {
   static async getOverviewReviewsByRoomType(
     roomTypeId: number,
   ): Promise<ReviewOverviewResponse> {
-    const { data } = await httpClient.get(
+    const { data } = await httpPublic.get(
       `${BASE_URL}/room-types/${roomTypeId}/overview`,
     );
     return data;

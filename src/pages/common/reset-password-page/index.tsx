@@ -63,16 +63,15 @@ const ResetPasswordPage = () => {
     confirmPassword: "",
   };
 
-  // ===== MUTATION RESET PASSWORD =====
   const mResetPassword = useMutation({
     mutationFn: async (payload: { newPassword: string }) => {
       if (!token) {
         throw new Error("Mã đặt lại mật khẩu không hợp lệ hoặc đã hết hạn");
       }
-      // return ProfileService.resetPassword({
-      //   token,
-      //   newPassword: payload.newPassword,
-      // });
+      return AuthService.resetPassword({
+        token,
+        password: payload.newPassword,
+      });
     },
     onSuccess: () => {
       showSuccess("Đổi mật khẩu thành công. Vui lòng đăng nhập lại.");

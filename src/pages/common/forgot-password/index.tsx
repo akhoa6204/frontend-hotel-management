@@ -12,6 +12,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import AuthService from "@services/auth/auth.service";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
@@ -34,8 +35,8 @@ const ForgotPasswordPage = () => {
 
   // ===== MUTATION =====
   const mRequestReset = useMutation({
-    mutationFn: async (payload: { email: string }) => {
-      // return AccountService.requestPasswordReset(payload);
+    mutationFn: async (email: string) => {
+      return AuthService.requestResetPassword(email);
     },
 
     onSuccess: () => {
@@ -68,7 +69,7 @@ const ForgotPasswordPage = () => {
 
     // onSubmit
     async (values) => {
-      await mRequestReset.mutateAsync(values);
+      await mRequestReset.mutateAsync(form.email);
     },
   );
 
