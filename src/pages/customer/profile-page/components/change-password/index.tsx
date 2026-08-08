@@ -1,87 +1,55 @@
-import {
-  Box,
-  Button,
-  Divider,
-  InputLabel,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { Form } from "../../useAccountProfilePage";
+import { Box, Button, Stack, TextField, Typography } from "@mui/material";
+import type { FormEvent } from "react";
+import type { Form } from "../../useAccountProfilePage";
 
-export interface Props {
-  form: Pick<Form, "password" | "newPassword" | "confirmPassword">;
-  errors: Partial<
-    Record<
-      keyof Pick<Form, "password" | "newPassword" | "confirmPassword">,
-      string
-    >
-  >;
-  onChangeField: (
-    field: keyof Pick<Form, "password" | "newPassword" | "confirmPassword">,
-    value: any,
-  ) => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+type PasswordField = "password" | "newPassword" | "confirmPassword";
+
+interface Props {
+  form: Pick<Form, PasswordField>;
+  errors: Partial<Record<PasswordField, string>>;
+  saving: boolean;
+  onChangeField: <K extends keyof Form>(field: K, value: Form[K]) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }
 
-const ChangePasswordTab = ({
-  form,
-  onChangeField,
-  onSubmit,
-  errors,
-}: Props) => {
-  const fields = [
-    {
-      label: "Mật khẩu hiện tại",
-      name: "password",
-      value: form.password,
-    },
-    {
-      label: "Mật khẩu mới",
-      name: "newPassword",
-      value: form.newPassword,
-    },
-    {
-      label: "Nhập lại mật khẩu mới",
-      name: "confirmPassword",
-      value: form.confirmPassword,
-    },
-  ];
+const fields: Array<{ label: string; name: PasswordField; autoComplete: string }> = [
+  { label: "Mật khẩu hiện tại", name: "password", autoComplete: "current-password" },
+  { label: "Mật khẩu mới", name: "newPassword", autoComplete: "new-password" },
+  { label: "Xác nhận mật khẩu mới", name: "confirmPassword", autoComplete: "new-password" },
+];
 
-  return (
-    <Box component={"form"} onSubmit={onSubmit}>
-      <Stack spacing={3}>
-        {fields.map((f, idx) => (
-          <Box key={f.name}>
-            <InputLabel shrink>{f.label}</InputLabel>
-            <TextField
-              fullWidth
-              size="small"
-              type="password"
-              value={form[f.name as keyof typeof form] || ""}
-              error={!!errors[f.name as keyof typeof errors]}
-              helperText={errors[f.name as keyof typeof errors]}
-              onChange={(e) =>
-                onChangeField(
-                  f.name as keyof Pick<
-                    Form,
-                    "password" | "newPassword" | "confirmPassword"
-                  >,
-                  e.target.value,
-                )
-              }
-            />
-          </Box>
+const ChangePasswordTab = ({ form, onChangeField, onSubmit, errors, saving }: Props) => (
+  <Box component="section" aria-labelledby="account-security-title">
+    <Typography id="account-security-title" component="h2" sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 24, sm: 27 } }}>
+      Bảo mật tài khoản
+    </Typography>
+    <Typography color="text.secondary" variant="body2" sx={{ mt: 0.65, maxWidth: 600, lineHeight: 1.65 }}>
+      Cập nhật mật khẩu định kỳ để bảo vệ thông tin và các đặt phòng của bạn.
+    </Typography>
+
+    <Box component="form" onSubmit={onSubmit} noValidate sx={{ mt: 3.5, pt: 3, borderTop: "1px solid", borderColor: "divider" }}>
+      <Stack spacing={2.5}>
+        {fields.map((field) => (
+          <TextField
+            key={field.name}
+            fullWidth
+            label={field.label}
+            type="password"
+            autoComplete={field.autoComplete}
+            value={form[field.name] ?? ""}
+            error={Boolean(errors[field.name])}
+            helperText={errors[field.name]}
+            onChange={(event) => onChangeField(field.name, event.target.value)}
+          />
         ))}
-        <Divider />
-        <Box textAlign="right" mt={3}>
-          <Button variant="contained" type="submit">
-            Lưu thay đổi
+        <Stack direction="row" justifyContent="flex-end" sx={{ pt: 1 }}>
+          <Button type="submit" variant="contained" disabled={saving} sx={{ minHeight: 44, width: { xs: 1, sm: "auto" } }}>
+            {saving ? "Đang cập nhật…" : "Đổi mật khẩu"}
           </Button>
-        </Box>
+        </Stack>
       </Stack>
     </Box>
-  );
-};
+  </Box>
+);
 
 export default ChangePasswordTab;
