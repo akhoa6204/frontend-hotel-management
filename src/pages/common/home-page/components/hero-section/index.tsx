@@ -1,143 +1,60 @@
-import { BgHome } from "@assets/images";
-import { Box, Grid, Stack, Typography } from "@mui/material";
-import RoomRoundedIcon from "@mui/icons-material/RoomRounded";
-
+import { ImageHotel } from "@assets/images";
 import { SearchBar } from "@components";
 import { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
+import { Box, Button, Container, Stack, Typography } from "@mui/material";
+import { Link } from "react-router-dom";
+
 interface Props {
   form: SearchBookingFilter;
-  onChange: (field: keyof SearchBookingFilter, value: any) => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onChange: (field: keyof SearchBookingFilter, value: string | number) => void;
+  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
 }
-const HeroSection: React.FC<Props> = (props) => {
-  return (
-    <Box position={"relative"} paddingY={"20px"} mb={"100px"}>
-      <Grid
-        container
-        sx={{
-          borderRadius: 8,
-          overflow: "hidden",
-          bgcolor: "#2E90FA0d",
-        }}
-      >
-        <Grid
-          size={6}
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            p: 4,
-          }}
-        >
-          <Box sx={{ mb: 2.5 }}>
-            <Typography
-              sx={{
-                fontWeight: 600,
-                fontSize: 48,
-              }}
-            >
-              Trải nghiệm cùng
+
+const HeroSection = (props: Props) => (
+  <Box component="section" sx={{ bgcolor: "#f3f0e9", pb: { xs: 7, md: 10 } }}>
+    <Box
+      sx={{
+        position: "relative",
+        minHeight: { xs: 650, sm: 720, md: 760 },
+        display: "flex",
+        alignItems: "center",
+        overflow: "hidden",
+        backgroundImage: `linear-gradient(90deg, rgba(8,25,37,.82) 0%, rgba(8,25,37,.48) 50%, rgba(8,25,37,.12) 100%), url(${ImageHotel})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      <Container maxWidth="lg" sx={{ pb: { xs: 20, md: 13 } }}>
+        <Box sx={{ maxWidth: 700, color: "#fff" }}>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2.5 }}>
+            <LocationOnOutlinedIcon sx={{ fontSize: 19, color: "#9bc4d7" }} />
+            <Typography sx={{ letterSpacing: 2.8, fontSize: 12, fontWeight: 700, color: "#d9edf5" }}>
+              BỜ BIỂN ĐÀ NẴNG, VIỆT NAM
             </Typography>
-            <Typography
-              color="primary"
-              sx={{
-                fontWeight: 700,
-                fontSize: 48,
-              }}
-            >
-              Diamond Sea Đà Nẵng
-            </Typography>
-          </Box>
-          <Typography
-            variant="body1"
-            sx={{ fontSize: 16 }}
-            color="text.secondary"
-          >
-            Chọn đúng nơi, tận hưởng đúng trải nghiệm.
+          </Stack>
+          <Typography component="h1" sx={{ fontFamily: "Georgia, serif", fontSize: { xs: 48, sm: 66, md: 82 }, fontWeight: 400, lineHeight: 1.02, letterSpacing: "-.035em", color: "inherit" }}>
+            Chạm vào nhịp sống bên biển.
           </Typography>
-        </Grid>
-        <Grid size={6} sx={{ position: "relative" }}>
-          <Box
-            component="img"
-            src={BgHome}
-            alt="Hotel background"
-            sx={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
-
-          <Box sx={{ position: "absolute", top: "30%", right: "10%" }}>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                bgcolor: "#fff",
-                borderRadius: 9999,
-                px: 2.5,
-                py: 1.25,
-                boxShadow: 3,
-              }}
-            >
-              <Box
-                sx={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: "50%",
-                  bgcolor: "primary.main",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <RoomRoundedIcon sx={{ fontSize: 18, color: "#fff" }} />
-              </Box>
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: 600, fontSize: 12 }}
-                color="text.secondary"
-              >
-                71 Ngũ Hành Sơn, Đà Nẵng
-              </Typography>
-            </Box>
-
-            <Box
-              sx={{
-                position: "absolute",
-                top: "60%",
-                left: -11,
-                width: 22,
-                height: 44,
-                borderLeft: "1px solid white",
-                borderTop: "1px solid white",
-                borderTopLeftRadius: 4,
-              }}
-            >
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: "100%",
-                  left: "-20%",
-                  width: 8,
-                  height: 8,
-                  bgcolor: "rgba(255,255,255,0.95)",
-                  borderRadius: "50%",
-                }}
-              />
-            </Box>
-          </Box>
-        </Grid>
-      </Grid>
-      <Stack
-        direction={"row"}
-        justifyContent={"center"}
-        sx={{
-          position: "absolute",
-          bottom: "5%",
-          left: 0,
-          right: 0,
-        }}
-      >
-        <SearchBar {...props} />
-      </Stack>
+          <Typography sx={{ mt: 3, maxWidth: 560, fontSize: { xs: 17, md: 19 }, lineHeight: 1.75, color: "rgba(255,255,255,.84)" }}>
+            Một kỳ nghỉ hiện đại, thư thái giữa làn gió biển và năng lượng của thành phố Đà Nẵng.
+          </Typography>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mt: 4, alignItems: { xs: "stretch", sm: "center" } }}>
+            <Button component={Link} to="/search" variant="contained" size="large" endIcon={<ArrowForwardRoundedIcon />} sx={{ px: 3.5, py: 1.35 }}>
+              Đặt kỳ nghỉ
+            </Button>
+            <Button component="a" href="#rooms" size="large" sx={{ color: "#fff", px: 2, "&:hover": { bgcolor: "rgba(255,255,255,.1)" } }}>
+              Khám phá phòng
+            </Button>
+          </Stack>
+        </Box>
+      </Container>
     </Box>
-  );
-};
+    <Container maxWidth="lg" sx={{ mt: { xs: -17, md: -7 }, position: "relative", zIndex: 2 }}>
+      <SearchBar {...props} />
+    </Container>
+  </Box>
+);
+
 export default HeroSection;

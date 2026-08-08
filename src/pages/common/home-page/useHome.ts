@@ -28,10 +28,10 @@ const useHome = () => {
       },
 
       (f) => {
-        const errors: any = {};
+        const errors: Partial<Record<keyof SearchBookingFilter, string>> = {};
 
-        if (!f.startDate) errors.from = "Vui lòng chọn ngày nhận phòng";
-        if (!f.endDate) errors.to = "Vui lòng chọn ngày trả phòng";
+        if (!f.startDate) errors.startDate = "Vui lòng chọn ngày nhận phòng";
+        if (!f.endDate) errors.endDate = "Vui lòng chọn ngày trả phòng";
 
         if (Object.keys(errors).length > 0) {
           showError("Vui lòng chọn ngày nhận phòng và ngày trả phòng");

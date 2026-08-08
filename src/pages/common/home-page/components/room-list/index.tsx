@@ -1,94 +1,25 @@
-import { RoomCard, RoomCardSkeleton } from "@components";
 import { RoomTypeResponse } from "@constant/response/RoomTypeResponse";
-import { Box, Button, Grid, Stack, Typography, Skeleton } from "@mui/material";
+import { HospitalityRoomCard } from "@components";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import { Box, Button, Grid, Skeleton, Stack, Typography } from "@mui/material";
 
-interface Props {
-  rooms: RoomTypeResponse[];
-  loading: boolean;
-  onClickSeeAll: () => void;
-  onClickRoomCard: (capacity: number) => void;
-}
+interface Props { rooms: RoomTypeResponse[]; loading: boolean; onClickSeeAll: () => void; onClickRoomCard: (capacity: number) => void; }
 
-const RoomList: React.FC<Props> = ({
-  rooms,
-  loading,
-  onClickSeeAll,
-  onClickRoomCard,
-}) => {
-  const fallbackImg =
-    "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1600&auto=format&fit=crop";
+const RoomList = ({ rooms, loading, onClickSeeAll, onClickRoomCard }: Props) => {
   return (
-    <Box mb={"100px"}>
-      {loading ? (
-        <>
-          <Skeleton variant="text" width={300} height={40} sx={{ mb: 2 }} />
-
-          <Stack
-            direction={{ xs: "column", md: "row" }}
-            spacing={{ xs: 2, md: 0 }}
-            justifyContent="space-between"
-            alignItems={{ xs: "flex-start", md: "center" }}
-            mb={4}
-          >
-            <Skeleton variant="text" width={400} height={24} />
-            <Skeleton
-              variant="rectangular"
-              width={120}
-              height={36}
-              sx={{ borderRadius: 2 }}
-            />
-          </Stack>
-
-          <Grid container spacing={3}>
-            {Array.from({ length: 3 }).map((_, idx) => (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={idx}>
-                <RoomCardSkeleton />
-              </Grid>
-            ))}
-          </Grid>
-        </>
-      ) : (
-        <>
-          <Typography variant="h4" fontWeight={600} mb={2}>
-            Khám phá Diamond Sea Đà Nẵng
-          </Typography>
-
-          <Stack
-            direction={{ xs: "column", md: "row" }}
-            spacing={{ xs: 2, md: 0 }}
-            justifyContent="space-between"
-            alignItems={{ xs: "flex-start", md: "center" }}
-            mb={4}
-          >
-            <Typography color="text.secondary" sx={{ maxWidth: 556 }}>
-              Khám phá đa dạng các hạng phòng với thiết kế tinh tế, tiện nghi
-              hiện đại, phù hợp cho cả kỳ nghỉ và công tác
-            </Typography>
-            <Button variant="outlined" size="medium" onClick={onClickSeeAll}>
-              Xem tất cả
-            </Button>
-          </Stack>
-
-          <Grid container spacing={3}>
-            {rooms.map((room) => (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={room.id}>
-                <RoomCard
-                  id={room.id}
-                  name={room.name}
-                  type={room.name || "Hạng phòng"}
-                  price={Number(room.basePrice)}
-                  discount={Number(room.discountAmount)}
-                  capacity={room.capacity}
-                  image={room.roomTypeImages?.[0]?.url || fallbackImg}
-                  onBooking={() => onClickRoomCard(room.capacity)}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        </>
-      )}
+    <Box component="section" id="rooms" sx={{ py: { xs: 9, md: 14 }, scrollMarginTop: 90 }}>
+      <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems={{ md: "flex-end" }} spacing={3} sx={{ mb: 5 }}>
+        <Box><Typography sx={{ color: "primary.main", letterSpacing: 2.2, fontSize: 12, fontWeight: 700 }}>KHÔNG GIAN NGHỈ DƯỠNG</Typography><Typography component="h2" sx={{ mt: 1.5, fontFamily: "Georgia, serif", fontSize: { xs: 38, md: 52 }, lineHeight: 1.15 }}>Phòng dành cho những ngày thật chậm.</Typography></Box>
+        <Button variant="text" endIcon={<ArrowForwardRoundedIcon />} onClick={onClickSeeAll}>Xem tất cả hạng phòng</Button>
+      </Stack>
+      <Grid container spacing={{ xs: 4, md: 3 }}>
+        {(loading ? Array.from({ length: 3 }) : rooms).map((room, index) => {
+          if (loading) return <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}><Skeleton variant="rectangular" height={390} /><Skeleton height={46} /><Skeleton width="70%" /></Grid>;
+          const item = room as RoomTypeResponse;
+          return <Grid size={{ xs: 12, sm: 6, md: 4 }} key={item.id}><HospitalityRoomCard room={item} onBooking={(selectedRoom) => onClickRoomCard(selectedRoom.capacity)} /></Grid>;
+        })}
+      </Grid>
     </Box>
   );
 };
-
 export default RoomList;
