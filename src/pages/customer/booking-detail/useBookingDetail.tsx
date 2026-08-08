@@ -1,11 +1,10 @@
 import useSnackbar from "@hooks/useSnackbar";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { sleep } from "@utils/sleep";
+import { useNavigate, useParams } from "react-router-dom";
+import { useState } from "react";
 import { diffNights } from "@utils/format";
 import MyBookingService from "@services/me/booking.service";
-import { BookingCancelRequest } from "@constant/request/BookingCancelRequest";
+import type { BookingCancelRequest } from "@constant/request/BookingCancelRequest";
 
 const useBookingDetail = () => {
   const queryClient = useQueryClient();
@@ -14,7 +13,7 @@ const useBookingDetail = () => {
 
   const { alert, closeSnackbar, showError, showSuccess } = useSnackbar();
 
-  const { data: booking, isLoading } = useQuery({
+  const { data: booking, isLoading, isError } = useQuery({
     queryKey: ["booking-detail", id],
     queryFn: async () => {
       if (!id) return;
@@ -51,11 +50,8 @@ const useBookingDetail = () => {
       closeCancelDialog();
       await queryClient.invalidateQueries({ queryKey: ["booking-detail", id] });
     },
-    onError: (err: any) => {
-      const msg =
-        err?.response?.data?.message ||
-        "Hủy đặt phòng thất bại, vui lòng thử lại.";
-      showError(msg);
+    onError: () => {
+      showError("Không thể hủy đặt phòng lúc này. Vui lòng thử lại.");
     },
   });
 
@@ -86,6 +82,7 @@ const useBookingDetail = () => {
   return {
     booking,
     loadingBooking: isLoading,
+    bookingError: isError,
     onBack,
     onReview,
     alert,
@@ -93,6 +90,7 @@ const useBookingDetail = () => {
 
     onReBook,
     confirmCancel,
+    cancelling: cancelMutation.isPending,
 
     cancelOpen,
     cancelReason,

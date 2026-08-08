@@ -1,24 +1,42 @@
-import { Header } from "@components";
+import { Footer, Header } from "@components";
 import AccountSidebar from "@components/account-sidebar";
-import { Container, Grid } from "@mui/material";
+import { Box, Container } from "@mui/material";
 import { Outlet } from "react-router-dom";
+
 const AccountLayout = () => {
   return (
     <>
       <Header />
-      <div className="bg-gray-100 min-h-[92vh]">
-        <Container>
-          <Grid container spacing={2.5} py={2.5}>
-            <Grid size={3}>
-              <AccountSidebar />
-            </Grid>
-            <Grid size={9}>
+      <Box sx={{ bgcolor: "#F6F5F2", minHeight: "92vh" }}>
+        <Container
+          maxWidth={false}
+          sx={{
+            maxWidth: 1440,
+            px: { xs: 2, sm: 3, lg: 4 },
+            py: { xs: 2.5, md: 3.5, lg: 4 },
+          }}
+        >
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "minmax(0, 1fr)",
+                lg: "216px minmax(0, 1fr)",
+              },
+              alignItems: "start",
+              gap: { xs: 3, lg: 4 },
+            }}
+          >
+            <AccountSidebar />
+            <Box component="main" sx={{ minWidth: 0 }}>
               <Outlet />
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </Container>
-      </div>
+      </Box>
+      <Footer />
     </>
   );
 };
+
 export default AccountLayout;
