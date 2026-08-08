@@ -1,143 +1,92 @@
+import type { AxiosError } from "axios";
+import AuthLayout from "@components/auth/AuthLayout";
 import GlobalSnackbar from "@components/GlobalSnackbar";
 import useForm from "@hooks/useForm";
 import useSnackbar from "@hooks/useSnackbar";
-import {
-  Box,
-  Button,
-  Container,
-  InputLabel,
-  Link,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
+import { Box, Button, Link as MuiLink, Stack, TextField, Typography } from "@mui/material";
 import AuthService from "@services/auth/auth.service";
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
-const fields = [
-  {
-    name: "email",
-    label: "Email",
-    type: "email",
-    placeholder: "Nhập email tài khoản của bạn để nhận mã xác thực",
-  },
-];
+interface ForgotPasswordForm {
+  email: string;
+}
 
 const ForgotPasswordPage = () => {
-  const navigate = useNavigate();
-  const { alert, closeSnackbar, showError, showSuccess } = useSnackbar();
+  const [requestedEmail, setRequestedEmail] = useState("");
+  const { alert, closeSnackbar, showError } = useSnackbar();
 
-  const initForm = {
-    email: "",
-  };
-
-  // ===== MUTATION =====
   const mRequestReset = useMutation({
-    mutationFn: async (email: string) => {
-      return AuthService.requestResetPassword(email);
-    },
-
-    onSuccess: () => {
-      showSuccess(
-        "Gửi mã xác thực thành công. Kiểm tra email của bạn để nhận mật khẩu mới",
-      );
-    },
-
-    onError: (err: any) => {
-      const msg =
-        err?.response?.data?.message || "Đăng ký thất bại, vui lòng thử lại!";
-      showError(msg);
+    mutationFn: (email: string) => AuthService.requestResetPassword(email),
+    onSuccess: (_data, email) => setRequestedEmail(email),
+    onError: (error: AxiosError<{ message?: string }>) => {
+      showError(error.response?.data?.message || "Không thể gửi yêu cầu đặt lại mật khẩu. Vui lòng thử lại.");
     },
   });
 
-  // ===== FORM + VALIDATE =====
-  const { form, errors, onChange, onSubmit } = useForm(
-    initForm,
-
-    // validate
-    (f) => {
-      const errors: any = {};
-
-      if (!f.email.trim()) errors.email = "Email không được để trống";
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email))
-        errors.email = "Email không hợp lệ";
-
-      return errors;
+  const { form, errors, onChange, onSubmit } = useForm<ForgotPasswordForm>(
+    { email: "" },
+    (values) => {
+      const validationErrors: Partial<Record<keyof ForgotPasswordForm, string>> = {};
+      if (!values.email.trim()) validationErrors.email = "Email không được để trống";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) validationErrors.email = "Email không hợp lệ";
+      return validationErrors;
     },
-
-    // onSubmit
-    async (values) => {
-      await mRequestReset.mutateAsync(form.email);
-    },
+    (values) => mRequestReset.mutate(values.email),
   );
 
   return (
     <>
-      <Container maxWidth="md">
-        <Paper elevation={3} sx={{ my: 10, p: 5, borderRadius: 2 }}>
-          <Stack spacing={2} alignItems="center">
-            <Typography variant="h5" fontWeight={700}>
-              Quên mật khẩu
+      <AuthLayout
+        eyebrow="KHÔI PHỤC TÀI KHOẢN"
+        title={requestedEmail ? "Kiểm tra email của bạn." : "Quên mật khẩu?"}
+        description={requestedEmail
+          ? "Nếu địa chỉ này khớp với tài khoản, hướng dẫn đặt lại mật khẩu sẽ được gửi đến hộp thư của bạn."
+          : "Nhập email gắn với tài khoản và chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu."}
+      >
+        {requestedEmail ? (
+          <Stack spacing={3} alignItems="flex-start">
+            <Box sx={{ display: "grid", placeItems: "center", width: 52, height: 52, borderRadius: "50%", bgcolor: "#edf8f1", color: "#2f7d4a" }}>
+              <CheckCircleOutlineRoundedIcon sx={{ fontSize: 30 }} />
+            </Box>
+            <Typography color="text.secondary" sx={{ lineHeight: 1.7 }}>
+              Yêu cầu khôi phục cho <Box component="span" sx={{ color: "#153746", fontWeight: 700 }}>{requestedEmail}</Box> đã được tiếp nhận. Vui lòng kiểm tra cả thư mục spam.
             </Typography>
-
-            <Typography color="text.secondary">
-              Nhập email nhận OTP đặt lại mật khẩu
-            </Typography>
-
-            <Box
-              component="form"
-              sx={{ width: "100%", mt: 2 }}
-              onSubmit={onSubmit}
-            >
-              <Stack spacing={2}>
-                {fields.map((f) => (
-                  <Box key={f.name}>
-                    <InputLabel>{f.label}</InputLabel>
-                    <TextField
-                      type={f.type}
-                      name={f.name}
-                      fullWidth
-                      value={form[f.name]}
-                      onChange={onChange}
-                      placeholder={f.placeholder}
-                      error={Boolean(errors[f.name])}
-                      helperText={errors[f.name] || ""}
-                    />
-                  </Box>
-                ))}
-
-                <Button
-                  type="submit"
-                  variant="contained"
-                  fullWidth
-                  sx={{ py: 1.2 }}
+            <Button component={Link} to="/login" variant="contained" fullWidth sx={{ minHeight: 48, borderRadius: 1.25 }}>
+              Quay lại đăng nhập
+            </Button>
+          </Stack>
+        ) : (
+          <>
+            <Box component="form" onSubmit={onSubmit} noValidate>
+              <Stack spacing={2.25}>
+                <TextField
+                  label="Email"
+                  name="email"
+                  type="email"
+                  placeholder="example@email.com"
+                  value={form.email}
+                  onChange={onChange}
+                  error={Boolean(errors.email)}
+                  helperText={errors.email}
+                  autoComplete="email"
+                  autoFocus
                   disabled={mRequestReset.isPending}
-                >
-                  {mRequestReset.isPending
-                    ? "Đang xử lý..."
-                    : "Gửi mã xác thực"}
+                  fullWidth
+                />
+                <Button type="submit" variant="contained" fullWidth disabled={mRequestReset.isPending} sx={{ minHeight: 48, borderRadius: 1.25 }}>
+                  {mRequestReset.isPending ? "Đang gửi hướng dẫn..." : "Gửi hướng dẫn"}
                 </Button>
               </Stack>
             </Box>
-
-            <Link href="/login" textAlign="center">
-              <Typography
-                color="text.secondary"
-                sx={{
-                  "&:hover": {
-                    color: "#2E90FA",
-                  },
-                }}
-              >
-                Quay lại đăng nhập?
-              </Typography>
-            </Link>
-          </Stack>
-        </Paper>
-      </Container>
-
+            <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ mt: 3 }}>
+              <MuiLink component={Link} to="/login" underline="hover" sx={{ fontWeight: 700 }}>Quay lại đăng nhập</MuiLink>
+            </Typography>
+          </>
+        )}
+      </AuthLayout>
       <GlobalSnackbar alert={alert} closeSnackbar={closeSnackbar} />
     </>
   );
