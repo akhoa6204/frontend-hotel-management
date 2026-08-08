@@ -1,175 +1,142 @@
-import { QrState } from "@constant/internal/QrState";
-import { PaymentCreationRequest } from "@constant/request/PaymentCreationRequest";
-import { BookingResponse } from "@constant/response/BookingResponse";
+import type { AxiosError } from "axios";
+import type { QrState } from "@constant/internal/QrState";
+import type { PaymentCreationRequest } from "@constant/request/PaymentCreationRequest";
+import type { BookingResponse } from "@constant/response/BookingResponse";
 import useAuth from "@hooks/useAuth";
 import useSnackbar from "@hooks/useSnackbar";
 import GuestPaymentService from "@services/guest/payment.service";
-
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
+const DEPOSIT_AMOUNT = 150_000;
+
+interface PaymentNotice {
+  open: boolean;
+  type: "success" | "error";
+}
+
 const usePayment = () => {
-  const queryClient = useQueryClient();
-  const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { state } = useLocation() as { state?: { booking?: BookingResponse } };
+  const booking = state?.booking;
+  const { alert, showSuccess, showError, closeSnackbar } = useSnackbar();
 
-  const booking: BookingResponse = location?.state?.booking;
-
-  const [showNotice, setShowNotice] = useState({
-    open: false,
-    type: "success",
-  });
+  const [showNotice, setShowNotice] = useState<PaymentNotice>({ open: false, type: "success" });
   const [qrState, setQrState] = useState<QrState>({
     paymentQrDialogOpen: false,
     paid: false,
     open: false,
   });
 
-  const closePaymentDialog = () =>
-    setQrState({ paymentQrDialogOpen: false, paid: false, open: false });
-
-  const { alert, showSuccess, showError, closeSnackbar } = useSnackbar();
   useEffect(() => {
-    if (!booking?.id) {
-      navigate("/search", { replace: true });
-    }
-  }, [booking, navigate]);
+    if (!booking?.id) navigate("/search", { replace: true });
+  }, [booking?.id, navigate]);
+
+  const closePaymentDialog = () => {
+    setQrState((previous) => ({ ...previous, open: false }));
+  };
 
   const mCreatePaymentOnline = useMutation({
-    mutationFn: async ({ paymentId }: { paymentId: number }) => {
-      setQrState((pre) => ({
-        ...pre,
-        open: true,
-      }));
-
-      return GuestPaymentService.createCheckoutLink(paymentId);
-    },
-
+    mutationFn: ({ paymentId }: { paymentId: number }) => GuestPaymentService.createCheckoutLink(paymentId),
     onSuccess: (data) => {
       if (!data?.qrUrl) {
         showError("Không lấy được mã QR thanh toán");
         return;
       }
-
-      setQrState((pre) => ({
-        ...pre,
+      setQrState((previous) => ({
+        ...previous,
+        open: true,
         qrUrl: data.qrUrl,
         paymentQrDialogOpen: true,
         onlinePaymentId: data.paymentId,
       }));
     },
-
-    onError: () => {
-      showError("Tạo thanh toán online thất bại");
-    },
+    onError: () => showError("Không thể khởi tạo mã QR thanh toán. Vui lòng thử lại."),
   });
 
   const mCreatePayment = useMutation({
-    mutationFn: async (data: PaymentCreationRequest) => {
-      return await GuestPaymentService.create(data);
+    mutationFn: (data: PaymentCreationRequest) => GuestPaymentService.create(data),
+    onSuccess: (data) => {
+      const paymentId = Number(data.id);
+      setQrState((previous) => ({ ...previous, open: true, onlinePaymentId: paymentId }));
+      mCreatePaymentOnline.mutate({ paymentId });
     },
-    onSuccess: async (data) => {
-      await mCreatePaymentOnline.mutateAsync({
-        paymentId: Number(data.id),
-      });
-    },
-
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message || "Tạo thanh toán thất bại";
-      showError(msg);
+    onError: (error: AxiosError<{ message?: string }>) => {
+      showError(error.response?.data?.message || "Không thể khởi tạo thanh toán. Vui lòng thử lại.");
     },
   });
 
-  const onPayment = async () => {
-    await mCreatePayment.mutateAsync({
+  const onPayment = () => {
+    if (!booking || mCreatePayment.isPending || mCreatePaymentOnline.isPending) return;
+
+    if (qrState.qrUrl) {
+      setQrState((previous) => ({ ...previous, open: true }));
+      return;
+    }
+
+    if (qrState.onlinePaymentId) {
+      setQrState((previous) => ({ ...previous, open: true }));
+      mCreatePaymentOnline.mutate({ paymentId: qrState.onlinePaymentId });
+      return;
+    }
+
+    mCreatePayment.mutate({
       invoiceId: booking.invoiceId,
       paymentMethod: "BANK_TRANSFER",
-      amount: 150000,
+      amount: DEPOSIT_AMOUNT,
       paymentType: "DEPOSIT",
     });
   };
 
-  const handlePaymentSuccess = async () => {
-    if (!qrState.onlinePaymentId) return;
-
-    setQrState((prev) => ({
-      ...prev,
-      paid: true,
-    }));
-
-    setShowNotice({ open: true, type: "success" });
-    showSuccess("Thanh toán thành công");
-  };
-
   useEffect(() => {
-    if (
-      !qrState.paymentQrDialogOpen ||
-      !qrState.onlinePaymentId ||
-      qrState.paid
-    ) {
-      return;
-    }
+    if (!qrState.paymentQrDialogOpen || !qrState.onlinePaymentId || qrState.paid) return;
 
-    const intervalId = setInterval(async () => {
+    const paymentId = qrState.onlinePaymentId;
+    const intervalId = window.setInterval(async () => {
       try {
-        const payment = await GuestPaymentService.getById(
-          qrState.onlinePaymentId!,
-        );
+        const payment = await GuestPaymentService.getById(paymentId);
+        if (payment?.status !== "SUCCESS") return;
 
-        if (payment?.status === "SUCCESS") {
-          setQrState((prev) => ({
-            ...prev,
-            paid: true,
-          }));
-
-          setQrState({
-            paymentQrDialogOpen: false,
-            paid: false,
-            open: false,
-          });
-          setShowNotice({ open: true, type: "success" });
-          showSuccess("Thanh toán thành công");
-        }
-      } catch (error) {
-        console.error("Kiểm tra trạng thái thanh toán thất bại", error);
+        setQrState({ paymentQrDialogOpen: false, paid: true, open: false });
+        setShowNotice({ open: true, type: "success" });
+        showSuccess("Thanh toán thành công");
+      } catch {
+        // A temporary polling failure should not interrupt the active QR payment.
       }
     }, 15_000);
 
-    return () => clearInterval(intervalId);
-  }, [
-    qrState.paymentQrDialogOpen,
-    qrState.onlinePaymentId,
-    qrState.paid,
-    queryClient,
-    showSuccess,
-  ]);
+    return () => window.clearInterval(intervalId);
+  }, [qrState.onlinePaymentId, qrState.paid, qrState.paymentQrDialogOpen, showSuccess]);
 
   const backToHome = () => {
-    if (!user) {
+    if (!booking) {
       navigate("/", { replace: true });
-    } else {
-      navigate(`/account/bookings/${booking.id}`, { replace: true });
+      return;
     }
+    navigate(user ? `/account/bookings/${booking.id}` : "/", { replace: true });
   };
+
+  const loadingPayment = mCreatePayment.isPending || mCreatePaymentOnline.isPending;
+  const finalTotal = Number(booking?.finalAmount ?? booking?.remainingAmount ?? 0);
+  const remainingBalance = Math.max(0, finalTotal - DEPOSIT_AMOUNT);
+
   return {
     booking,
-
+    depositAmount: DEPOSIT_AMOUNT,
+    finalTotal,
+    remainingBalance,
     onPayment,
-    loadingPayment: mCreatePayment.isPending,
-
+    loadingPayment,
     alert,
     closeSnackbar,
-
     showNotice,
-
+    backToHome,
     qrState,
     closePaymentDialog,
-    handlePaymentSuccess,
     isPendingCreateQr: mCreatePaymentOnline.isPending,
-
-    backToHome,
   };
 };
+
 export default usePayment;
