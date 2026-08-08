@@ -1,165 +1,81 @@
-import { Box, Divider, IconButton, TextField, Typography } from "@mui/material";
+import { Box, Button, Divider, TextField, Typography } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import PeopleAltRoundedIcon from "@mui/icons-material/PeopleAltRounded";
-import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs, { Dayjs } from "dayjs";
-import { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
+import dayjs, { type Dayjs } from "dayjs";
+import type { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
 
-type Props = {
+interface Props {
   form: SearchBookingFilter;
-  onChange: (field: keyof SearchBookingFilter, value: any) => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-};
+  onChange: (field: keyof SearchBookingFilter, value: string | number) => void;
+  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+}
 
-export default function SearchBar({ form, onSubmit, onChange }: Props) {
-  const pickerTextField = {
-    variant: "standard",
-    placeholder: "DD/MM/YYYY",
-    InputProps: { disableUnderline: true },
-    InputLabelProps: { shrink: false, sx: { display: "none" } },
-  } as const;
-
-  const pickerSx = {
-    "& .MuiInputBase-root": { width: 180, p: 0 },
-    "& .MuiInputBase-input": { p: 0, fontWeight: 700 },
-  } as const;
-
+const SearchBar = ({ form, onSubmit, onChange }: Props) => {
   const today = dayjs().startOf("day");
-
-  const fromD: Dayjs | null = form.startDate ? dayjs(form.startDate) : null;
-  const toD: Dayjs | null = form.endDate ? dayjs(form.endDate) : null;
-
-  const minToDate = (fromD ?? today).add(1, "day");
+  const fromDate: Dayjs | null = form.startDate ? dayjs(form.startDate) : null;
+  const toDate: Dayjs | null = form.endDate ? dayjs(form.endDate) : null;
+  const minCheckoutDate = (fromDate ?? today).add(1, "day");
+  const fieldSx = {
+    flex: 1,
+    minWidth: 0,
+    px: { xs: 0, md: 2.5 },
+    py: { xs: 1, md: 0 },
+    "& .MuiInputBase-root": { width: "100%", p: 0 },
+    "& .MuiInputBase-input": { p: 0, fontWeight: 600, color: "#152a38" },
+  } as const;
+  const textFieldSlot = {
+    variant: "standard",
+    InputProps: { disableUnderline: true },
+    inputProps: { "aria-label": "Ngày lưu trú" },
+  } as const;
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box
-        component="form"
-        onSubmit={onSubmit}
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          mx: "auto",
-          border: "1px solid #2E90FA",
-          boxShadow: 2,
-          borderRadius: "999px",
-          bgcolor: "#fff",
-          overflow: "hidden",
-          width: "860px",
-          p: "2px",
-          gap: 0.5,
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", px: 2 }}>
-          <CalendarTodayRoundedIcon color="primary" sx={{ mr: 1.5 }} />
-          <Box>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ lineHeight: 1 }}
-            >
-              Ngày nhận phòng
-            </Typography>
-            <DatePicker
-              value={fromD}
-              minDate={today}
-              onChange={(d) => {
-                if (!d) {
-                  onChange("startDate", "");
-                  return;
-                }
-
-                const normalized = d.startOf("day");
-
-                onChange("startDate", normalized.format("YYYY-MM-DD"));
-
-                if (toD && toD.isBefore(normalized.add(1, "day"), "day")) {
-                  const newTo = normalized.add(1, "day");
-                  onChange("endDate", newTo.format("YYYY-MM-DD"));
-                }
-              }}
-              format="DD/MM/YYYY"
-              slotProps={{ textField: pickerTextField }}
-              sx={pickerSx}
-            />
+      <Box component="form" onSubmit={onSubmit} aria-label="Tìm phòng" sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, alignItems: { md: "center" }, width: "100%", bgcolor: "#fff", p: { xs: 2.5, md: 2 }, boxShadow: "0 18px 55px rgba(12,39,55,.16)", borderRadius: { xs: 2, md: 1 }, gap: { xs: 1, md: 0 } }}>
+        <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flex: 1 }}>
+          <CalendarMonthOutlinedIcon color="primary" />
+          <Box sx={fieldSx}>
+            <Typography variant="caption" color="text.secondary">Nhận phòng</Typography>
+            <DatePicker value={fromDate} minDate={today} onChange={(date) => {
+              if (!date) return onChange("startDate", "");
+              const normalized = date.startOf("day");
+              onChange("startDate", normalized.format("YYYY-MM-DD"));
+              if (toDate && toDate.isBefore(normalized.add(1, "day"), "day")) onChange("endDate", normalized.add(1, "day").format("YYYY-MM-DD"));
+            }} format="DD/MM/YYYY" slotProps={{ textField: textFieldSlot }} sx={{ width: "100%" }} />
           </Box>
         </Box>
-
-        <Divider orientation="vertical" flexItem />
-
-        {/* Ngày trả phòng */}
-        <Box sx={{ display: "flex", alignItems: "center", px: 2 }}>
-          <CalendarTodayRoundedIcon color="primary" sx={{ mr: 1.5 }} />
-          <Box>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ lineHeight: 1 }}
-            >
-              Ngày trả phòng
-            </Typography>
-            <DatePicker
-              value={toD}
-              minDate={minToDate}
-              onChange={(d) =>
-                onChange(
-                  "endDate",
-                  d ? d.startOf("day").format("YYYY-MM-DD") : "",
-                )
-              }
-              format="DD/MM/YYYY"
-              slotProps={{ textField: pickerTextField }}
-              sx={pickerSx}
-            />
+        <Divider
+          orientation="vertical"
+          sx={{ display: { xs: "none", md: "block" }, height: 44, mx: 3, alignSelf: "center", borderColor: "#dedbd4" }}
+        />
+        <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flex: 1 }}>
+          <CalendarMonthOutlinedIcon color="primary" />
+          <Box sx={fieldSx}>
+            <Typography variant="caption" color="text.secondary">Trả phòng</Typography>
+            <DatePicker value={toDate} minDate={minCheckoutDate} onChange={(date) => onChange("endDate", date ? date.startOf("day").format("YYYY-MM-DD") : "")} format="DD/MM/YYYY" slotProps={{ textField: textFieldSlot }} sx={{ width: "100%" }} />
           </Box>
         </Box>
-
-        <Divider orientation="vertical" flexItem />
-
-        {/* Số lượng khách */}
-        <Box
-          sx={{ display: "flex", alignItems: "center", px: 2, minWidth: 170 }}
-        >
-          <PeopleAltRoundedIcon color="primary" sx={{ mr: 1.5 }} />
-          <Box>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ lineHeight: 1 }}
-            >
-              Số lượng khách
-            </Typography>
-            <TextField
-              name="capacity"
-              type="number"
-              variant="standard"
-              InputProps={{ disableUnderline: true }}
-              inputProps={{ min: 1 }}
-              value={form.capacity}
-              onChange={(e) => onChange("capacity", e.target.value)}
-              sx={{
-                "& .MuiInputBase-input": { p: 0, fontWeight: 700, width: 60 },
-              }}
-            />
+        <Divider
+          orientation="vertical"
+          sx={{ display: { xs: "none", md: "block" }, height: 44, mx: 3, alignSelf: "center", borderColor: "#dedbd4" }}
+        />
+        <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flex: { md: .75 } }}>
+          <PeopleAltOutlinedIcon color="primary" />
+          <Box sx={fieldSx}>
+            <Typography variant="caption" color="text.secondary">Số khách</Typography>
+            <TextField type="number" variant="standard" value={form.capacity} onChange={(event) => onChange("capacity", Number(event.target.value))} slotProps={{ input: { disableUnderline: true, inputProps: { min: 1, "aria-label": "Số lượng khách" } } }} sx={{ width: "100%" }} />
           </Box>
         </Box>
-
-        <IconButton
-          type="submit"
-          sx={{
-            ml: "auto",
-            bgcolor: "primary.main",
-            borderRadius: "50%",
-            p: 2.2,
-            "&:hover": { bgcolor: "primary.dark" },
-          }}
-        >
-          <SearchIcon sx={{ color: "#fff" }} />
-        </IconButton>
+        <Button type="submit" variant="contained" size="large" startIcon={<SearchIcon />} sx={{ ml: { md: 2 }, px: 3.5, py: 1.4, borderRadius: 1, flexShrink: 0 }}>
+          Tìm phòng
+        </Button>
       </Box>
     </LocalizationProvider>
   );
-}
+};
+
+export default SearchBar;
