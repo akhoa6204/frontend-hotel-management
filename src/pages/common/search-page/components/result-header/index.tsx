@@ -1,70 +1,41 @@
-import {
-  Box,
-  FormControl,
-  InputAdornment,
-  MenuItem,
-  OutlinedInput,
-  Select,
-  Stack,
-  Typography,
-} from "@mui/material";
-import FilterListIcon from "@mui/icons-material/FilterList";
+import SwapVertRoundedIcon from "@mui/icons-material/SwapVertRounded";
+import { FormControl, MenuItem, Select, Stack, Typography } from "@mui/material";
 
 interface Props {
   total: number;
   sort?: "asc" | "desc";
-  onSortChange: (v: "asc" | "desc") => void;
+  onSortChange: (value: "asc" | "desc") => void;
 }
 
-const SearchResultsHeader: React.FC<Props> = ({
-  total,
-  sort = "asc",
-  onSortChange,
-}) => (
-  <Stack
-    direction="row"
-    justifyContent="space-between"
-    alignItems={"center"}
-    spacing={2}
-    mb={4.5}
-    sx={{
-      py: 2.5,
-      borderBottom: "1px solid #ccc",
-    }}
-  >
-    <Typography variant="body1">
-      Có <b>{total}</b> kết quả tìm kiếm phù hợp
-    </Typography>
-
-    <FormControl size="small">
-      <Select
-        value={sort}
-        onChange={(e) => onSortChange(e.target.value)}
-        displayEmpty
-        input={
-          <OutlinedInput
-            startAdornment={
-              <InputAdornment
-                position="start"
-                sx={{ mr: 1, color: "text.primary" }}
-              >
-                <FilterListIcon fontSize="small" />
-              </InputAdornment>
-            }
-          />
-        }
-        sx={{
-          "& .MuiOutlinedInput-root": { borderRadius: "999px" },
-          "& .MuiOutlinedInput-notchedOutline": { borderRadius: "999px" },
-          "& fieldset": { borderRadius: "999px" },
-          "& .MuiSelect-icon": { mr: 0.5 },
-        }}
-      >
-        <MenuItem value="asc">Giá tăng dần</MenuItem>
-        <MenuItem value="desc">Giá giảm dần</MenuItem>
-      </Select>
-    </FormControl>
+const SearchResultsHeader = ({ total, sort = "asc", onSortChange }: Props) => (
+  <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} spacing={2.5} sx={{ mb: { xs: 3, md: 4 } }}>
+    <BoxCopy total={total} />
+    <Stack direction="row" spacing={1} alignItems="center">
+      <SwapVertRoundedIcon sx={{ color: "text.secondary", fontSize: 20 }} />
+      <FormControl size="small">
+        <Select
+          aria-label="Sắp xếp phòng"
+          value={sort}
+          onChange={(event) => onSortChange(event.target.value as "asc" | "desc")}
+          sx={{ minWidth: 178, bgcolor: "#fff", borderRadius: 1, "& .MuiOutlinedInput-notchedOutline": { borderColor: "#dedbd4" } }}
+        >
+          <MenuItem value="asc">Giá thấp đến cao</MenuItem>
+          <MenuItem value="desc">Giá cao đến thấp</MenuItem>
+        </Select>
+      </FormControl>
+    </Stack>
   </Stack>
+);
+
+const BoxCopy = ({ total }: { total: number }) => (
+  <div>
+    <Typography id="search-results-heading" component="h2" sx={{ fontFamily: "Georgia, serif", fontSize: { xs: 28, md: 34 }, color: "#183746" }}>
+      Phòng phù hợp với kỳ nghỉ của bạn
+    </Typography>
+    <Typography color="text.secondary" sx={{ mt: .75 }}>
+      {total} hạng phòng khả dụng
+    </Typography>
+  </div>
 );
 
 export default SearchResultsHeader;

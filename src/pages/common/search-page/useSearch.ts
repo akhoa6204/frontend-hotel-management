@@ -1,12 +1,11 @@
 import useSnackbar from "@hooks/useSnackbar";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import useForm from "@hooks/useForm";
 import { formatDateInput } from "@utils/format";
-import { useMediaQuery, useTheme } from "@mui/material";
-import { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
-import { SearchFilter } from "@constant/internal/SearchFilter";
+import type { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
 import GuestRoomTypeService from "@services/guest/roomType.service";
 
 type FormBooking = SearchBookingFilter & SearchFilter;
@@ -16,7 +15,7 @@ const useSearch = () => {
     state?: Partial<SearchBookingFilter>;
   };
 
-  const { alert, showError, closeSnackbar, showSuccess } = useSnackbar();
+  const { alert, showError, closeSnackbar } = useSnackbar();
   const nights = state?.nights || 1;
   const today = new Date();
   const tomorrow = new Date();
@@ -58,7 +57,7 @@ const useSearch = () => {
     [formSearch.startDate, formSearch.endDate, formSearch.capacity],
   );
 
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading, isFetching, isError, refetch } = useQuery({
     queryKey: ["rooms.search", filters],
     queryFn: async () => {
       return GuestRoomTypeService.getList({
@@ -68,7 +67,7 @@ const useSearch = () => {
     },
     enabled,
   });
-  const rooms = data?.data ?? [];
+  const rooms = useMemo(() => data?.data ?? [], [data?.data]);
   const meta = data?.pagination;
   const loadingRooms = isLoading || isFetching;
 
@@ -96,7 +95,7 @@ const useSearch = () => {
         endDate: formSearch.endDate,
       },
     });
-  }, [data, loadingRooms, rooms, state?.roomTypeId]);
+  }, [data, formSearch.endDate, formSearch.startDate, loadingRooms, navigate, rooms, showError, state?.roomTypeId]);
 
   const handleSort = (s: typeof filters.sortOrder) =>
     setFilters((p) => ({ ...p, sortOrder: s, page: 1 }));
@@ -118,8 +117,16 @@ const useSearch = () => {
     });
   };
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const onViewRoom = (roomTypeId: number) => {
+    navigate(`/room-detail/${roomTypeId}`, {
+      state: {
+        startDate: formSearch.startDate,
+        endDate: formSearch.endDate,
+        capacity: formSearch.capacity,
+      },
+    });
+  };
+
   return {
     formSearch,
     errors,
@@ -130,7 +137,9 @@ const useSearch = () => {
 
     rooms,
     loadingRooms,
+    roomsError: isError,
     meta,
+    retryRooms: refetch,
     handleSort,
     handleRoomType,
     setPage: (page: number) => setFilters((p) => ({ ...p, page })),
@@ -140,8 +149,7 @@ const useSearch = () => {
     closeSnackbar,
 
     onBooking,
-
-    isMobile,
+    onViewRoom,
   };
 };
 
