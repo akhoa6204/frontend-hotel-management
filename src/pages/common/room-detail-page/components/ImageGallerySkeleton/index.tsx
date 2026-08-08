@@ -1,4 +1,4 @@
-import { Box, Grid, Skeleton } from "@mui/material";
+import { Grid, Skeleton } from "@mui/material";
 
 const ImageGallerySkeleton = () => {
   return (

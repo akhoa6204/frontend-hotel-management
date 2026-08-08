@@ -1,86 +1,18 @@
 import { Customer } from "@assets/images";
 import { ReviewOverviewResponse } from "@constant/response/ReviewOverviewResponse";
 import { ReviewResponse } from "@constant/response/ReviewResponse";
-import {
-  Box,
-  Stack,
-  Typography,
-  Grid,
-  Avatar,
-  LinearProgress,
-  Rating,
-} from "@mui/material";
+import { Avatar, Box, Grid, Rating, Stack, Typography } from "@mui/material";
 import { formatDate } from "@utils/format";
 
-type Props = {
-  stats?: ReviewOverviewResponse;
-  reviews: ReviewResponse[];
-};
+interface Props { stats?: ReviewOverviewResponse; reviews: ReviewResponse[]; }
 
-export default function ReviewSection({ stats, reviews }: Props) {
-  return (
-    <Box mt={4}>
-      {/* Header + overall score */}
-      <Stack direction="row" alignItems="center" spacing={2} mb={3}>
-        <Typography variant="h6" fontWeight={700}>
-          Đánh giá
-        </Typography>
-        <Typography variant="h6" fontWeight={700}>
-          {stats?.avgOverall.toFixed(1)}
-        </Typography>
-        <Rating
-          value={Number(stats?.avgOverall)}
-          max={5}
-          precision={0.5}
-          readOnly
-          size="small"
-          sx={{ color: "#FFD700" }}
-        />
-        {stats?.totalReviews && (
-          <Typography variant="body2" color="text.secondary">
-            ({Number(stats.totalReviews)} đánh giá)
-          </Typography>
-        )}
-      </Stack>
-
-      {/* Reviews list */}
-      <Grid container spacing={4}>
-        {reviews.map((r) => {
-          return (
-            <Grid size={{ xs: 12, md: 4 }} key={r.id}>
-              <Stack spacing={1.5}>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <Avatar
-                    sx={{ width: 40, height: 40, bgcolor: "#2E90FA" }}
-                    src={Customer}
-                  />
-                  <Box>
-                    <Typography fontWeight={600}>
-                      {r.booking.guestName}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {formatDate(r.createdAt)}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Rating
-                      value={r.overall}
-                      precision={1}
-                      readOnly
-                      sx={{ color: "#FFD700" }}
-                    />
-                  </Box>
-                </Stack>
-
-                {/* comment */}
-                <Typography variant="body2" color="text.primary">
-                  {r.comment || "Khách không để lại nhận xét."}
-                </Typography>
-              </Stack>
-            </Grid>
-          );
-        })}
-      </Grid>
-    </Box>
-  );
-}
+const ReviewSection = ({ stats, reviews }: Props) => (
+  <Box sx={{ py: { xs: 6, md: 8 }, borderTop: "1px solid #dcd9d1" }}>
+    <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ sm: "flex-end" }} spacing={2} sx={{ mb: 5 }}>
+      <Box><Typography sx={{ color: "primary.main", letterSpacing: 2.2, fontSize: 12, fontWeight: 700 }}>TRẢI NGHIỆM CỦA KHÁCH</Typography><Typography component="h2" sx={{ mt: 1.5, fontFamily: "Georgia, serif", fontSize: { xs: 36, md: 48 } }}>Những kỳ nghỉ được ghi nhớ.</Typography></Box>
+      {stats && <Stack direction="row" spacing={1.25} alignItems="center"><Typography sx={{ fontFamily: "Georgia, serif", fontSize: 32 }}>{stats.avgOverall.toFixed(1)}</Typography><Box><Rating value={stats.avgOverall} precision={.1} readOnly size="small" sx={{ color: "#c58f37" }} /><Typography variant="body2" color="text.secondary">{stats.totalReviews} đánh giá</Typography></Box></Stack>}
+    </Stack>
+    <Grid container spacing={{ xs: 5, md: 6 }}>{reviews.map((review) => <Grid size={{ xs: 12, md: 4 }} key={review.id}><Stack spacing={2.25}><Rating value={review.overall} precision={1} readOnly size="small" sx={{ color: "#c58f37" }} /><Typography sx={{ lineHeight: 1.8, minHeight: { md: 86 } }}>“{review.comment || "Khách không để lại nhận xét."}”</Typography><Stack direction="row" spacing={1.5} alignItems="center"><Avatar src={Customer} alt="" sx={{ width: 40, height: 40 }} /><Box><Typography fontWeight={600}>{review.booking.guestName}</Typography><Typography variant="caption" color="text.secondary">{formatDate(review.createdAt)}</Typography></Box></Stack></Stack></Grid>)}</Grid>
+  </Box>
+);
+export default ReviewSection;

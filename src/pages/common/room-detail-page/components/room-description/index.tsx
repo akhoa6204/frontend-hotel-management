@@ -1,238 +1,55 @@
-import {
-  Box,
-  Grid,
-  Typography,
-  Stack,
-  Button,
-  Card,
-  CardMedia,
-  Chip,
-  Rating,
-} from "@mui/material";
-
-import AcUnitIcon from "@mui/icons-material/AcUnit";
-import AirIcon from "@mui/icons-material/Air";
-import WhatshotIcon from "@mui/icons-material/Whatshot";
-import CheckroomIcon from "@mui/icons-material/Checkroom";
-import DeskIcon from "@mui/icons-material/Desk";
-import WeekendIcon from "@mui/icons-material/Weekend";
-import BalconyIcon from "@mui/icons-material/Balcony";
-import WindowIcon from "@mui/icons-material/Window";
-import TvIcon from "@mui/icons-material/Tv";
-import SmartDisplayIcon from "@mui/icons-material/SmartDisplay";
-import MovieIcon from "@mui/icons-material/Movie";
-import CableIcon from "@mui/icons-material/Cable";
-import WifiIcon from "@mui/icons-material/Wifi";
-import NetworkCheckIcon from "@mui/icons-material/NetworkCheck";
-import ShowerIcon from "@mui/icons-material/Shower";
-import BathtubIcon from "@mui/icons-material/Bathtub";
-import LocalLaundryServiceIcon from "@mui/icons-material/LocalLaundryService";
-import BathroomIcon from "@mui/icons-material/Bathroom";
-import KitchenIcon from "@mui/icons-material/Kitchen";
-import KettleIcon from "@mui/icons-material/EmojiFoodBeverage";
-import KitchenOutlinedIcon from "@mui/icons-material/KitchenOutlined";
-import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
-import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
-import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
-import RoomServiceIcon from "@mui/icons-material/RoomService";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import LocalHotelIcon from "@mui/icons-material/LocalHotel";
-
-import { Call, CallRounded, Check, Person } from "@mui/icons-material";
-import { fmtVND } from "@utils/format";
+import { useState } from "react";
 import { AmenityResponse } from "@constant/response/AmenityResponse";
+import { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
+import AcUnitOutlinedIcon from "@mui/icons-material/AcUnitOutlined";
+import BathtubOutlinedIcon from "@mui/icons-material/BathtubOutlined";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
+import CoffeeMakerOutlinedIcon from "@mui/icons-material/CoffeeMakerOutlined";
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
+import StarRoundedIcon from "@mui/icons-material/StarRounded";
+import TvOutlinedIcon from "@mui/icons-material/TvOutlined";
+import WifiOutlinedIcon from "@mui/icons-material/WifiOutlined";
+import { Box, Button, Divider, Grid, Paper, Stack, TextField, Typography } from "@mui/material";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import { fmtVND } from "@utils/format";
 
-type Props = {
-  name: string;
-  description?: string | null;
-  capacity: number;
-  basePrice: number;
-  discount: number;
-  amenities?: AmenityResponse[];
-  rating: number;
-  handleBookingRoom: () => void;
-};
+interface Props { name: string; description?: string | null; capacity: number; basePrice: number; discount: number; amenities?: AmenityResponse[]; rating: number; totalReviews: number; handleBookingRoom: (selection: SearchBookingFilter) => void; }
 
-const iconColor = "#2E90FA";
+const amenityIcons: Record<string, React.ReactNode> = { WIFI: <WifiOutlinedIcon />, AIR_CONDITIONER: <AcUnitOutlinedIcon />, BATHTUB: <BathtubOutlinedIcon />, COFFEE_MACHINE: <CoffeeMakerOutlinedIcon />, TV: <TvOutlinedIcon />, SMART_TV: <TvOutlinedIcon /> };
+const normalizeAmenity = (label: string) => label.trim().toUpperCase().replace(/[ -]+/g, "_");
 
-const amenityIconMap: Record<string, React.JSX.Element> = {
-  WIFI: <WifiIcon sx={{ color: iconColor }} />,
-  TV: <TvIcon sx={{ color: iconColor }} />,
-  AIR_CONDITIONER: <AcUnitIcon sx={{ color: iconColor }} />,
-  BATHTUB: <BathtubIcon sx={{ color: iconColor }} />,
-  MINI_BAR: <KitchenIcon sx={{ color: iconColor }} />,
-  BALCONY: <BalconyIcon sx={{ color: iconColor }} />,
-  HAIR_DRYER: <LocalLaundryServiceIcon sx={{ color: iconColor }} />,
-  SAFE_BOX: <LocalHotelIcon sx={{ color: iconColor }} />,
-  COFFEE_MACHINE: <KettleIcon sx={{ color: iconColor }} />,
-  OCEAN_VIEW: <WindowIcon sx={{ color: iconColor }} />,
-  WORK_DESK: <DeskIcon sx={{ color: iconColor }} />,
-  WARDROBE: <CheckroomIcon sx={{ color: iconColor }} />,
-  KETTLE: <KettleIcon sx={{ color: iconColor }} />,
-  SMART_TV: <SmartDisplayIcon sx={{ color: iconColor }} />,
-  NETFLIX: <MovieIcon sx={{ color: iconColor }} />,
-  SOFA: <WeekendIcon sx={{ color: iconColor }} />,
-  DINING_TABLE: <DeskIcon sx={{ color: iconColor }} />,
-  SHOWER: <ShowerIcon sx={{ color: iconColor }} />,
-  SLIPPERS: <CheckroomIcon sx={{ color: iconColor }} />,
-  BATHROBE: <CheckroomIcon sx={{ color: iconColor }} />,
-};
+const RoomDescription = ({ name, description, capacity, basePrice, discount, amenities = [], rating, totalReviews, handleBookingRoom }: Props) => {
+  const today = dayjs().startOf("day");
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(today.add(1, "day"));
+  const [guests, setGuests] = useState(Math.min(2, capacity));
+  const nightlyPrice = Number(basePrice) - Number(discount);
 
-function normalizeAmenityLabel(label: string) {
-  return label.trim().toUpperCase().replaceAll(" ", "_").replaceAll("-", "_");
-}
+  const checkAvailability = () => handleBookingRoom({ startDate: startDate.format("YYYY-MM-DD"), endDate: endDate.format("YYYY-MM-DD"), capacity: guests });
 
-function getAmenityIcon(label: string) {
-  const key = normalizeAmenityLabel(label);
+  return <Box component="section" sx={{ pt: { xs: 4.5, md: 6 }, pb: { xs: 5, md: 7 } }}>
+    <Grid container spacing={{ xs: 3, md: 7 }} alignItems="flex-end" sx={{ pb: { xs: 4, md: 5 }, borderBottom: "1px solid #dcd9d1" }}>
+      <Grid size={{ xs: 12, md: 8 }}><Typography sx={{ color: "primary.main", letterSpacing: 2, fontSize: 12, fontWeight: 700 }}>PHÒNG NGHỈ DIAMOND SEA</Typography><Typography component="h1" sx={{ mt: 1, fontFamily: "Georgia, serif", fontSize: { xs: 38, md: 50 }, fontWeight: 400, lineHeight: 1.12 }}>{name}</Typography>{description && <Typography color="text.secondary" sx={{ mt: 1.75, maxWidth: 720, fontSize: 16, lineHeight: 1.7 }}>{description}</Typography>}<Stack direction="row" flexWrap="wrap" gap={2.5} sx={{ mt: 2.25, color: "text.secondary" }}><Stack direction="row" spacing={.75} alignItems="center"><PeopleAltOutlinedIcon fontSize="small" /><Typography variant="body2">Tối đa {capacity} khách</Typography></Stack>{rating > 0 && <Stack direction="row" spacing={.5} alignItems="center"><StarRoundedIcon sx={{ color: "#c58f37", fontSize: 20 }} /><Typography variant="body2">{rating.toFixed(1)} · {totalReviews} đánh giá</Typography></Stack>}</Stack></Grid>
+      <Grid size={{ xs: 12, md: 4 }}><Typography variant="body2" color="text.secondary">Giá từ</Typography>{discount > 0 && <Typography variant="body2" sx={{ textDecoration: "line-through", color: "text.disabled" }}>{fmtVND(basePrice)} ₫</Typography>}<Stack direction="row" spacing={1} alignItems="baseline"><Typography sx={{ fontSize: { xs: 28, md: 34 }, fontWeight: 600, color: "#183746" }}>{fmtVND(nightlyPrice)} ₫</Typography><Typography variant="body2" color="text.secondary">/ đêm</Typography></Stack></Grid>
+    </Grid>
 
-  return (
-    amenityIconMap[key] ?? <CheckCircleOutlineIcon sx={{ color: iconColor }} />
-  );
-}
-
-const RoomDescription = ({
-  name,
-  description,
-  capacity,
-  basePrice,
-  discount,
-  amenities,
-  rating,
-  handleBookingRoom,
-}: Props) => {
-  const safeAmenities = amenities?.slice(0, 6) ?? [];
-
-  return (
-    <Box mt={6}>
-      {/* Header + ảnh + box giá */}
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 8 }}>
-          <Box mb={2.5}>
-            <Typography variant="h5" fontWeight={700} mb={1}>
-              Phòng {name}
-            </Typography>
-            <Stack direction={"row"} alignContent={"center"} spacing={1}>
-              <Chip
-                icon={<Person />}
-                label={`${capacity} người`}
-                sx={{
-                  p: 1,
-                  bgcolor: "#2E90FA0d",
-                  color: "#2E90FA",
-                  "& .MuiChip-icon": {
-                    color: "#2E90FA",
-                  },
-                }}
-                size="small"
-              />
-              <Rating value={rating} precision={0.1} readOnly />
-            </Stack>
-          </Box>
-          {/* Tiện nghi */}
-          {!!safeAmenities.length && (
-            <Box
-              sx={{
-                borderRadius: 2,
-                border: "1px solid #eee",
-                p: 2.5,
-                mb: 2.5,
-              }}
-            >
-              <Typography variant="h6" fontWeight={700} mb={2}>
-                Tiện nghi được cung cấp
-              </Typography>
-
-              <Grid container spacing={2}>
-                {safeAmenities.map((a) => (
-                  <Grid key={a.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                    <Stack direction="row" spacing={1.5} alignItems="center">
-                      {getAmenityIcon(a.label)}
-                      <Typography variant="body2">{a.label}</Typography>
-                    </Stack>
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-          )}
-          {/* Mô tả */}
-          {description && (
-            <Box sx={{ borderRadius: 2, border: "1px solid #eee", p: 2.5 }}>
-              <Typography variant="h6" fontWeight={700} mb={1}>
-                Mô tả
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {description}
-              </Typography>
-            </Box>
-          )}
-        </Grid>
-
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Card
-            sx={{
-              borderRadius: 3,
-              p: 2.5,
-              boxShadow: 3,
-              display: "flex",
-              flexDirection: "column",
-              gap: 1,
-            }}
-          >
-            <Typography fontSize={14}>Giá/ phòng/ đêm từ</Typography>
-            <Stack direction={"row"} spacing={1} justifyContent={"center"}>
-              {discount ? (
-                <>
-                  <Typography
-                    fontSize={16}
-                    fontWeight={700}
-                    sx={{ color: "#ccc", textDecoration: "line-through" }}
-                  >
-                    {fmtVND(basePrice)} VND
-                  </Typography>
-                  <Typography fontSize={16} fontWeight={700}>
-                    -
-                  </Typography>
-                </>
-              ) : (
-                ""
-              )}
-              <Typography fontSize={16} fontWeight={700} color="primary">
-                {fmtVND(Number(basePrice) - Number(discount))} VND
-              </Typography>
-            </Stack>
-            <Stack
-              fontSize={12}
-              direction={"row"}
-              gap={0.5}
-              alignContent={"center"}
-            >
-              <Check sx={{ color: iconColor }} fontSize="small" />
-              Miễn phí huỷ phòng trước 1 ngày
-            </Stack>
-
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ borderRadius: 999 }}
-              fullWidth
-              onClick={handleBookingRoom}
-            >
-              Đặt phòng
-            </Button>
-            <Button
-              variant="contained"
-              // color="primary"
-              sx={{ borderRadius: 999, bgcolor: "#2E90FA0d", color: "#2E90FA" }}
-              fullWidth
-            >
-              <CallRounded sx={{ color: iconColor, mr: 1 }} fontSize="small" />
-              Liên hệ ngay
-            </Button>
-          </Card>
-        </Grid>
+    <Grid container spacing={{ xs: 5, md: 7 }} sx={{ pt: { xs: 5, md: 7 } }}>
+      <Grid size={{ xs: 12, md: 8 }}>
+        {description && <Box component="section" aria-labelledby="about-room-heading"><Typography id="about-room-heading" component="h2" variant="h2" sx={{ fontSize: { xs: 28, md: 32 } }}>Về căn phòng này</Typography><Typography color="text.secondary" sx={{ mt: 2, maxWidth: 760, lineHeight: 1.85 }}>{description}</Typography></Box>}
+        {!!amenities.length && <Box component="section" aria-labelledby="room-amenities-heading" sx={{ mt: description ? { xs: 5, md: 6 } : 0 }}><Typography id="room-amenities-heading" component="h2" variant="h2" sx={{ fontSize: { xs: 28, md: 32 } }}>Tiện nghi trong phòng</Typography><Grid container rowSpacing={3} columnSpacing={4} sx={{ mt: 1.5 }}>{amenities.map((amenity) => { const icon = amenityIcons[normalizeAmenity(amenity.label)] ?? <CheckCircleOutlineRoundedIcon />; return <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={amenity.id}><Stack direction="row" spacing={1.5} alignItems="center" sx={{ color: "#183746", "& svg": { color: "primary.main", fontSize: 25 } }}>{icon}<Typography>{amenity.label}</Typography></Stack></Grid>; })}</Grid></Box>}
       </Grid>
-    </Box>
-  );
-};
 
+      <Grid size={{ xs: 12, md: 4 }}>
+        <Paper elevation={0} sx={{ position: { md: "sticky" }, top: { md: 104 }, p: { xs: 3, md: 3.5 }, borderRadius: 1, bgcolor: "#fff", border: "1px solid #dedbd4", boxShadow: "0 14px 36px rgba(16,43,56,.09)" }}>
+          <Typography variant="body2" color="text.secondary">Giá mỗi đêm từ</Typography><Typography sx={{ mt: .25, fontSize: 30, fontWeight: 600, color: "#183746" }}>{fmtVND(nightlyPrice)} ₫</Typography><Divider sx={{ my: 2.5 }} />
+          <LocalizationProvider dateAdapter={AdapterDayjs}><Stack spacing={2}><DatePicker label="Nhận phòng" value={startDate} minDate={today} format="DD/MM/YYYY" onChange={(date) => { if (!date) return; const nextStart = date.startOf("day"); setStartDate(nextStart); if (!endDate.isAfter(nextStart)) setEndDate(nextStart.add(1, "day")); }} slotProps={{ textField: { fullWidth: true } }} /><DatePicker label="Trả phòng" value={endDate} minDate={startDate.add(1, "day")} format="DD/MM/YYYY" onChange={(date) => date && setEndDate(date.startOf("day"))} slotProps={{ textField: { fullWidth: true } }} /><TextField select label="Số khách" value={guests} onChange={(event) => setGuests(Number(event.target.value))} slotProps={{ select: { native: true } }}>{Array.from({ length: capacity }, (_, index) => index + 1).map((value) => <option key={value} value={value}>{value} khách</option>)}</TextField></Stack></LocalizationProvider>
+          <Button fullWidth variant="contained" size="large" onClick={checkAvailability} sx={{ mt: 2.5, borderRadius: 1, py: 1.35 }}>Kiểm tra phòng trống</Button><Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1.25, textAlign: "center" }}>Phòng và giá được xác nhận ở bước tiếp theo.</Typography>
+        </Paper>
+      </Grid>
+    </Grid>
+  </Box>;
+};
 export default RoomDescription;

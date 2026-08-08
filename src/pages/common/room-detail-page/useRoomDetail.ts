@@ -2,10 +2,10 @@ import GuestReviewService from "@services/guest/review.service";
 import GuestRoomTypeService from "@services/guest/roomType.service";
 import { useQuery } from "@tanstack/react-query";
 import { buildDefaultSearchParams } from "@utils/dateRange";
+import { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-``;
 const useRoomDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -26,6 +26,16 @@ const useRoomDetail = () => {
     queryFn: async () => {
       return GuestRoomTypeService.getById(Number(id));
     },
+    enabled: !!id,
+  });
+
+  const { data: relatedRoomsResponse, isLoading: loadingRelatedRooms } = useQuery({
+    queryKey: ["related-room-types", id],
+    queryFn: () => GuestRoomTypeService.getList({
+      page: 1,
+      limit: 4,
+      ...buildDefaultSearchParams(),
+    }),
     enabled: !!id,
   });
 
@@ -64,10 +74,20 @@ const useRoomDetail = () => {
 
   const handleChangePage = (page: number) => setReviewPage(page);
 
-  const handleBookingRoom = () => {
-    const dateRange = buildDefaultSearchParams(room?.capacity);
-    navigate("/booking", {
-      state: { ...dateRange },
+  const relatedRooms = (relatedRoomsResponse?.data ?? [])
+    .filter((relatedRoom) => relatedRoom.id !== Number(id))
+    .slice(0, 3);
+
+  const handleBookingRoom = (selection?: SearchBookingFilter) => {
+    const dateRange = selection ?? buildDefaultSearchParams(room?.capacity);
+    navigate("/search", {
+      state: { ...dateRange, roomTypeId: Number(id) },
+    });
+  };
+
+  const handleRelatedRoomBooking = (roomTypeId: number, capacity: number) => {
+    navigate("/search", {
+      state: { ...buildDefaultSearchParams(capacity), roomTypeId },
     });
   };
 
@@ -79,16 +99,19 @@ const useRoomDetail = () => {
     reviewMeta: meta,
     totalReviewPages: totalPages,
     reviewPage,
+    relatedRooms,
 
     loadingRoom,
     loadingReviews,
     loadingStats,
+    loadingRelatedRooms,
     fetchingRoom,
     fetchingReviews,
     fetchingStats,
 
     handleChangePage,
     handleBookingRoom,
+    handleRelatedRoomBooking,
   };
 };
 

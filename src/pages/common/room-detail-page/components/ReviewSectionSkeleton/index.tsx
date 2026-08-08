@@ -1,5 +1,5 @@
 // src/pages/.../components/ReviewSectionSkeleton.tsx
-import { Box, Grid, Skeleton, Stack, Typography } from "@mui/material";
+import { Box, Grid, Skeleton, Stack } from "@mui/material";
 
 const ReviewSectionSkeleton = () => {
   return (
