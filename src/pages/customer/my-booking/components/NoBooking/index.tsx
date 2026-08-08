@@ -1,28 +1,21 @@
-import { NoBookingImg } from "@assets/images";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import type { BookingTab } from "../../useMyBooking";
 
-const NoBooking = ({ step }: { step: string }) => {
-  const messages: Record<string, string> = {
-    upcoming: "Bạn chưa có lịch đặt phòng sắp tới",
-    done: "Bạn chưa có lịch sử đặt phòng",
-    cancelled: "Bạn chưa có phòng đã hủy",
-  };
+const messages: Record<BookingTab, { title: string; description: string }> = {
+  upcoming: { title: "Bạn chưa có kỳ nghỉ nào sắp tới.", description: "Khám phá những căn phòng phù hợp cho kỳ nghỉ tiếp theo tại Diamond Sea." },
+  done: { title: "Chưa có kỳ nghỉ đã hoàn tất.", description: "Lịch sử lưu trú của bạn sẽ xuất hiện tại đây sau khi trả phòng." },
+  cancelled: { title: "Bạn chưa có đặt phòng đã hủy.", description: "Các đặt phòng đã hủy sẽ được lưu tại đây để bạn dễ dàng theo dõi." },
+};
 
-  const title = messages[step] || "Bạn chưa có dữ liệu";
-
+const NoBooking = ({ step }: { step: BookingTab }) => {
+  const navigate = useNavigate();
+  const content = messages[step];
   return (
-    <Box sx={{ backgroundColor: "#2E90FA0d", py: 7 }}>
-      <Stack alignItems="center">
-        <Box
-          component="img"
-          src={NoBookingImg}
-          sx={{ width: 140, objectFit: "cover", mb: 1 }}
-        />
-        <Typography variant="h6">{title}</Typography>
-        <Typography color="text.secondary">
-          Khám phá, đặt phòng và tận hưởng chuyến đi theo cách của bạn.
-        </Typography>
-      </Stack>
+    <Box sx={{ py: { xs: 6, md: 8 }, borderTop: "1px solid rgba(23, 60, 75, 0.10)" }}>
+      <Typography component="h2" sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 23, md: 26 } }}>{content.title}</Typography>
+      <Typography color="text.secondary" sx={{ mt: 1, maxWidth: 560, lineHeight: 1.7 }}>{content.description}</Typography>
+      {step === "upcoming" && <Button variant="contained" onClick={() => navigate("/search")} sx={{ mt: 2.5 }}>Khám phá phòng</Button>}
     </Box>
   );
 };
