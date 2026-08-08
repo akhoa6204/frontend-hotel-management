@@ -1,135 +1,82 @@
-import {
-  Box,
-  Paper,
-  Typography,
-  FormControl,
-  Select,
-  MenuItem,
-} from "@mui/material";
-import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
+import { Box, FormControl, MenuItem, Select, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useMemo } from "react";
 import { formatDate } from "@utils/format";
-import { BookingForm } from "../../useBooking";
+import type { BookingForm } from "../../useBooking";
 
-type Option = { value: string; label: string };
+interface Option {
+  value: string;
+  label: string;
+}
 
-type Props = {
+interface Props {
   value?: string;
-  onChange: (field: keyof BookingForm, value: any) => void;
+  onChange: <K extends keyof BookingForm>(field: K, value: BookingForm[K]) => void;
   checkInDate?: string;
-};
+}
 
 const buildArrivalOptions = (checkInDate?: string): Option[] => {
   const today = dayjs().startOf("day");
-  const checkInDay = checkInDate
-    ? dayjs(checkInDate).startOf("day")
-    : undefined;
-
+  const checkInDay = checkInDate ? dayjs(checkInDate).startOf("day") : undefined;
   const baseDay = checkInDay ?? today;
-  const start14 = baseDay.hour(14).minute(0).second(0);
-  const end22 = baseDay.hour(22).minute(0).second(0);
+  const end = baseDay.hour(22).minute(0).second(0);
+  let current = baseDay.hour(14).minute(0).second(0);
 
-  let minStart = start14;
-
-  if (checkInDay && checkInDay.isSame(today, "day")) {
+  if (checkInDay?.isSame(today, "day")) {
     const nowPlus30 = dayjs().add(30, "minute");
-    if (nowPlus30.isAfter(minStart)) {
-      minStart = nowPlus30;
-    }
+    if (nowPlus30.isAfter(current)) current = nowPlus30;
   }
+  if (current.isAfter(end)) return [];
 
-  if (minStart.isAfter(end22)) return [];
+  const minutes = current.minute();
+  if (minutes > 0 && minutes <= 30) current = current.minute(30).second(0);
+  if (minutes > 30) current = current.add(1, "hour").minute(0).second(0);
 
-  let t = minStart.second(0);
-  const m = t.minute();
-  if (m > 0 && m <= 30) {
-    t = t.minute(30);
-  } else if (m > 30) {
-    t = t.add(1, "hour").minute(0);
+  const options: Option[] = [];
+  while (!current.isAfter(end)) {
+    options.push({ value: current.format("HH:mm"), label: current.format("HH:mm") });
+    current = current.add(30, "minute");
   }
-
-  const opts: Option[] = [];
-  while (!t.isAfter(end22)) {
-    opts.push({
-      value: t.format("HH:mm"),
-      label: t.format("HH:mm"),
-    });
-    t = t.add(30, "minute");
-  }
-
-  return opts;
+  return options;
 };
 
 const ArrivalTimeCard = ({ value = "14:00", onChange, checkInDate }: Props) => {
-  const options = useMemo(
-    () => buildArrivalOptions(checkInDate),
-    [checkInDate],
-  );
+  const options = useMemo(() => buildArrivalOptions(checkInDate), [checkInDate]);
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: 3,
-        borderRadius: 3,
-        mb: 3,
-      }}
-      variant="outlined"
-    >
-      <Box mb={2}>
-        <Typography variant="h5" fontWeight={700} mb={0.5}>
-          Thời gian đến của bạn
+    <Box component="section" aria-labelledby="arrival-time-title">
+      <Typography id="arrival-time-title" component="h2" sx={{ fontSize: { xs: 24, md: 27 }, fontWeight: 650, color: "#183746" }}>
+        Thời gian đến
+      </Typography>
+      <Stack direction="row" spacing={1.25} alignItems="flex-start" sx={{ mt: 1.5, color: "#425866" }}>
+        <CheckCircleOutlineRoundedIcon sx={{ mt: 0.15, color: "primary.main", fontSize: 21 }} />
+        <Typography variant="body2" sx={{ lineHeight: 1.7 }}>
+          Nhận phòng từ 14:00 đến 22:00{checkInDate ? ` ngày ${formatDate(checkInDate)}` : ""}.
         </Typography>
-      </Box>
+      </Stack>
 
-      <Box display="flex" alignItems="center" mb={2}>
-        <CheckCircleRoundedIcon
-          sx={{ color: "#2E90FA", mr: 1.5, fontSize: 24 }}
-        />
-        <Typography variant="body2">
-          Bạn có thể nhận chỗ nghỉ trong khoảng từ 14:00 - 22:00 ngày
-          {formatDate(checkInDate)}
+      <Box sx={{ mt: 2.5, maxWidth: 360 }}>
+        <Typography component="label" htmlFor="estimated-arrival-time" sx={{ display: "block", mb: 1, fontSize: 14, fontWeight: 650 }}>
+          Giờ đến dự kiến <Typography component="span" variant="body2" color="text.secondary">(không bắt buộc)</Typography>
         </Typography>
-      </Box>
-
-      <Box mb={1}>
-        <Typography fontWeight={600} mb={0.5}>
-          Thêm thời gian dự kiến đến của bạn{" "}
-          <Typography
-            component="span"
-            variant="body2"
-            color="text.secondary"
-            fontWeight={400}
-          >
-            (không bắt buộc)
-          </Typography>
-        </Typography>
-
-        <FormControl fullWidth size="small">
+        <FormControl fullWidth>
           <Select
+            id="estimated-arrival-time"
             value={value}
             displayEmpty
-            onChange={(e) => onChange("estimatedArrivalTime", e.target.value)}
-            sx={{ bgcolor: "#fff" }}
+            onChange={(event) => onChange("estimatedArrivalTime", event.target.value)}
+            sx={{ minHeight: 50, borderRadius: 1.25, bgcolor: "#fff", "& fieldset": { borderColor: "#d8d6cf" } }}
           >
-            <MenuItem value="">
-              <em>Vui lòng chọn</em>
-            </MenuItem>
-
-            {options.map((opt) => (
-              <MenuItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </MenuItem>
-            ))}
+            <MenuItem value=""><em>Chưa xác định</em></MenuItem>
+            {options.map((option) => <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>)}
           </Select>
         </FormControl>
+        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
+          Giờ địa phương tại Đà Nẵng
+        </Typography>
       </Box>
-
-      <Typography variant="body2" color="text.secondary">
-        Thời gian theo múi giờ Đà Nẵng
-      </Typography>
-    </Paper>
+    </Box>
   );
 };
 

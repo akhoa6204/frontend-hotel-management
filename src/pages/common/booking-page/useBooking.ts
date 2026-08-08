@@ -1,11 +1,12 @@
 import useSnackbar from "@hooks/useSnackbar";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import useForm from "@hooks/useForm";
 import useAuth from "@hooks/useAuth";
-import { QuoteResponse } from "@constant/response/QuoteResponse";
-import { BookingCreationRequest } from "@constant/request/BookingCreationRequest";
+import type { AxiosError } from "axios";
+import type { QuoteResponse } from "@constant/response/QuoteResponse";
+import type { BookingCreationRequest } from "@constant/request/BookingCreationRequest";
 import GuestRoomService from "@services/guest/room.service";
 import GuestBookingService from "@services/guest/booking.service";
 const validateForm = (form: BookingForm) => {
@@ -65,20 +66,19 @@ const useBooking = () => {
   const navigate = useNavigate();
   const auth = useAuth();
   const { state } = useLocation() as {
-    state: { roomId: number; startDate: string; endDate: string };
+    state?: { roomId?: number; startDate?: string; endDate?: string };
   };
 
   useEffect(() => {
     if (!state?.roomId || !state?.startDate || !state.endDate) {
       navigate("/search");
     }
-  }, [state?.roomId, state?.startDate, state?.endDate]);
+  }, [navigate, state?.roomId, state?.startDate, state?.endDate]);
 
   const { alert, showError, closeSnackbar } = useSnackbar();
 
   const {
     form: bookingForm,
-    errors: bookingErrors,
     onChangeField,
     errors,
     onSubmit,
@@ -89,13 +89,14 @@ const useBooking = () => {
       guestEmail: auth.user?.email || "",
       bookingForSomeoneElse: false,
       estimatedArrivalTime: "14:00",
-      checkInDate: state?.startDate,
-      checkOutDate: state?.endDate,
-      roomId: state.roomId,
+      checkInDate: state?.startDate ?? "",
+      checkOutDate: state?.endDate ?? "",
+      roomId: state?.roomId ?? 0,
       customerId: auth.user?.id,
     },
     validateForm,
     async () => {
+      if (mCreateBooking.isPending) return;
       await mCreateBooking.mutateAsync(bookingForm);
     },
   );
@@ -113,9 +114,7 @@ const useBooking = () => {
   });
   const mCreateBooking = useMutation({
     mutationFn: async (data: BookingCreationRequest) => {
-      const roomId = bookingForm.roomId;
-
-      if (!roomId) {
+      if (!data.roomId) {
         showError("Thiếu thông tin phòng");
         return;
       }
@@ -129,15 +128,18 @@ const useBooking = () => {
         },
       });
     },
-    onError: (e: any) => {
-      const msg = e?.response?.data?.message;
+    onError: (error: AxiosError<{ message?: string }>) => {
+      const msg = error.response?.data?.message;
       showError(msg || "Tạo đặt phòng thất bại");
     },
   });
 
   const [pricing, setPricing] = useState<QuoteResponse>();
 
-  const mQuoteBooking = useMutation({
+  const {
+    mutate: quoteBooking,
+    isPending: loadingQuote,
+  } = useMutation({
     mutationFn: async () => {
       return await GuestBookingService.quote({
         roomId: bookingForm.roomId,
@@ -147,23 +149,21 @@ const useBooking = () => {
       });
     },
     onSuccess: (data) => setPricing(data),
+    onError: () => showError("Không thể cập nhật giá cho kỳ nghỉ này"),
   });
   useEffect(() => {
     if (!room) return;
-    mQuoteBooking.mutateAsync();
-  }, [room]);
+    quoteBooking();
+  }, [quoteBooking, room]);
 
   const loadingRoomDetail = loadingRoom || fetchingRoom;
   const loadingCreateBooking = mCreateBooking.isPending;
-  const loadingQuote = mQuoteBooking.isPending;
-
   return {
     room,
     loadingRoom,
     fetchingRoom,
 
     bookingForm,
-    bookingErrors,
     onChangeField,
     errors,
 

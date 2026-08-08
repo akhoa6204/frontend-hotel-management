@@ -1,86 +1,57 @@
-import { Box, Chip, Stack, Typography } from "@mui/material";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
+import { Box, Stack, Typography } from "@mui/material";
 
-type BookingStepperProps = {
+interface BookingStepperProps {
   activeStep: number;
-};
+}
 
 const steps = ["Bạn chọn", "Đặt phòng", "Thanh toán"];
 
-const BookingStepper = ({ activeStep = 1 }: BookingStepperProps) => {
-  return (
-    <Box py={4.5}>
-      <Stack direction="row" alignItems="center" sx={{ width: "100%" }}>
-        {steps.map((label, index) => {
-          const stepNumber = index + 1;
-          const isActive = stepNumber === activeStep;
-          const isCompleted = stepNumber < activeStep;
-          const isLast = index === steps.length - 1;
+const BookingStepper = ({ activeStep = 1 }: BookingStepperProps) => (
+  <Box component="nav" aria-label="Tiến trình đặt phòng" sx={{ py: { xs: 3, md: 3.5 } }}>
+    <Stack direction="row" alignItems="flex-start" sx={{ width: 1 }}>
+      {steps.map((label, index) => {
+        const stepNumber = index + 1;
+        const completed = stepNumber < activeStep;
+        const active = stepNumber === activeStep;
+        const last = index === steps.length - 1;
 
-          return (
-            <Stack
-              key={label}
-              direction="row"
-              alignItems="center"
-              sx={{ flex: isLast ? "0 auto" : 1 }}
-            >
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={1}
-                alignItems="center"
+        return (
+          <Stack key={label} direction="row" alignItems="flex-start" sx={{ flex: last ? "0 0 auto" : 1, minWidth: 0 }}>
+            <Stack alignItems="center" spacing={0.75}>
+              <Box
+                aria-current={active ? "step" : undefined}
+                sx={{
+                  display: "grid",
+                  placeItems: "center",
+                  width: 27,
+                  height: 27,
+                  borderRadius: "50%",
+                  border: "1px solid",
+                  borderColor: active || completed ? "primary.main" : "#c8c9c6",
+                  bgcolor: completed ? "primary.main" : active ? "#fff" : "transparent",
+                  color: completed ? "#fff" : active ? "primary.main" : "text.secondary",
+                  fontSize: 12,
+                  fontWeight: 750,
+                }}
               >
-                <Chip
-                  label={stepNumber}
-                  size="small"
-                  sx={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: "50%",
-                    fontWeight: 600,
-                    "& .MuiChip-label": { p: 0, lineHeight: "28px" },
-                    ...(isActive || isCompleted
-                      ? {
-                          bgcolor: "#2E90FA",
-                          color: "white",
-                          border: "none",
-                        }
-                      : {
-                          bgcolor: "transparent",
-                          color: "#2E90FA",
-                          border: "1px solid #2E90FA",
-                        }),
-                  }}
-                />
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: isActive ? 600 : 500,
-                    color:
-                      isActive || isCompleted
-                        ? "text.primary"
-                        : "text.secondary",
-                  }}
-                >
-                  {label}
-                </Typography>
-              </Stack>
-
-              {!isLast && (
-                <Box
-                  sx={{
-                    flex: 1,
-                    ml: 2,
-                    height: 2,
-                    borderRadius: 999,
-                    bgcolor: isCompleted ? "#2E90FA" : "grey.300",
-                  }}
-                />
-              )}
+                {completed ? <CheckRoundedIcon sx={{ fontSize: 17 }} /> : stepNumber}
+              </Box>
+              <Typography
+                variant="caption"
+                sx={{ color: active ? "#183746" : "text.secondary", fontWeight: active ? 700 : 500, whiteSpace: "nowrap" }}
+              >
+                {label}
+              </Typography>
             </Stack>
-          );
-        })}
-      </Stack>
-    </Box>
-  );
-};
+            {!last && (
+              <Box sx={{ flex: 1, height: 1, mx: { xs: 1.25, sm: 2.5 }, mt: "13px", bgcolor: completed ? "primary.main" : "#d8d6cf" }} />
+            )}
+          </Stack>
+        );
+      })}
+    </Stack>
+  </Box>
+);
 
 export default BookingStepper;
