@@ -102,7 +102,7 @@ const BookingDetailPage = () => {
             </Typography>
             <Typography
               component="h1"
-              sx={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 32, md: 44 }, lineHeight: 1.12, color: "#173C4B" }}
+              sx={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 32, md: 44 }, lineHeight: 1.12, color: "text.primary" }}
             >
               {booking.room.roomType.name}
             </Typography>
@@ -128,7 +128,7 @@ const BookingDetailPage = () => {
       </Box>
 
       <Box component="section" sx={{ mt: { xs: 4, md: 5.5 }, pt: { xs: 3, md: 3.5 }, borderTop: "1px solid", borderColor: "divider" }}>
-        <Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', color: "#173C4B", fontSize: 24, mb: 1 }}>
+        <Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', color: "text.primary", fontSize: 24, mb: 1 }}>
           Chính sách đặt phòng
         </Typography>
         <Typography color="text.secondary" sx={{ maxWidth: 760, lineHeight: 1.7 }}>
@@ -148,7 +148,7 @@ const BookingDetailPage = () => {
           sx={{ mt: { xs: 3, md: 3.25 }, pt: 2.25, borderTop: "1px solid", borderColor: "divider", "& .MuiButton-root": { minHeight: 42, textTransform: "none", px: 2.25, width: { xs: 1, sm: "auto" } } }}
         >
           <Box>
-            <Typography fontWeight={650} color="#173C4B">Quản lý đặt phòng</Typography>
+            <Typography fontWeight={650} color="text.primary">Quản lý đặt phòng</Typography>
             <Typography variant="body2" color="text.secondary" mt={0.2}>Các thao tác hiện có cho đặt phòng này.</Typography>
           </Box>
           <Stack

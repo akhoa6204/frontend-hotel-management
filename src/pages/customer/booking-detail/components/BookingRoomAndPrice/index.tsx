@@ -22,19 +22,19 @@ const BookingRoomAndPrice = ({ booking }: Props) => {
 
   return (
     <Box component="aside" aria-label="Tóm tắt thanh toán" sx={{ bgcolor: "rgba(239, 234, 224, 0.56)", p: { xs: 2.5, sm: 3, xl: 3.5 }, alignSelf: "stretch", minWidth: 0 }}>
-      <Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', color: "#173C4B", fontSize: 25, mb: 3 }}>Tóm tắt thanh toán</Typography>
+      <Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', color: "text.primary", fontSize: 25, mb: 3 }}>Tóm tắt thanh toán</Typography>
       <Stack spacing={1.6}>
         <MoneyRow label="Tiền phòng" value={roomAmount} />
         {discount > 0 && <MoneyRow label={booking.promotionCode ? `Ưu đãi (${booking.promotionCode})` : "Ưu đãi"} value={discount} accent />}
         <Divider sx={{ my: .5 }} />
         <Stack direction="row" justifyContent="space-between" alignItems="baseline" spacing={2}>
           <Typography fontWeight={650}>Tổng giá trị</Typography>
-          <Typography sx={{ color: "#173C4B", fontSize: 20, fontWeight: 700, textAlign: "right" }}>{fmtVND(total)} VND</Typography>
+          <Typography sx={{ color: "text.primary", fontSize: 20, fontWeight: 700, textAlign: "right" }}>{fmtVND(total)} VND</Typography>
         </Stack>
         {(booking.depositPaidAmount !== undefined || booking.roomPaymentPaidAmount !== undefined) && <MoneyRow label="Đã thanh toán" value={paid} />}
         <Stack direction="row" justifyContent="space-between" spacing={2} sx={{ pt: 1.5 }}>
           <Typography fontWeight={650}>Còn lại</Typography>
-          <Typography fontWeight={remaining > 0 ? 700 : 500} color={remaining > 0 ? "#173C4B" : "text.secondary"} textAlign="right">{fmtVND(remaining)} VND</Typography>
+          <Typography fontWeight={remaining > 0 ? 700 : 500} color={remaining > 0 ? "text.primary" : "text.secondary"} textAlign="right">{fmtVND(remaining)} VND</Typography>
         </Stack>
       </Stack>
       <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 2, lineHeight: 1.6 }}>

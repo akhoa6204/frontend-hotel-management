@@ -30,9 +30,9 @@ const BookingStayOverview = ({ booking }: Props) => {
           Phòng {booking.room.name}
         </Typography>
         <Stack direction="row" alignItems="center" spacing={{ xs: 1.5, sm: 2.5 }} sx={{ my: 2.5 }}>
-          <Box><Typography fontSize={12} color="text.secondary">NHẬN PHÒNG</Typography><Typography sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 18, sm: 22 }, mt: .5 }}>{displayDate(booking.checkInDate)}</Typography></Box>
+          <Box><Typography fontSize={12} color="text.secondary">NHẬN PHÒNG</Typography><Typography sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 18, sm: 22 }, mt: .5 }}>{displayDate(booking.checkInDate)}</Typography></Box>
           <ArrowForwardRounded aria-hidden sx={{ color: "primary.main", flexShrink: 0 }} />
-          <Box><Typography fontSize={12} color="text.secondary">TRẢ PHÒNG</Typography><Typography sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 18, sm: 22 }, mt: .5 }}>{displayDate(booking.checkOutDate)}</Typography></Box>
+          <Box><Typography fontSize={12} color="text.secondary">TRẢ PHÒNG</Typography><Typography sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 18, sm: 22 }, mt: .5 }}>{displayDate(booking.checkOutDate)}</Typography></Box>
         </Stack>
         <Stack direction={{ xs: "column", sm: "row" }} spacing={{ xs: 1, sm: 3 }} color="text.secondary">
           <Stack direction="row" spacing={1} alignItems="center"><HotelOutlined fontSize="small" /><Typography variant="body2">{nights} đêm</Typography></Stack>

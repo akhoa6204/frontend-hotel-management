@@ -23,7 +23,7 @@ const BookingInformation = ({ booking }: Props) => {
   const arrivalTime = formatTime(booking.estimatedArrivalTime);
   return (
     <Box component="section" sx={{ minWidth: 0, height: 1 }}>
-      <Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', color: "#173C4B", fontSize: 27, mb: 1 }}>Thông tin lưu trú</Typography>
+      <Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', color: "text.primary", fontSize: 27, mb: 1 }}>Thông tin lưu trú</Typography>
       <Typography color="text.secondary" sx={{ mb: 3 }}>Thông tin liên hệ được cung cấp cho đặt phòng này.</Typography>
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: { xs: 2.5, sm: 3.5 }, py: 3, borderTop: "1px solid", borderBottom: "1px solid", borderColor: "divider" }}>
         <Detail icon={<PersonOutlineRounded fontSize="small" />} label="Khách lưu trú" value={booking.guestName} />

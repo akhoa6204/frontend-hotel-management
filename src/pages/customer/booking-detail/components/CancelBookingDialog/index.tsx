@@ -79,7 +79,7 @@ const CancelBookingDialog = ({
           pt: { xs: 2.5, sm: 3 },
           pb: 0,
           pr: { xs: 7, sm: 8 },
-          color: "#173C4B",
+          color: "text.primary",
           fontFamily: 'Georgia, "Times New Roman", serif',
           fontSize: { xs: 22, sm: 24 },
           lineHeight: 1.25,
@@ -99,7 +99,7 @@ const CancelBookingDialog = ({
           width: 40,
           height: 40,
           color: "text.secondary",
-          "&:hover": { bgcolor: "rgba(23, 60, 75, 0.06)", color: "#173C4B" },
+          "&:hover": { bgcolor: "rgba(23, 60, 75, 0.06)", color: "text.primary" },
         }}
       >
         <CloseRounded fontSize="small" />
