@@ -3,7 +3,6 @@ import { BgRoom } from "@assets/images";
 import type { QuoteResponse } from "@constant/response/QuoteResponse";
 import type { RoomResponse } from "@constant/response/RoomResponse";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
-import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import { Box, Button, Divider, Stack, Typography } from "@mui/material";
 import { diffNights, fmtVND, formatDate } from "@utils/format";
@@ -46,8 +45,9 @@ const ReservationSummary = ({
         position: { md: "sticky" },
         top: { md: 96 },
         overflow: "hidden",
-        bgcolor: "#fff",
-        border: "1px solid #dedbd4",
+        bgcolor: "background.paper",
+        border: "1px solid",
+        borderColor: "divider",
         borderRadius: 2,
         boxShadow: "0 18px 50px rgba(13,52,66,.09)",
       }}
@@ -97,7 +97,7 @@ const ReservationSummary = ({
             fontFamily: "Georgia, serif",
             fontSize: { xs: 25, md: 28 },
             lineHeight: 1.2,
-            color: "#183746",
+            color: "text.primary",
           }}
         >
           {room.roomType.name}
@@ -114,7 +114,7 @@ const ReservationSummary = ({
           </Typography>
         </Stack>
 
-        <Divider sx={{ my: 3, borderColor: "#dedbd4" }} />
+        <Divider sx={{ my: 3 }} />
 
         <Box
           sx={{
@@ -136,7 +136,7 @@ const ReservationSummary = ({
 
             <Typography
               fontWeight={700}
-              color="#183746"
+              color="text.primary"
               sx={{
                 mt: 0.5,
                 fontSize: { xs: 15, sm: 16 },
@@ -189,7 +189,7 @@ const ReservationSummary = ({
 
             <Typography
               fontWeight={700}
-              color="#183746"
+              color="text.primary"
               sx={{
                 mt: 0.5,
                 fontSize: { xs: 15, sm: 16 },
@@ -200,11 +200,11 @@ const ReservationSummary = ({
             </Typography>
           </Box>
         </Box>
-        <Divider sx={{ my: 3, borderColor: "#dedbd4" }} />
+        <Divider sx={{ my: 3 }} />
 
         <Typography
           component="h3"
-          sx={{ fontSize: 17, fontWeight: 700, color: "#183746" }}
+          sx={{ fontSize: 17, fontWeight: 700, color: "text.primary" }}
         >
           Tóm tắt giá
         </Typography>
@@ -225,14 +225,14 @@ const ReservationSummary = ({
                   </Typography>
                 )}
               </Box>
-              <Typography fontWeight={600} color="#2f6b55">
+              <Typography fontWeight={600} color="success.main">
                 − {fmtVND(pricing?.totalDiscount ?? 0)} VND
               </Typography>
             </Stack>
           )}
         </Stack>
 
-        <Divider sx={{ my: 2.5, borderColor: "#dedbd4" }} />
+        <Divider sx={{ my: 2.5 }} />
 
         <Stack
           direction="row"
@@ -240,14 +240,14 @@ const ReservationSummary = ({
           alignItems="baseline"
           spacing={2}
         >
-          <Typography fontWeight={700} color="#183746">
+          <Typography fontWeight={700} color="text.primary">
             Tổng cộng
           </Typography>
           <Typography
             sx={{
               fontSize: { xs: 24, md: 27 },
               fontWeight: 750,
-              color: "#183746",
+              color: "text.primary",
               whiteSpace: "nowrap",
             }}
           >

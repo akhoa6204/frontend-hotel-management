@@ -46,10 +46,10 @@ const ArrivalTimeCard = ({ value = "14:00", onChange, checkInDate }: Props) => {
 
   return (
     <Box component="section" aria-labelledby="arrival-time-title">
-      <Typography id="arrival-time-title" component="h2" sx={{ fontSize: { xs: 24, md: 27 }, fontWeight: 650, color: "#183746" }}>
+      <Typography id="arrival-time-title" component="h2" sx={{ fontSize: { xs: 24, md: 27 }, fontWeight: 650, color: "text.primary" }}>
         Thời gian đến
       </Typography>
-      <Stack direction="row" spacing={1.25} alignItems="flex-start" sx={{ mt: 1.5, color: "#425866" }}>
+      <Stack direction="row" spacing={1.25} alignItems="flex-start" sx={{ mt: 1.5, color: "text.secondary" }}>
         <CheckCircleOutlineRoundedIcon sx={{ mt: 0.15, color: "primary.main", fontSize: 21 }} />
         <Typography variant="body2" sx={{ lineHeight: 1.7 }}>
           Nhận phòng từ 14:00 đến 22:00{checkInDate ? ` ngày ${formatDate(checkInDate)}` : ""}.

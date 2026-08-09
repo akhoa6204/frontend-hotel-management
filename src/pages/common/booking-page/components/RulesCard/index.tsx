@@ -9,7 +9,7 @@ const policies = [
 
 const RulesCard = () => (
   <Box component="section" aria-labelledby="stay-policies-title">
-    <Typography id="stay-policies-title" component="h2" sx={{ fontSize: { xs: 24, md: 27 }, fontWeight: 650, color: "#183746" }}>
+    <Typography id="stay-policies-title" component="h2" sx={{ fontSize: { xs: 24, md: 27 }, fontWeight: 650, color: "text.primary" }}>
       Quy tắc lưu trú
     </Typography>
     <Typography color="text.secondary" sx={{ mt: 1, lineHeight: 1.7 }}>
@@ -19,8 +19,8 @@ const RulesCard = () => (
       {policies.map(({ label, value, icon: Icon }) => (
         <Stack key={label} direction="row" spacing={1.5} alignItems="center">
           <Icon sx={{ color: "primary.main", fontSize: 21 }} />
-          <Typography sx={{ minWidth: { sm: 170 }, color: "#425866" }}>{label}</Typography>
-          <Typography fontWeight={650} color="#183746">{value}</Typography>
+          <Typography sx={{ minWidth: { sm: 170 }, color: "text.secondary" }}>{label}</Typography>
+          <Typography fontWeight={650} color="text.primary">{value}</Typography>
         </Stack>
       ))}
     </Stack>

@@ -1,7 +1,7 @@
 import { Box, Divider, Skeleton, Stack } from "@mui/material";
 
 const ReservationSummarySkeleton = () => (
-  <Box sx={{ overflow: "hidden", bgcolor: "#fff", border: "1px solid #dedbd4", borderRadius: 2 }} aria-label="Đang tải thông tin kỳ nghỉ">
+  <Box sx={{ overflow: "hidden", bgcolor: "background.paper", border: "1px solid", borderColor: "divider", borderRadius: 2 }} aria-label="Đang tải thông tin kỳ nghỉ">
     <Skeleton variant="rectangular" sx={{ width: 1, aspectRatio: { xs: "16 / 7", sm: "16 / 6", md: "16 / 9" } }} />
     <Stack spacing={1.5} sx={{ p: { xs: 2.5, sm: 3, md: 3.25 } }}>
       <Skeleton width={130} />

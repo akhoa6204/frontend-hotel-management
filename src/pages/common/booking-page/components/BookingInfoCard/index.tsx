@@ -20,7 +20,7 @@ const fieldSx = {
 
 const BookingInfoCard = ({ value, onChange, errors }: Props) => (
   <Box component="section" aria-labelledby="guest-information-title">
-    <Typography id="guest-information-title" component="h2" sx={{ fontSize: { xs: 24, md: 27 }, fontWeight: 650, color: "#183746" }}>
+    <Typography id="guest-information-title" component="h2" sx={{ fontSize: { xs: 24, md: 27 }, fontWeight: 650, color: "text.primary" }}>
       Thông tin khách lưu trú
     </Typography>
     <Typography color="text.secondary" sx={{ mt: 1, lineHeight: 1.7 }}>
@@ -74,9 +74,9 @@ const BookingInfoCard = ({ value, onChange, errors }: Props) => (
       </Grid>
     </Grid>
 
-    <Divider sx={{ my: { xs: 4, md: 5 }, borderColor: "#dedbd4" }} />
+    <Divider sx={{ my: { xs: 4, md: 5 } }} />
 
-    <Typography component="h3" sx={{ fontSize: 18, fontWeight: 650, color: "#183746" }}>
+    <Typography component="h3" sx={{ fontSize: 18, fontWeight: 650, color: "text.primary" }}>
       Bạn đặt phòng cho ai?
     </Typography>
     <RadioGroup
