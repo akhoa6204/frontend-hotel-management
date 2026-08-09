@@ -21,6 +21,8 @@ const MyBookingPage = () => {
     retry,
     onSelectBooking,
     onReview,
+    onViewReview,
+    reviews,
     onReBook,
     cancelOpen,
     bookingToCancel,
@@ -96,16 +98,21 @@ const MyBookingPage = () => {
       ) : (
         <>
           <Stack spacing={{ xs: 2.5, md: 3 }}>
-            {bookings.map((booking) => (
-              <BookingCard
-                key={booking.id}
-                booking={booking}
-                onCancel={tab === "upcoming" ? () => openCancelDialog(booking) : undefined}
-                onClick={() => onSelectBooking(booking.id)}
-                onReview={() => onReview(booking.id)}
-                onReBook={() => onReBook(booking.room.roomType.id, diffNights(booking.checkInDate, booking.checkOutDate))}
-              />
-            ))}
+            {bookings.map((booking) => {
+              const review = reviews?.find((item) => item.bookingId === booking.id);
+              return (
+                <BookingCard
+                  key={booking.id}
+                  booking={booking}
+                  reviewId={review?.id}
+                  onCancel={tab === "upcoming" ? () => openCancelDialog(booking) : undefined}
+                  onClick={() => onSelectBooking(booking.id)}
+                  onReview={() => onReview(booking.id)}
+                  onViewReview={review ? () => onViewReview(review.id) : undefined}
+                  onReBook={() => onReBook(booking.room.roomType.id, diffNights(booking.checkInDate, booking.checkOutDate))}
+                />
+              );
+            })}
           </Stack>
 
           {totalPages > 1 && (

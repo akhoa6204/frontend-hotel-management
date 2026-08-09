@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { diffNights } from "@utils/format";
 import MyBookingService from "@services/me/booking.service";
+import MyReviewService from "@services/me/review.service";
 import type { BookingCancelRequest } from "@constant/request/BookingCancelRequest";
 
 const useBookingDetail = () => {
@@ -22,12 +23,24 @@ const useBookingDetail = () => {
     enabled: !!id,
   });
 
+  const { data: reviews, isLoading: loadingReviews } = useQuery({
+    queryKey: ["my-review-index"],
+    queryFn: () => MyReviewService.getAllForCurrentCustomer(),
+    enabled: booking?.status === "CHECKED_OUT" && booking.hasReview === true,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const existingReview = reviews?.find((review) => review.bookingId === booking?.id);
+
   const onBack = () => navigate("/account/bookings");
 
   const onReview = () =>
     navigate("/account/reviews/create", {
       state: { bookingId: id },
     });
+
+  const onViewReview = (reviewId: number) =>
+    navigate(`/account/reviews/${reviewId}`);
 
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
@@ -81,10 +94,13 @@ const useBookingDetail = () => {
 
   return {
     booking,
+    existingReview,
+    loadingReviews,
     loadingBooking: isLoading,
     bookingError: isError,
     onBack,
     onReview,
+    onViewReview,
     alert,
     closeSnackbar,
 

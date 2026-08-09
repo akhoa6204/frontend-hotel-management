@@ -5,6 +5,7 @@ import { BgRoom } from "@assets/images";
 import type { BookingResponse } from "@constant/response/BookingResponse";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { diffNights, fmtVND } from "@utils/format";
+import { getBookingReviewAction } from "@utils/bookingReview";
 import { useState } from "react";
 
 interface BookingCardProps {
@@ -12,7 +13,9 @@ interface BookingCardProps {
   onCancel?: () => void;
   onClick?: () => void;
   onReview?: () => void;
+  onViewReview?: () => void;
   onReBook?: () => void;
+  reviewId?: number;
 }
 
 const statusLabels = {
@@ -35,7 +38,7 @@ const unsuitableImagePattern = /(meme|joke|giphy|tenor|\.gif(?:\?|$))/i;
 const displayDate = (value: string) =>
   new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
 
-const BookingCard = ({ booking, onCancel, onClick, onReview, onReBook }: BookingCardProps) => {
+const BookingCard = ({ booking, onCancel, onClick, onReview, onViewReview, onReBook, reviewId }: BookingCardProps) => {
   const [imageFailed, setImageFailed] = useState(false);
   const suitableImage = booking.room.roomType.roomTypeImages?.find((image) => image.url && !unsuitableImagePattern.test(image.url));
   const image = imageFailed || !suitableImage ? BgRoom : suitableImage.url;
@@ -45,6 +48,11 @@ const BookingCard = ({ booking, onCancel, onClick, onReview, onReBook }: Booking
   const total = Number(booking.finalAmount ?? booking.roomFinalAmount ?? Math.max(0, roomAmount - discount));
   const remaining = Number(booking.remainingAmount ?? 0);
   const statusStyle = statusColors[booking.status];
+  const reviewAction = getBookingReviewAction(
+    booking,
+    booking.id,
+    reviewId === undefined ? undefined : { id: reviewId },
+  );
 
   return (
     <Box
@@ -110,7 +118,8 @@ const BookingCard = ({ booking, onCancel, onClick, onReview, onReBook }: Booking
             {booking.status === "CHECKED_OUT" && (
               <>
                 <Button variant="text" startIcon={<ReplayRounded />} onClick={onReBook}>Đặt lại</Button>
-                {!booking.hasReview && <Button variant="contained" startIcon={<StarOutlineRounded />} onClick={onReview}>Viết đánh giá</Button>}
+                {reviewAction.type === "write" && <Button variant="contained" startIcon={<StarOutlineRounded />} onClick={onReview}>Viết đánh giá</Button>}
+                {reviewAction.type === "view" && <Button variant="outlined" startIcon={<StarOutlineRounded />} onClick={onViewReview}>Xem đánh giá</Button>}
               </>
             )}
             {booking.status === "CANCELLED" && <Button variant="outlined" startIcon={<ReplayRounded />} onClick={onReBook}>Đặt lại</Button>}

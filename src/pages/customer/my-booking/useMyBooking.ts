@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import useSnackbar from "@hooks/useSnackbar";
 import MyBookingService from "@services/me/booking.service";
+import MyReviewService from "@services/me/review.service";
 import type { BookingStatus } from "@enums/BookingStatus";
 import type { BookingResponse } from "@constant/response/BookingResponse";
 import type { BookingCancelRequest } from "@constant/request/BookingCancelRequest";
@@ -51,6 +52,15 @@ const useMyBooking = () => {
     if (!bookingStatus) return true;
 
     return booking.status === bookingStatus;
+  });
+  const hasReviewedBookings = bookings.some(
+    (booking) => booking.status === "CHECKED_OUT" && booking.hasReview,
+  );
+  const { data: reviews } = useQuery({
+    queryKey: ["my-review-index"],
+    queryFn: () => MyReviewService.getAllForCurrentCustomer(),
+    enabled: hasReviewedBookings,
+    staleTime: 5 * 60 * 1000,
   });
   const meta = data?.pagination;
   const totalPages = meta?.totalPages ?? 0;
@@ -113,6 +123,9 @@ const useMyBooking = () => {
       },
     });
 
+  const onViewReview = (reviewId: number) =>
+    navigate(`/account/reviews/${reviewId}`);
+
   const onReBook = (roomTypeId: number, nights: number) => {
     navigate("/search", {
       state: {
@@ -137,6 +150,8 @@ const useMyBooking = () => {
     fetching: isFetching,
     onSelectBooking,
     onReview,
+    onViewReview,
+    reviews,
     onReBook,
 
     // cancel dialog

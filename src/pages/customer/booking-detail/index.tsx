@@ -1,6 +1,7 @@
 import ArrowBackRounded from "@mui/icons-material/ArrowBackRounded";
 import ErrorOutlineRounded from "@mui/icons-material/ErrorOutlineRounded";
 import ReplayRounded from "@mui/icons-material/ReplayRounded";
+import StarOutlineRounded from "@mui/icons-material/StarOutlineRounded";
 import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
 import { GlobalSnackbar } from "@components";
 import BookingInformation from "./components/BookingInformation";
@@ -8,6 +9,7 @@ import BookingRoomAndPrice from "./components/BookingRoomAndPrice";
 import BookingStayOverview from "./components/BookingStayOverview";
 import CancelBookingDialog from "./components/CancelBookingDialog";
 import useBookingDetail from "./useBookingDetail";
+import { getBookingReviewAction } from "@utils/bookingReview";
 
 const statusLabels = {
   PENDING: "Đang chờ xác nhận",
@@ -28,12 +30,16 @@ const statusColors = {
 const BookingDetailPage = () => {
   const {
     booking,
+    existingReview,
+    loadingReviews,
     loadingBooking,
     bookingError,
     onBack,
     alert,
     closeSnackbar,
     onReBook,
+    onReview,
+    onViewReview,
     confirmCancel,
     cancelling,
     cancelOpen,
@@ -70,6 +76,9 @@ const BookingDetailPage = () => {
   }
 
   const canRebook = booking.status === "CHECKED_OUT" || booking.status === "CANCELLED";
+  const reviewAction = loadingReviews
+    ? { type: "none" as const }
+    : getBookingReviewAction(booking, booking.id, existingReview);
   const statusStyle = statusColors[booking.status];
 
   return (
@@ -142,16 +151,47 @@ const BookingDetailPage = () => {
             <Typography fontWeight={650} color="#173C4B">Quản lý đặt phòng</Typography>
             <Typography variant="body2" color="text.secondary" mt={0.2}>Các thao tác hiện có cho đặt phòng này.</Typography>
           </Box>
-          {booking.status === "CONFIRMED" && (
-            <Button color="error" variant="outlined" onClick={openCancelDialog}>
-              Hủy đặt phòng
-            </Button>
-          )}
-          {canRebook && (
-            <Button variant="contained" startIcon={<ReplayRounded />} onClick={onReBook}>
-              Đặt lại phòng
-            </Button>
-          )}
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={1}
+            sx={{ width: { xs: 1, sm: "auto" } }}
+          >
+            {booking.status === "CONFIRMED" && (
+              <Button color="error" variant="outlined" onClick={openCancelDialog}>
+                Hủy đặt phòng
+              </Button>
+            )}
+            {canRebook && (
+              <Button
+                variant="outlined"
+                startIcon={<ReplayRounded />}
+                onClick={onReBook}
+                sx={{ order: { xs: reviewAction.type === "write" ? 2 : 1, sm: 1 } }}
+              >
+                Đặt lại phòng
+              </Button>
+            )}
+            {reviewAction.type === "write" && (
+              <Button
+                variant="contained"
+                startIcon={<StarOutlineRounded />}
+                onClick={onReview}
+                sx={{ order: { xs: 1, sm: 2 } }}
+              >
+                Viết đánh giá
+              </Button>
+            )}
+            {reviewAction.type === "view" && (
+              <Button
+                variant="outlined"
+                startIcon={<StarOutlineRounded />}
+                onClick={() => onViewReview(reviewAction.reviewId)}
+                sx={{ order: { xs: 1, sm: 2 } }}
+              >
+                Xem đánh giá
+              </Button>
+            )}
+          </Stack>
         </Stack>
       )}
 
