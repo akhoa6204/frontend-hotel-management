@@ -16,7 +16,7 @@ const PaymentQrDialog = ({ qrState, closePaymentDialog, isPendingCreateQr }: Pro
     fullWidth
     PaperProps={{ sx: { borderRadius: 2, bgcolor: "#fff", backgroundImage: "none" } }}
   >
-    <DialogTitle sx={{ px: { xs: 2.5, sm: 3.5 }, pt: 3, pb: 1, fontFamily: "Georgia, serif", fontSize: 27, color: "#183746" }}>
+    <DialogTitle sx={{ px: { xs: 2.5, sm: 3.5 }, pt: 3, pb: 1, fontFamily: "Georgia, serif", fontSize: 27, color: "text.primary" }}>
       Thanh toán bằng mã QR
     </DialogTitle>
     <DialogContent sx={{ px: { xs: 2.5, sm: 3.5 } }}>
@@ -32,10 +32,10 @@ const PaymentQrDialog = ({ qrState, closePaymentDialog, isPendingCreateQr }: Pro
           </>
         ) : (
           <>
-            <Box sx={{ width: "min(260px, 100%)", aspectRatio: "1", p: 1.5, border: "1px solid #dedbd4", bgcolor: "#fff" }}>
+            <Box sx={{ width: "min(260px, 100%)", aspectRatio: "1", p: 1.5, border: "1px solid", borderColor: "divider", bgcolor: "background.paper" }}>
               <Box component="img" src={qrState.qrUrl} alt="Mã QR thanh toán tiền cọc" sx={{ display: "block", width: 1, height: 1, objectFit: "contain" }} />
             </Box>
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ color: "#183746" }}>
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ color: "text.primary" }}>
               <AccountBalanceOutlinedIcon sx={{ fontSize: 20, color: "primary.main" }} />
               <Typography fontWeight={700}>Nội dung chuyển khoản: DH{qrState.onlinePaymentId}</Typography>
             </Stack>
@@ -48,7 +48,7 @@ const PaymentQrDialog = ({ qrState, closePaymentDialog, isPendingCreateQr }: Pro
       </Typography>
     </DialogContent>
     <DialogActions sx={{ px: { xs: 2.5, sm: 3.5 }, pb: 3, pt: 2 }}>
-      <Button onClick={closePaymentDialog} variant="outlined" fullWidth sx={{ minHeight: 46, borderRadius: 1.25, color: "#183746", borderColor: "#b9c3c7" }}>
+      <Button onClick={closePaymentDialog} variant="outlined" fullWidth sx={{ minHeight: 46, borderRadius: 1.25, color: "text.primary", borderColor: "divider" }}>
         Đóng
       </Button>
     </DialogActions>

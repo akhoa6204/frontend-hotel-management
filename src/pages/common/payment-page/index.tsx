@@ -28,7 +28,7 @@ const PaymentPage = () => {
 
   return (
     <>
-      <Box component="main" sx={{ bgcolor: "#f7f5f0", color: "#183746", minHeight: "72vh", py: { xs: 5, sm: 6, md: 8 } }}>
+      <Box component="main" sx={{ bgcolor: "background.default", color: "text.primary", minHeight: "72vh", py: { xs: 5, sm: 6, md: 8 } }}>
         <Container maxWidth="lg">
           <Box sx={{ maxWidth: 760 }}>
             <Typography sx={{ color: "primary.main", letterSpacing: 2, fontSize: 11, fontWeight: 750 }}>
@@ -75,7 +75,7 @@ const PaymentPage = () => {
 
       <Dialog open={showNotice.open} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: 2, p: 1 } }}>
         <DialogContent>
-          <Typography component="h2" sx={{ fontFamily: "Georgia, serif", fontSize: 28, color: "#183746", textAlign: "center" }}>
+          <Typography component="h2" sx={{ fontFamily: "Georgia, serif", fontSize: 28, color: "text.primary", textAlign: "center" }}>
             {showNotice.type === "success" ? "Thanh toán thành công" : "Thanh toán chưa hoàn tất"}
           </Typography>
           <Typography color="text.secondary" sx={{ mt: 1.5, lineHeight: 1.7, textAlign: "center" }}>
