@@ -40,20 +40,20 @@ const SearchPage = () => {
   };
 
   return (
-    <Box component="main" sx={{ bgcolor: "#f8f7f3", minHeight: "70vh" }}>
-      <Box component="section" sx={{ bgcolor: "#eef2f1", borderBottom: "1px solid #dedbd4" }}>
+    <Box component="main" sx={{ bgcolor: "background.default", minHeight: "70vh" }}>
+      <Box component="section" sx={{ bgcolor: "#eef2f1", borderBottom: "1px solid", borderColor: "divider" }}>
         <Container maxWidth="lg" sx={{ py: { xs: 5.5, md: 8 } }}>
           <Typography sx={{ color: "primary.main", letterSpacing: 2.2, fontSize: 12, fontWeight: 700 }}>
             KỲ NGHỈ TẠI DIAMOND SEA
           </Typography>
-          <Typography component="h1" sx={{ mt: 1.5, fontFamily: "Georgia, serif", fontSize: { xs: 38, sm: 46, md: 54 }, lineHeight: 1.12, color: "#183746" }}>
+          <Typography component="h1" sx={{ mt: 1.5, fontFamily: "Georgia, serif", fontSize: { xs: 38, sm: 46, md: 54 }, lineHeight: 1.12, color: "text.primary" }}>
             Chọn không gian nghỉ dành cho bạn.
           </Typography>
           <Typography color="text.secondary" sx={{ mt: 2, maxWidth: 650, fontSize: { xs: 16, md: 17 }, lineHeight: 1.75 }}>
             Khám phá các hạng phòng phù hợp với ngày lưu trú và số lượng khách bạn đã chọn.
           </Typography>
 
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={{ xs: 1.25, sm: 3 }} sx={{ mt: 3.5, color: "#425866" }}>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={{ xs: 1.25, sm: 3 }} sx={{ mt: 3.5, color: "text.secondary" }}>
             <Stack direction="row" spacing={1} alignItems="center">
               <CalendarMonthOutlinedIcon sx={{ color: "primary.main", fontSize: 21 }} />
               <Typography fontWeight={600}>{formattedStart} — {formattedEnd}</Typography>
@@ -80,8 +80,8 @@ const SearchPage = () => {
               {Array.from({ length: 3 }).map((_, index) => <SearchRoomResultSkeleton key={index} />)}
             </Stack>
           ) : roomsError ? (
-            <Stack alignItems="center" sx={{ py: { xs: 7, md: 10 }, borderTop: "1px solid #dedbd4", textAlign: "center" }}>
-              <Typography component="h2" sx={{ fontFamily: "Georgia, serif", fontSize: { xs: 28, md: 34 }, color: "#183746" }}>Không thể tải phòng khả dụng.</Typography>
+            <Stack alignItems="center" sx={{ py: { xs: 7, md: 10 }, borderTop: "1px solid", borderColor: "divider", textAlign: "center" }}>
+              <Typography component="h2" sx={{ fontFamily: "Georgia, serif", fontSize: { xs: 28, md: 34 }, color: "text.primary" }}>Không thể tải phòng khả dụng.</Typography>
               <Typography color="text.secondary" sx={{ mt: 1.5 }}>Vui lòng thử lại. Thông tin kỳ nghỉ của bạn vẫn được giữ nguyên.</Typography>
               <Button variant="contained" onClick={() => retryRooms()} sx={{ mt: 3, minHeight: 46, borderRadius: 1 }}>Thử lại</Button>
             </Stack>
@@ -90,9 +90,9 @@ const SearchPage = () => {
               {rooms.map((room) => <SearchRoomResult key={room.id} room={room} onViewRoom={onViewRoom} onBooking={onBooking} />)}
             </Stack>
           ) : (
-            <Stack alignItems="center" sx={{ py: { xs: 7, md: 9 }, borderTop: "1px solid #dedbd4", textAlign: "center" }}>
+            <Stack alignItems="center" sx={{ py: { xs: 7, md: 9 }, borderTop: "1px solid", borderColor: "divider", textAlign: "center" }}>
               <Box component="img" src={MatchNotFound} alt="Không có phòng phù hợp" sx={{ width: 150, maxWidth: "45vw", height: "auto" }} />
-              <Typography component="h2" sx={{ mt: 3, fontFamily: "Georgia, serif", fontSize: { xs: 28, md: 34 }, color: "#183746" }}>Chưa có phòng phù hợp cho kỳ nghỉ này.</Typography>
+              <Typography component="h2" sx={{ mt: 3, fontFamily: "Georgia, serif", fontSize: { xs: 28, md: 34 }, color: "text.primary" }}>Chưa có phòng phù hợp cho kỳ nghỉ này.</Typography>
               <Typography color="text.secondary" sx={{ mt: 1.5, maxWidth: 520 }}>Hãy thử thay đổi ngày nhận phòng, ngày trả phòng hoặc số lượng khách.</Typography>
               <Button variant="contained" startIcon={<EditCalendarOutlinedIcon />} onClick={focusSearch} sx={{ mt: 3, minHeight: 46, borderRadius: 1 }}>Thay đổi tìm kiếm</Button>
             </Stack>

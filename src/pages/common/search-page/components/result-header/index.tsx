@@ -17,7 +17,7 @@ const SearchResultsHeader = ({ total, sort = "asc", onSortChange }: Props) => (
           aria-label="Sắp xếp phòng"
           value={sort}
           onChange={(event) => onSortChange(event.target.value as "asc" | "desc")}
-          sx={{ minWidth: 178, bgcolor: "#fff", borderRadius: 1, "& .MuiOutlinedInput-notchedOutline": { borderColor: "#dedbd4" } }}
+          sx={{ minWidth: 178, bgcolor: "background.paper", borderRadius: 1 }}
         >
           <MenuItem value="asc">Giá thấp đến cao</MenuItem>
           <MenuItem value="desc">Giá cao đến thấp</MenuItem>
@@ -29,7 +29,7 @@ const SearchResultsHeader = ({ total, sort = "asc", onSortChange }: Props) => (
 
 const BoxCopy = ({ total }: { total: number }) => (
   <div>
-    <Typography id="search-results-heading" component="h2" sx={{ fontFamily: "Georgia, serif", fontSize: { xs: 28, md: 34 }, color: "#183746" }}>
+    <Typography id="search-results-heading" component="h2" sx={{ fontFamily: "Georgia, serif", fontSize: { xs: 28, md: 34 }, color: "text.primary" }}>
       Phòng phù hợp với kỳ nghỉ của bạn
     </Typography>
     <Typography color="text.secondary" sx={{ mt: .75 }}>

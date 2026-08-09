@@ -31,7 +31,8 @@ const SearchRoomResult = ({ room, onViewRoom, onBooking }: Props) => {
         gridTemplateColumns: { xs: "1fr", md: "minmax(300px, 42%) minmax(0, 1fr)" },
         minHeight: { md: 330 },
         bgcolor: "#fff",
-        borderBottom: "1px solid #dedbd4",
+        borderBottom: "1px solid",
+        borderColor: "divider",
         overflow: "hidden",
       }}
     >
@@ -79,7 +80,7 @@ const SearchRoomResult = ({ room, onViewRoom, onBooking }: Props) => {
           <Typography sx={{ color: "primary.main", letterSpacing: 1.8, fontSize: 11, fontWeight: 700 }}>
             PHÒNG DIAMOND SEA
           </Typography>
-          <Typography component="h2" sx={{ mt: 1, fontFamily: "Georgia, serif", fontSize: { xs: 27, md: 31 }, lineHeight: 1.2, color: "#183746" }}>
+          <Typography component="h2" sx={{ mt: 1, fontFamily: "Georgia, serif", fontSize: { xs: 27, md: 31 }, lineHeight: 1.2, color: "text.primary" }}>
             {room.name}
           </Typography>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1.5, color: "text.secondary" }}>
@@ -96,7 +97,7 @@ const SearchRoomResult = ({ room, onViewRoom, onBooking }: Props) => {
           {!!room.amenities?.length && (
             <Stack direction="row" flexWrap="wrap" columnGap={2.5} rowGap={1.25} sx={{ mt: 2.5 }}>
               {room.amenities.slice(0, 4).map((amenity) => (
-                <Stack key={amenity.id} direction="row" spacing={.75} alignItems="center" sx={{ color: "#425866" }}>
+                <Stack key={amenity.id} direction="row" spacing={.75} alignItems="center" sx={{ color: "text.secondary" }}>
                   <CheckCircleOutlineRoundedIcon sx={{ fontSize: 18, color: "primary.main" }} />
                   <Typography variant="body2">{amenity.label}</Typography>
                 </Stack>
@@ -113,7 +114,7 @@ const SearchRoomResult = ({ room, onViewRoom, onBooking }: Props) => {
                 {fmtVND(room.basePrice)} ₫
               </Typography>
             )}
-            <Typography sx={{ mt: .25, fontSize: { xs: 25, md: 28 }, fontWeight: 700, color: "#183746", whiteSpace: "nowrap" }}>
+            <Typography sx={{ mt: .25, fontSize: { xs: 25, md: 28 }, fontWeight: 700, color: "text.primary", whiteSpace: "nowrap" }}>
               {fmtVND(displayPrice)} ₫
             </Typography>
           </Box>

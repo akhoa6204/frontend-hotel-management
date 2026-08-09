@@ -1,7 +1,7 @@
 import { Box, Skeleton, Stack } from "@mui/material";
 
 const SearchRoomResultSkeleton = () => (
-  <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "minmax(300px, 42%) minmax(0, 1fr)" }, bgcolor: "#fff", borderBottom: "1px solid #dedbd4", overflow: "hidden" }}>
+  <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "minmax(300px, 42%) minmax(0, 1fr)" }, bgcolor: "background.paper", borderBottom: "1px solid", borderColor: "divider", overflow: "hidden" }}>
     <Skeleton
       variant="rectangular"
       animation="wave"

@@ -22,10 +22,10 @@ const amenities = [
 const ServicesSection = () => {
   const reducedMotion = useReducedMotion();
   return (
-  <Box component="section" id="facilities" sx={{ py: { xs: 9, md: 12 }, scrollMarginTop: 90, borderTop: "1px solid #dfddd6", borderBottom: "1px solid #dfddd6" }}>
+  <Box component="section" id="facilities" sx={{ py: { xs: 9, md: 12 }, scrollMarginTop: 90, borderTop: "1px solid", borderBottom: "1px solid", borderColor: "divider" }}>
     <Grid container spacing={{ xs: 5, md: 8 }}>
       <Grid size={{ xs: 12, md: 4 }}><MotionBox variants={fadeUp(reducedMotion)} initial="hidden" whileInView="visible" viewport={revealViewport}><Typography sx={{ color: "primary.main", letterSpacing: 2.2, fontSize: 12, fontWeight: 700 }}>TIỆN NGHI ĐẶC TRƯNG</Typography><Typography component="h2" sx={{ mt: 1.5, fontFamily: "Georgia, serif", fontSize: { xs: 38, md: 48 }, lineHeight: 1.18 }}>Mọi điều bạn cần, được chăm chút vừa đủ.</Typography></MotionBox></Grid>
-      <Grid size={{ xs: 12, md: 8 }}><MotionBox variants={stagger(reducedMotion, 0.05, 0.07)} initial="hidden" whileInView="visible" viewport={revealViewport}><Grid container rowSpacing={4.5} columnSpacing={4}>{amenities.map(([title, icon]) => <Grid size={{ xs: 6, sm: 3 }} key={title}><MotionBox variants={fadeUp(reducedMotion, 16)}><Stack spacing={1.5} sx={{ color: "#183746", "& svg": { fontSize: 30, color: "primary.main" } }}>{icon}<Typography fontWeight={600}>{title}</Typography></Stack></MotionBox></Grid>)}</Grid></MotionBox></Grid>
+      <Grid size={{ xs: 12, md: 8 }}><MotionBox variants={stagger(reducedMotion, 0.05, 0.07)} initial="hidden" whileInView="visible" viewport={revealViewport}><Grid container rowSpacing={4.5} columnSpacing={4}>{amenities.map(([title, icon]) => <Grid size={{ xs: 6, sm: 3 }} key={title}><MotionBox variants={fadeUp(reducedMotion, 16)}><Stack spacing={1.5} sx={{ color: "text.primary", "& svg": { fontSize: 30, color: "primary.main" } }}>{icon}<Typography fontWeight={600}>{title}</Typography></Stack></MotionBox></Grid>)}</Grid></MotionBox></Grid>
     </Grid>
   </Box>
   );

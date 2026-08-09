@@ -27,7 +27,7 @@ const ReviewSection = ({ stats, reviews }: Props) => (
         </Typography>
         <Typography
           component="h2"
-          sx={{ mt: 1.25, color: "#173C4B", fontFamily: "Georgia, serif", fontSize: { xs: 32, sm: 38, md: 44 }, lineHeight: 1.16 }}
+          sx={{ mt: 1.25, color: "text.primary", fontFamily: "Georgia, serif", fontSize: { xs: 32, sm: 38, md: 44 }, lineHeight: 1.16 }}
         >
           Những kỳ nghỉ được ghi nhớ.
         </Typography>
@@ -35,11 +35,11 @@ const ReviewSection = ({ stats, reviews }: Props) => (
 
       {stats && (
         <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: "fit-content" }}>
-          <Typography sx={{ color: "#173C4B", fontFamily: "Georgia, serif", fontSize: { xs: 30, md: 34 }, lineHeight: 1 }}>
+          <Typography sx={{ color: "text.primary", fontFamily: "Georgia, serif", fontSize: { xs: 30, md: 34 }, lineHeight: 1 }}>
             {stats.avgOverall.toFixed(1)}
           </Typography>
           <Box>
-            <Rating value={stats.avgOverall} precision={0.1} readOnly size="small" aria-label={`${stats.avgOverall.toFixed(1)} trên 5 điểm`} sx={{ color: "#c58f37", display: "flex" }} />
+            <Rating value={stats.avgOverall} precision={0.1} readOnly size="small" aria-label={`${stats.avgOverall.toFixed(1)} trên 5 điểm`} sx={{ color: "rating.main", display: "flex" }} />
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
               {stats.totalReviews} đánh giá
             </Typography>
@@ -65,7 +65,7 @@ const ReviewSection = ({ stats, reviews }: Props) => (
               borderRadius: 1.5,
             }}
           >
-            <Rating value={review.overall} precision={1} readOnly size="small" aria-label={`${review.overall} trên 5 điểm`} sx={{ color: "#c58f37" }} />
+            <Rating value={review.overall} precision={1} readOnly size="small" aria-label={`${review.overall} trên 5 điểm`} sx={{ color: "rating.main" }} />
             <Typography
               sx={{
                 color: "#263F49",
@@ -90,7 +90,7 @@ const ReviewSection = ({ stats, reviews }: Props) => (
                 {getInitial(guestName)}
               </Avatar>
               <Box sx={{ minWidth: 0 }}>
-                <Typography fontWeight={650} color="#173C4B" noWrap>{guestName}</Typography>
+                <Typography fontWeight={650} color="text.primary" noWrap>{guestName}</Typography>
                 <Typography variant="caption" color="text.secondary">
                   {formatDate(review.createdAt)} · {review.booking.room.roomType.name} · {nights} đêm
                 </Typography>
