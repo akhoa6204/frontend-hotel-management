@@ -349,11 +349,11 @@ export default function useBookingManagement() {
 
   const handleSearchBooking = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
-    setFilter((prev) => ({ ...prev, searchKeyword: value, currentPage: 1 }));
+    setFilter((prev) => ({ ...prev, q: value.trim(), page: 1 }));
   };
 
   const handleChangePage = (page: number) =>
-    setFilter((prev) => ({ ...prev, currentPage: page }));
+    setFilter((prev) => ({ ...prev, page }));
 
   const nights = useMemo(() => {
     const start = dayjs(bookingForm.checkInDate);
