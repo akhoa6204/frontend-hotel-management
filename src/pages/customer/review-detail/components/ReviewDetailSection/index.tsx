@@ -1,64 +1,59 @@
-import { Box, Grid, Paper, Rating, Typography } from "@mui/material";
-import { RatingField, ReviewForm } from "../../useReviewDetail";
+import { Box, Rating, Typography } from "@mui/material";
 import type { SyntheticEvent } from "react";
+import type { RatingField, ReviewForm, ReviewFormErrors } from "../../useReviewDetail";
 
-const DETAIL_FIELDS: { key: RatingField; label: string }[] = [
+const DETAIL_FIELDS: { key: Exclude<RatingField, "overall">; label: string }[] = [
   { key: "amenities", label: "Tiện nghi" },
   { key: "cleanliness", label: "Vệ sinh" },
   { key: "comfort", label: "Thoải mái" },
   { key: "locationScore", label: "Địa điểm" },
-  { key: "valueForMoney", label: "Đánh giá tiền" },
+  { key: "valueForMoney", label: "Đáng giá tiền" },
   { key: "hygiene", label: "Sạch sẽ" },
 ];
 
-type Props = {
-  values: Pick<ReviewForm, RatingField>; // chỉ lấy các field rating
+interface Props {
+  values: ReviewForm;
   canEdit?: boolean;
+  errors?: ReviewFormErrors;
   onChangeField?: (field: RatingField, value: number) => void;
-};
+}
 
-const ReviewDetailSection = ({
-  values,
-  canEdit = true,
-  onChangeField,
-}: Props) => {
+const ReviewDetailSection = ({ values, canEdit = true, errors = {}, onChangeField }: Props) => {
   const handleRatingChange =
     (field: RatingField) => (_: SyntheticEvent, value: number | null) => {
-      if (!canEdit || !onChangeField || value == null) return;
-      onChangeField(field, value);
+      if (canEdit && value !== null) onChangeField?.(field, value);
     };
 
   return (
-    <Paper sx={{ mb: 1.5, p: 2.5 }} elevation={0}>
-      <Typography variant="h6" fontWeight={600}>
+    <Box component="section" aria-labelledby="detail-rating-title" sx={{ py: { xs: 4, md: 5 }, borderBottom: "1px solid", borderColor: "divider" }}>
+      <Typography id="detail-rating-title" component="h2" sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 24, md: 28 } }}>
         Đánh giá chi tiết
       </Typography>
-      <Typography variant="body2" color="text.secondary" mb={2}>
-        Đánh giá các tiêu chí cụ thể về dịch vụ
+      <Typography color="text.secondary" sx={{ mt: 0.75, mb: 3, lineHeight: 1.65 }}>
+        {canEdit ? "Chia sẻ cảm nhận của bạn ở từng khía cạnh của kỳ nghỉ." : "Điểm bạn đã dành cho từng khía cạnh của kỳ nghỉ."}
       </Typography>
 
-      <Box sx={{ bgcolor: "#2E90FA0d", borderRadius: 2, p: 2 }}>
-        <Grid container rowSpacing={2} columnSpacing={16}>
-          {DETAIL_FIELDS.map((f) => (
-            <Grid size={{ xs: 12, sm: 6 }} key={f.key}>
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                <Typography>{f.label}</Typography>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" }, columnGap: { md: 6 }, rowGap: { xs: 2.5, md: 3 } }}>
+        {DETAIL_FIELDS.map(({ key, label }) => (
+          <Box key={key}>
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "minmax(112px, 1fr) auto" }, alignItems: { sm: "center" }, gap: { xs: 0.75, sm: 1.5 } }}>
+              <Typography color="#263F49" fontWeight={600}>{label}</Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Rating
-                  value={values[f.key] ?? 0}
+                  value={values[key]}
                   readOnly={!canEdit}
-                  onChange={handleRatingChange(f.key)}
-                  sx={{ "& .MuiRating-icon": { fontSize: 28 } }}
+                  aria-label={`${label}: ${values[key]} trên 5 điểm`}
+                  onChange={handleRatingChange(key)}
+                  sx={{ color: "#B78945", fontSize: { xs: 29, sm: 27 }, "& .MuiRating-iconEmpty": { color: "rgba(183, 137, 69, .25)" } }}
                 />
+                {!canEdit && <Typography variant="body2" fontWeight={700} color="#173C4B">{values[key]}/5</Typography>}
               </Box>
-            </Grid>
-          ))}
-        </Grid>
+            </Box>
+            {errors[key] && <Typography role="alert" color="error" variant="caption" sx={{ display: "block", mt: 0.5 }}>{errors[key]}</Typography>}
+          </Box>
+        ))}
       </Box>
-    </Paper>
+    </Box>
   );
 };
 

@@ -1,47 +1,41 @@
-import { Box, Divider, Paper, Rating, Typography } from "@mui/material";
-import React from "react";
+import { Box, Rating, Typography } from "@mui/material";
 
 interface Props {
   overall: number;
   canEdit?: boolean;
+  error?: string;
   onChange?: (value: number) => void;
 }
 
-const ReviewOverallSection: React.FC<Props> = ({
-  overall,
-  canEdit = false,
-  onChange,
-}) => {
-  return (
-    <Paper elevation={0} sx={{ mb: 1.5 }}>
-      <Box sx={{ px: 2.5, py: 2 }}>
-        <Typography variant="h6" fontWeight={600}>
-          Đánh giá tổng quan
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Bạn đánh giá như thế nào về tổng thể
-        </Typography>
-      </Box>
+const ReviewOverallSection = ({ overall, canEdit = false, error, onChange }: Props) => (
+  <Box component="section" aria-labelledby="overall-rating-title" sx={{ py: { xs: 4, md: 5 }, borderBottom: "1px solid", borderColor: "divider", textAlign: "center" }}>
+    <Typography
+      id="overall-rating-title"
+      component="h2"
+      sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 26, md: 32 }, lineHeight: 1.25 }}
+    >
+      {canEdit ? "Bạn đánh giá kỳ nghỉ này thế nào?" : "Đánh giá tổng quan"}
+    </Typography>
+    <Typography color="text.secondary" sx={{ mt: 0.75, lineHeight: 1.65 }}>
+      {canEdit ? "Chọn mức điểm phản ánh cảm nhận chung của bạn." : "Cảm nhận chung của bạn về kỳ nghỉ tại Diamond Sea."}
+    </Typography>
 
-      <Divider />
-
-      <Box sx={{ px: 2.5, py: 2, textAlign: "center" }}>
-        <Rating
-          value={overall}
-          readOnly={!canEdit}
-          onChange={(_, value) => {
-            if (!canEdit) return;
-            if (onChange && value != null) onChange(value);
-          }}
-          sx={{
-            "& .MuiRating-icon": {
-              fontSize: 32,
-            },
-          }}
-        />
-      </Box>
-    </Paper>
-  );
-};
+    <Box sx={{ mt: 2.5, display: "flex", flexDirection: "column", alignItems: "center", gap: 0.75 }}>
+      <Rating
+        value={overall}
+        readOnly={!canEdit}
+        aria-label={`${overall} trên 5 điểm`}
+        onChange={(_, value) => {
+          if (canEdit && value !== null) onChange?.(value);
+        }}
+        sx={{ color: "#B78945", fontSize: { xs: 38, sm: 42 }, "& .MuiRating-iconEmpty": { color: "rgba(183, 137, 69, .28)" } }}
+      />
+      <Typography aria-live="polite" sx={{ color: "#173C4B", fontWeight: 700 }}>
+        {overall}/5
+      </Typography>
+    </Box>
+    {error && <Typography role="alert" color="error" variant="body2" sx={{ mt: 1 }}>{error}</Typography>}
+  </Box>
+);
 
 export default ReviewOverallSection;
