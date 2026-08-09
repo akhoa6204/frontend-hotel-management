@@ -6,7 +6,7 @@ import { buildDefaultSearchParams } from "@utils/dateRange";
 import useSnackbar from "@hooks/useSnackbar";
 import { sleep } from "@utils/sleep";
 import { formatDateInput } from "@utils/format";
-import { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
+import type { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
 import GuestRoomTypeService from "@services/guest/roomType.service";
 
 const useHome = () => {

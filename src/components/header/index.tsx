@@ -25,13 +25,14 @@ import PersonOutline from "@mui/icons-material/PersonOutline";
 import LockReset from "@mui/icons-material/LockReset";
 import Logout from "@mui/icons-material/Logout";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import useAuth from "@hooks/useAuth";
 import { useAppDispatch } from "@hooks/useRedux";
 import { logout } from "@store/slice/account.slice";
 
 const MotionBox = motion(Box);
 const MotionIconButton = motion(IconButton);
+const MotionAppBar = motion(AppBar);
 
 function HideOnScroll({ children }: { children: React.ReactElement }) {
   const trigger = useScrollTrigger();
@@ -140,7 +141,9 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useAppDispatch();
-  const transition = { type: "spring", stiffness: 260, damping: 20 } as const;
+  const reducedMotion = useReducedMotion();
+  const scrolled = useScrollTrigger({ disableHysteresis: true, threshold: 12 });
+  const transition = { duration: reducedMotion ? 0 : 0.32, ease: [0.22, 1, 0.36, 1] } as const;
 
   const { user } = useAuth();
 
@@ -161,14 +164,14 @@ const Header = () => {
         return (
           <MotionBox
             key={n.link}
-            initial={{ opacity: 0, y: -10 }}
+            initial={reducedMotion ? false : { opacity: 0, y: -6 }}
             animate={{
               opacity: 1,
               y: 0,
-              transition: { delay: i * 0.06, ...transition },
+              transition: { ...transition, delay: reducedMotion ? 0 : i * (mobile ? 0.055 : 0.035) },
             }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={reducedMotion ? undefined : { y: -1 }}
+            whileTap={reducedMotion ? undefined : { scale: 0.99 }}
             sx={{ width: mobile ? 1 : "auto" }}
           >
             <a
@@ -185,7 +188,7 @@ const Header = () => {
                   isActive
                     ? "text-[#2E90FA]"
                     : "text-slate-900 hover:text-[#2E90FA]",
-                  "after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:bg-[#2E90FA] after:transition-transform after:origin-left",
+                  "after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:bg-[#2E90FA] after:transition-transform after:duration-200 after:origin-left hover:after:scale-x-100",
                   mobile ? "after:w-6" : "after:right-0",
                   isActive ? "after:scale-x-100" : "after:scale-x-0",
                 ].join(" ")}
@@ -209,14 +212,19 @@ const Header = () => {
 
   return (
     <HideOnScroll>
-      <AppBar
+      <MotionAppBar
+        initial={reducedMotion ? false : { opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: reducedMotion ? 0 : 0.4, ease: [0.22, 1, 0.36, 1] }}
         position="sticky"
         elevation={0}
         color="inherit"
         sx={{
-          bgcolor: "rgba(255,255,255,.94)",
-          borderBottom: "1px solid rgba(0,0,0,.06)",
+          bgcolor: scrolled ? "rgba(252,251,248,.98)" : "rgba(255,255,255,.92)",
+          borderBottom: scrolled ? "1px solid rgba(13,52,66,.11)" : "1px solid rgba(0,0,0,.05)",
           backdropFilter: "blur(10px)",
+          transition: reducedMotion ? "none" : "background-color .25s ease, border-color .25s ease, box-shadow .25s ease",
+          boxShadow: scrolled ? "0 6px 20px rgba(13,52,66,.045)" : "none",
         }}
       >
         <Container maxWidth="lg">
@@ -224,7 +232,8 @@ const Header = () => {
             direction="row"
             alignItems="center"
             justifyContent="space-between"
-            py={{ xs: 1.5, md: 1.75 }}
+            py={{ xs: scrolled ? 1.25 : 1.5, md: scrolled ? 1.5 : 1.75 }}
+            sx={{ transition: reducedMotion ? "none" : "padding .25s ease" }}
           >
             {/* Logo */}
             <Typography
@@ -268,7 +277,7 @@ const Header = () => {
                     </Button>
                   </MotionBox>
                 )}
-                <Button component={Link} to="/search" variant="contained" sx={{ borderRadius: 1, px: 2.5 }}>Đặt ngay</Button>
+                <MotionBox whileHover={reducedMotion ? undefined : { y: -1 }} whileTap={reducedMotion ? undefined : { scale: 0.99 }} transition={{ duration: 0.18 }}><Button component={Link} to="/search" variant="contained" sx={{ borderRadius: 1, px: 2.5 }}>Đặt ngay</Button></MotionBox>
                 </Stack>
               </>
             )}
@@ -277,8 +286,8 @@ const Header = () => {
             {isMobile && (
               <MotionIconButton
                 onClick={() => setOpen(true)}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                whileHover={reducedMotion ? undefined : { scale: 1.025 }}
+                whileTap={reducedMotion ? undefined : { scale: 0.98 }}
                 aria-label="Mở menu"
                 aria-haspopup="dialog"
                 aria-expanded={open}
@@ -295,6 +304,7 @@ const Header = () => {
           anchor="right"
           open={open}
           onClose={() => setOpen(false)}
+          transitionDuration={{ enter: reducedMotion ? 0 : 300, exit: reducedMotion ? 0 : 240 }}
           PaperProps={{
             sx: {
               width: "86vw",
@@ -308,7 +318,8 @@ const Header = () => {
           }}
         >
           <MotionBox
-            initial={{ x: 50, opacity: 0 }}
+            key={open ? "drawer-open" : "drawer-closed"}
+            initial={reducedMotion ? false : { x: 24, opacity: 0 }}
             animate={{ x: 0, opacity: 1, transition }}
             sx={{
               minHeight: "100dvh",
@@ -411,7 +422,7 @@ const Header = () => {
             </Box>
           </MotionBox>
         </Drawer>
-      </AppBar>
+      </MotionAppBar>
     </HideOnScroll>
   );
 };
