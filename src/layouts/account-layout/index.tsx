@@ -7,7 +7,7 @@ const AccountLayout = () => {
   return (
     <>
       <Header />
-      <Box sx={{ bgcolor: "#F6F5F2", minHeight: "92vh" }}>
+      <Box sx={{ bgcolor: "background.default", minHeight: "92vh" }}>
         <Container
           maxWidth={false}
           sx={{

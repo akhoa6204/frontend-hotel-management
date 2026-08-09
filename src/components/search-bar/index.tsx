@@ -50,7 +50,7 @@ const SearchBar = ({ form, onSubmit, onChange }: Props) => {
         </Box>
         <Divider
           orientation="vertical"
-          sx={{ display: { xs: "none", md: "block" }, height: 44, mx: 3, alignSelf: "center", borderColor: "#dedbd4" }}
+          sx={{ display: { xs: "none", md: "block" }, height: 44, mx: 3, alignSelf: "center" }}
         />
         <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flex: 1 }}>
           <CalendarMonthOutlinedIcon color="primary" />
@@ -61,7 +61,7 @@ const SearchBar = ({ form, onSubmit, onChange }: Props) => {
         </Box>
         <Divider
           orientation="vertical"
-          sx={{ display: { xs: "none", md: "block" }, height: 44, mx: 3, alignSelf: "center", borderColor: "#dedbd4" }}
+          sx={{ display: { xs: "none", md: "block" }, height: 44, mx: 3, alignSelf: "center" }}
         />
         <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", flex: { md: .75 } }}>
           <PeopleAltOutlinedIcon color="primary" />

@@ -21,7 +21,7 @@ const AuthLayout = ({ eyebrow, title, description, children }: Props) => (
       gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(380px, 1fr) minmax(500px, 1fr)" },
       alignItems: "stretch",
       minHeight: `calc(100dvh - ${CUSTOMER_HEADER_HEIGHT}px)`,
-      bgcolor: "#fcfbf8",
+      bgcolor: "background.default",
     }}
   >
     <Box
@@ -52,14 +52,14 @@ const AuthLayout = ({ eyebrow, title, description, children }: Props) => (
 
     <Box sx={{ display: "flex", alignItems: "center", minWidth: 0, px: { xs: 2.5, sm: 4, md: 6, lg: 9 }, py: { xs: 5, sm: 7, md: 6 } }}>
       <Box sx={{ width: 1, maxWidth: 460, mx: "auto" }}>
-        <MuiLink component={Link} to="/" underline="none" sx={{ display: "inline-flex", alignItems: "center", gap: 0.75, color: "#425866", fontSize: 14, mb: { xs: 4, md: 5 }, "&:hover": { color: "primary.main" } }}>
+        <MuiLink component={Link} to="/" underline="none" sx={{ display: "inline-flex", alignItems: "center", gap: 0.75, color: "text.secondary", fontSize: 14, mb: { xs: 4, md: 5 }, "&:hover": { color: "primary.main" } }}>
           <ArrowBackRoundedIcon sx={{ fontSize: 18 }} />
           Về trang chủ
         </MuiLink>
 
         <Stack spacing={1.5} sx={{ mb: 4 }}>
           <Typography sx={{ color: "primary.main", fontSize: 11, fontWeight: 750, letterSpacing: 2 }}>{eyebrow}</Typography>
-          <Typography component="h1" sx={{ color: "#153746", fontFamily: "Georgia, serif", fontSize: { xs: 34, sm: 40 }, lineHeight: 1.12 }}>
+          <Typography component="h1" sx={{ color: "text.primary", fontFamily: "Georgia, serif", fontSize: { xs: 34, sm: 40 }, lineHeight: 1.12 }}>
             {title}
           </Typography>
           <Typography color="text.secondary" sx={{ maxWidth: 430, lineHeight: 1.7 }}>{description}</Typography>

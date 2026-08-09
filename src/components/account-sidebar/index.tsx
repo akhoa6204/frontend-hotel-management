@@ -77,11 +77,11 @@ const AccountSidebar = () => {
       }}
     >
       <Box sx={{ px: { xs: 1.75, lg: 1 }, pb: { xs: 1.25, lg: 2.25 }, pt: { xs: 1.25, lg: 0.5 }, display: "flex", alignItems: "center", gap: 1.25 }}>
-        <Avatar sx={{ bgcolor: "#DDE9ED", color: "#173C4B", width: 32, height: 32, fontSize: 13, fontWeight: 700 }}>
+        <Avatar sx={{ bgcolor: "#DDE9ED", color: "text.primary", width: 32, height: 32, fontSize: 13, fontWeight: 700 }}>
           {fullName[0]?.toUpperCase() ?? "U"}
         </Avatar>
         <Box sx={{ minWidth: 0 }}>
-          <Typography sx={{ color: "#173C4B", fontSize: 14, fontWeight: 650, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <Typography sx={{ color: "text.primary", fontSize: 14, fontWeight: 650, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {fullName}
           </Typography>
           <Typography sx={{ color: "text.secondary", fontSize: 11.5, mt: 0.15 }}>
@@ -142,7 +142,7 @@ const AccountSidebar = () => {
                   : active
                     ? "rgba(46, 144, 250, 0.11)"
                     : "rgba(46, 144, 250, 0.045)",
-                color: isLogout ? "#9B3B38" : active ? "primary.main" : "#173C4B",
+                color: isLogout ? "error.main" : active ? "primary.main" : "text.primary",
                 "& .MuiListItemIcon-root": {
                   color: isLogout ? "#9B3B38" : active ? "primary.main" : "#53656C",
                 },

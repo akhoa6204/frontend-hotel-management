@@ -291,7 +291,7 @@ const Header = () => {
                 aria-label="Mở menu"
                 aria-haspopup="dialog"
                 aria-expanded={open}
-                sx={{ width: 44, height: 44, color: "#153746" }}
+                sx={{ width: 44, height: 44, color: "text.primary" }}
               >
                 <MenuIcon />
               </MotionIconButton>
@@ -309,7 +309,7 @@ const Header = () => {
             sx: {
               width: "86vw",
               maxWidth: 380,
-              bgcolor: "#fcfbf8",
+              bgcolor: "background.paper",
               backgroundImage: "none",
               borderTopLeftRadius: 1.5,
               borderBottomLeftRadius: 1.5,
@@ -351,7 +351,7 @@ const Header = () => {
               <IconButton
                 onClick={() => setOpen(false)}
                 aria-label="Đóng menu"
-                sx={{ width: 44, height: 44, color: "#153746" }}
+                sx={{ width: 44, height: 44, color: "text.primary" }}
               >
                 <CloseIcon />
               </IconButton>
@@ -369,7 +369,7 @@ const Header = () => {
                       setOpen(false);
                       goProfile();
                     }}
-                    sx={{ minHeight: 46, borderRadius: 1, color: "#153746", borderColor: "#cbd3d5" }}
+                    sx={{ minHeight: 46, borderRadius: 1, color: "text.primary", borderColor: "divider" }}
                   >
                     Thông tin cá nhân
                   </Button>
@@ -380,7 +380,7 @@ const Header = () => {
                       setOpen(false);
                       goChangePassword();
                     }}
-                    sx={{ minHeight: 46, borderRadius: 1, color: "#153746", borderColor: "#cbd3d5" }}
+                    sx={{ minHeight: 46, borderRadius: 1, color: "text.primary", borderColor: "divider" }}
                   >
                     Đổi mật khẩu
                   </Button>
@@ -404,7 +404,7 @@ const Header = () => {
                   fullWidth
                   variant="outlined"
                   onClick={() => setOpen(false)}
-                  sx={{ minHeight: 46, borderRadius: 1, color: "#153746", borderColor: "#cbd3d5" }}
+                  sx={{ minHeight: 46, borderRadius: 1, color: "text.primary", borderColor: "divider" }}
                 >
                   Đăng nhập
                 </Button>
