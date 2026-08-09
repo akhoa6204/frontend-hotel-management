@@ -20,7 +20,7 @@ const fields: Array<{ label: string; name: PasswordField; autoComplete: string }
 
 const ChangePasswordTab = ({ form, onChangeField, onSubmit, errors, saving }: Props) => (
   <Box component="section" aria-labelledby="account-security-title">
-    <Typography id="account-security-title" component="h2" sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 24, sm: 27 } }}>
+    <Typography id="account-security-title" component="h2" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 24, sm: 27 } }}>
       Bảo mật tài khoản
     </Typography>
     <Typography color="text.secondary" variant="body2" sx={{ mt: 0.65, maxWidth: 600, lineHeight: 1.65 }}>

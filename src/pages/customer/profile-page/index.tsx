@@ -50,7 +50,7 @@ const AccountProfilePage = () => {
   if (loadError) {
     return (
       <Box sx={{ maxWidth: 720, py: { xs: 4, md: 6 }, borderTop: "1px solid", borderColor: "divider" }}>
-        <Typography component="h1" sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 30, md: 38 } }}>
+        <Typography component="h1" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 30, md: 38 } }}>
           Không thể tải hồ sơ
         </Typography>
         <Typography color="text.secondary" sx={{ mt: 1, mb: 2.5, lineHeight: 1.7 }}>
@@ -67,7 +67,7 @@ const AccountProfilePage = () => {
         <Typography sx={{ color: "primary.main", fontSize: 12, fontWeight: 700, letterSpacing: ".16em", mb: 1 }}>
           TÀI KHOẢN CỦA BẠN
         </Typography>
-        <Typography component="h1" sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 32, md: 42 }, lineHeight: 1.15 }}>
+        <Typography component="h1" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 32, md: 42 }, lineHeight: 1.15 }}>
           Hồ sơ của tôi
         </Typography>
         <Typography color="text.secondary" sx={{ mt: 1.25, maxWidth: 650, lineHeight: 1.7 }}>

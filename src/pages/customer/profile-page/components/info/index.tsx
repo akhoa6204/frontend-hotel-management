@@ -30,7 +30,7 @@ const InfoTab = ({ form, errors, editing, saving, onChange, onSubmit, onEdit, on
     <Box component="section" aria-labelledby="personal-information-title">
       <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ sm: "flex-end" }} gap={2}>
         <Box>
-          <Typography id="personal-information-title" component="h2" sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 24, sm: 27 } }}>
+          <Typography id="personal-information-title" component="h2" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 24, sm: 27 } }}>
             Thông tin cá nhân
           </Typography>
           <Typography color="text.secondary" variant="body2" sx={{ mt: 0.65, lineHeight: 1.65 }}>
