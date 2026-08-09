@@ -24,14 +24,15 @@ import CloseIcon from "@mui/icons-material/Close";
 import PersonOutline from "@mui/icons-material/PersonOutline";
 import LockReset from "@mui/icons-material/LockReset";
 import Logout from "@mui/icons-material/Logout";
-import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { motion, useReducedMotion } from "framer-motion";
 import useAuth from "@hooks/useAuth";
 import { useAppDispatch } from "@hooks/useRedux";
 import { logout } from "@store/slice/account.slice";
 
 const MotionBox = motion(Box);
 const MotionIconButton = motion(IconButton);
+const MotionAppBar = motion(AppBar);
 
 function HideOnScroll({ children }: { children: React.ReactElement }) {
   const trigger = useScrollTrigger();
@@ -43,12 +44,11 @@ function HideOnScroll({ children }: { children: React.ReactElement }) {
 }
 
 const navLinks = [
-  { label: "Trang chủ", link: "/", matchPaths: ["/"] },
-  {
-    label: "Đặt phòng",
-    link: "/search",
-    matchPaths: ["/search", "/booking", "/payment"],
-  },
+  { label: "Trang chủ", link: "/" },
+  { label: "Phòng", link: "/#rooms" },
+  { label: "Tiện nghi", link: "/#facilities" },
+  { label: "Về chúng tôi", link: "/#about" },
+  { label: "Liên hệ", link: "/#contact" },
 ];
 
 function UserMenu({
@@ -141,7 +141,9 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useAppDispatch();
-  const transition = { type: "spring", stiffness: 260, damping: 20 } as const;
+  const reducedMotion = useReducedMotion();
+  const scrolled = useScrollTrigger({ disableHysteresis: true, threshold: 12 });
+  const transition = { duration: reducedMotion ? 0 : 0.32, ease: [0.22, 1, 0.36, 1] } as const;
 
   const { user } = useAuth();
 
@@ -150,46 +152,50 @@ const Header = () => {
       sx={{
         display: "flex",
         flexDirection: mobile ? "column" : "row",
-        gap: mobile ? 16 / 8 : 32 / 8,
+        gap: mobile ? 1 : 32 / 8,
         alignItems: mobile ? "flex-start" : "center",
+        width: mobile ? 1 : "auto",
       }}
     >
       {navLinks.map((n, i) => {
-        const isActive =
-          n.link === "/"
-            ? location.pathname === "/"
-            : n.matchPaths.some((path) => location.pathname.startsWith(path));
+        const [targetPath, targetHash = ""] = n.link.split("#");
+        const isActive = location.pathname === targetPath && location.hash === (targetHash ? `#${targetHash}` : "");
 
         return (
           <MotionBox
             key={n.link}
-            initial={{ opacity: 0, y: -10 }}
+            initial={reducedMotion ? false : { opacity: 0, y: -6 }}
             animate={{
               opacity: 1,
               y: 0,
-              transition: { delay: i * 0.06, ...transition },
+              transition: { ...transition, delay: reducedMotion ? 0 : i * (mobile ? 0.055 : 0.035) },
             }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={reducedMotion ? undefined : { y: -1 }}
+            whileTap={reducedMotion ? undefined : { scale: 0.99 }}
+            sx={{ width: mobile ? 1 : "auto" }}
           >
-            <NavLink
-              to={n.link}
+            <a
+              href={n.link}
               onClick={() => mobile && setOpen(false)}
               className="no-underline"
+              aria-current={isActive ? "page" : undefined}
+              style={mobile ? { display: "flex", alignItems: "center", minHeight: 44 } : undefined}
             >
               <span
                 className={[
-                  "relative px-2 py-1 text-sm font-medium transition-colors",
+                  "relative transition-colors",
+                  mobile ? "px-0 py-1 text-lg font-medium" : "px-2 py-1 text-sm font-medium",
                   isActive
                     ? "text-[#2E90FA]"
                     : "text-slate-900 hover:text-[#2E90FA]",
-                  "after:absolute after:left-0 after:right-0 after:-bottom-0.5 after:h-0.5 after:bg-[#2E90FA] after:transition-transform after:origin-left",
+                  "after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:bg-[#2E90FA] after:transition-transform after:duration-200 after:origin-left hover:after:scale-x-100",
+                  mobile ? "after:w-6" : "after:right-0",
                   isActive ? "after:scale-x-100" : "after:scale-x-0",
                 ].join(" ")}
               >
                 {n.label}
               </span>
-            </NavLink>
+            </a>
           </MotionBox>
         );
       })}
@@ -206,14 +212,19 @@ const Header = () => {
 
   return (
     <HideOnScroll>
-      <AppBar
+      <MotionAppBar
+        initial={reducedMotion ? false : { opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: reducedMotion ? 0 : 0.4, ease: [0.22, 1, 0.36, 1] }}
         position="sticky"
         elevation={0}
         color="inherit"
         sx={{
-          bgcolor: "#2E90FA0d",
-          borderBottom: "1px solid rgba(0,0,0,.06)",
+          bgcolor: scrolled ? "rgba(252,251,248,.98)" : "rgba(255,255,255,.92)",
+          borderBottom: scrolled ? "1px solid rgba(13,52,66,.11)" : "1px solid rgba(0,0,0,.05)",
           backdropFilter: "blur(10px)",
+          transition: reducedMotion ? "none" : "background-color .25s ease, border-color .25s ease, box-shadow .25s ease",
+          boxShadow: scrolled ? "0 6px 20px rgba(13,52,66,.045)" : "none",
         }}
       >
         <Container maxWidth="lg">
@@ -221,14 +232,15 @@ const Header = () => {
             direction="row"
             alignItems="center"
             justifyContent="space-between"
-            py={{ xs: 1.5, md: 2 }}
+            py={{ xs: scrolled ? 1.25 : 1.5, md: scrolled ? 1.5 : 1.75 }}
+            sx={{ transition: reducedMotion ? "none" : "padding .25s ease" }}
           >
             {/* Logo */}
             <Typography
               variant="h5"
-              color="primary"
-              fontWeight={700}
-              sx={{ cursor: "pointer" }}
+              color="#153746"
+              fontWeight={600}
+              sx={{ cursor: "pointer", fontFamily: "Georgia, serif", letterSpacing: ".02em" }}
               onClick={() => navigate("/")}
             >
               Diamond Sea
@@ -241,6 +253,7 @@ const Header = () => {
                   {renderNav(false)}
                 </Stack>
 
+                <Stack direction="row" spacing={1.5} alignItems="center">
                 {user ? (
                   <UserMenu
                     userName={user.fullName || "User"}
@@ -258,13 +271,14 @@ const Header = () => {
                       component={Link}
                       to="/login"
                       fullWidth
-                      variant="contained"
-                      sx={{ borderRadius: "999px", py: 1.2 }}
+                      variant="text"
                     >
                       Đăng nhập
                     </Button>
                   </MotionBox>
                 )}
+                <MotionBox whileHover={reducedMotion ? undefined : { y: -1 }} whileTap={reducedMotion ? undefined : { scale: 0.99 }} transition={{ duration: 0.18 }}><Button component={Link} to="/search" variant="contained" sx={{ borderRadius: 1, px: 2.5 }}>Đặt ngay</Button></MotionBox>
+                </Stack>
               </>
             )}
 
@@ -272,9 +286,12 @@ const Header = () => {
             {isMobile && (
               <MotionIconButton
                 onClick={() => setOpen(true)}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                aria-label="open menu"
+                whileHover={reducedMotion ? undefined : { scale: 1.025 }}
+                whileTap={reducedMotion ? undefined : { scale: 0.98 }}
+                aria-label="Mở menu"
+                aria-haspopup="dialog"
+                aria-expanded={open}
+                sx={{ width: 44, height: 44, color: "text.primary" }}
               >
                 <MenuIcon />
               </MotionIconButton>
@@ -287,31 +304,43 @@ const Header = () => {
           anchor="right"
           open={open}
           onClose={() => setOpen(false)}
+          transitionDuration={{ enter: reducedMotion ? 0 : 300, exit: reducedMotion ? 0 : 240 }}
           PaperProps={{
             sx: {
-              width: "100%",
-              maxWidth: 320,
-              background: "rgba(255,255,255,.98)",
-              backdropFilter: "blur(10px)",
+              width: "86vw",
+              maxWidth: 380,
+              bgcolor: "background.paper",
+              backgroundImage: "none",
+              borderTopLeftRadius: 1.5,
+              borderBottomLeftRadius: 1.5,
+              boxShadow: "-12px 0 32px rgba(13,52,66,.12)",
             },
           }}
         >
           <MotionBox
-            initial={{ x: 50, opacity: 0 }}
+            key={open ? "drawer-open" : "drawer-closed"}
+            initial={reducedMotion ? false : { x: 24, opacity: 0 }}
             animate={{ x: 0, opacity: 1, transition }}
-            sx={{ height: 1, display: "flex", flexDirection: "column", p: 3 }}
+            sx={{
+              minHeight: "100dvh",
+              display: "flex",
+              flexDirection: "column",
+              overflowY: "auto",
+              px: { xs: 2.5, sm: 3 },
+              py: 2,
+            }}
           >
             <Stack
               direction="row"
               alignItems="center"
               justifyContent="space-between"
-              mb={3}
+              mb={2.5}
             >
               <Typography
                 variant="h5"
-                color="primary"
-                fontWeight={700}
-                sx={{ cursor: "pointer" }}
+                color="#153746"
+                fontWeight={600}
+                sx={{ cursor: "pointer", fontFamily: "Georgia, serif", letterSpacing: ".02em" }}
                 onClick={() => {
                   navigate("/");
                   setOpen(false);
@@ -319,16 +348,20 @@ const Header = () => {
               >
                 Diamond Sea
               </Typography>
-              <IconButton onClick={() => setOpen(false)} aria-label="close">
+              <IconButton
+                onClick={() => setOpen(false)}
+                aria-label="Đóng menu"
+                sx={{ width: 44, height: 44, color: "text.primary" }}
+              >
                 <CloseIcon />
               </IconButton>
             </Stack>
 
             {renderNav(true)}
 
-            <Box mt="auto" pt={3}>
+            <Box mt="auto" pt={4} pb={1}>
               {user ? (
-                <Stack spacing={1.2}>
+                <Stack spacing={1}>
                   <Button
                     fullWidth
                     variant="outlined"
@@ -336,7 +369,7 @@ const Header = () => {
                       setOpen(false);
                       goProfile();
                     }}
-                    sx={{ borderRadius: "999px", py: 1.1 }}
+                    sx={{ minHeight: 46, borderRadius: 1, color: "text.primary", borderColor: "divider" }}
                   >
                     Thông tin cá nhân
                   </Button>
@@ -347,7 +380,7 @@ const Header = () => {
                       setOpen(false);
                       goChangePassword();
                     }}
-                    sx={{ borderRadius: "999px", py: 1.1 }}
+                    sx={{ minHeight: 46, borderRadius: 1, color: "text.primary", borderColor: "divider" }}
                   >
                     Đổi mật khẩu
                   </Button>
@@ -359,7 +392,7 @@ const Header = () => {
                       setOpen(false);
                       handleLogOut();
                     }}
-                    sx={{ borderRadius: "999px", py: 1.2 }}
+                    sx={{ minHeight: 46, borderRadius: 1 }}
                   >
                     Đăng xuất
                   </Button>
@@ -369,17 +402,27 @@ const Header = () => {
                   component={Link}
                   to="/login"
                   fullWidth
-                  variant="contained"
+                  variant="outlined"
                   onClick={() => setOpen(false)}
-                  sx={{ borderRadius: "999px", py: 1.2 }}
+                  sx={{ minHeight: 46, borderRadius: 1, color: "text.primary", borderColor: "divider" }}
                 >
                   Đăng nhập
                 </Button>
               )}
+              <Button
+                component={Link}
+                to="/search"
+                fullWidth
+                variant="contained"
+                onClick={() => setOpen(false)}
+                sx={{ mt: 1.25, minHeight: 46, borderRadius: 1 }}
+              >
+                Đặt ngay
+              </Button>
             </Box>
           </MotionBox>
         </Drawer>
-      </AppBar>
+      </MotionAppBar>
     </HideOnScroll>
   );
 };

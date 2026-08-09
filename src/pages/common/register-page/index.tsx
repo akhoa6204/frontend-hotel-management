@@ -1,167 +1,140 @@
+import type { AxiosError } from "axios";
+import AuthLayout from "@components/auth/AuthLayout";
+import AuthPasswordField from "@components/auth/AuthPasswordField";
 import GlobalSnackbar from "@components/GlobalSnackbar";
-import { RegisterRequest } from "@constant/request/RegisterRequest";
+import type { RegisterRequest } from "@constant/request/RegisterRequest";
 import useForm from "@hooks/useForm";
 import useSnackbar from "@hooks/useSnackbar";
-import {
-  Box,
-  Button,
-  Container,
-  InputLabel,
-  Link,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Link as MuiLink, Stack, TextField, Typography } from "@mui/material";
 import AuthService from "@services/auth/auth.service";
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-type RegisterForm = RegisterRequest & {
-  confirmPassword: string;
+type RegisterForm = RegisterRequest & { confirmPassword: string };
+
+const initialForm: RegisterForm = {
+  fullName: "",
+  email: "",
+  phone: "",
+  password: "",
+  confirmPassword: "",
 };
-
-type RegisterField = {
-  name: keyof RegisterForm;
-  label: string;
-  type: string;
-};
-
-const fields: RegisterField[] = [
-  { name: "fullName", label: "Họ tên", type: "text" },
-  { name: "email", label: "Email", type: "email" },
-  { name: "phone", label: "Số điện thoại", type: "tel" },
-  { name: "password", label: "Mật khẩu", type: "password" },
-  { name: "confirmPassword", label: "Nhập lại mật khẩu", type: "password" },
-];
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const { alert, closeSnackbar, showError, showSuccess } = useSnackbar();
-
-  const initForm: RegisterForm = {
-    fullName: "",
-    email: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
-  };
+  const { alert, closeSnackbar, showError } = useSnackbar();
 
   const mRegister = useMutation({
-    mutationFn: async (payload: RegisterForm) => {
-      const { confirmPassword, ...request } = payload;
+    mutationFn: (values: RegisterForm) => {
+      const request: RegisterRequest = {
+        fullName: values.fullName,
+        email: values.email,
+        phone: values.phone,
+        password: values.password,
+      };
       return AuthService.register(request);
     },
-
-    onSuccess: () => {
-      navigate("/login", {
-        state: {
-          result: true,
-        },
-      });
-    },
-
-    onError: (err: any) => {
-      const msg =
-        err?.response?.data?.message || "Đăng ký thất bại, vui lòng thử lại!";
-      showError(msg);
+    onSuccess: () => navigate("/login", { state: { result: true } }),
+    onError: (error: AxiosError<{ message?: string }>) => {
+      showError(error.response?.data?.message || "Không thể tạo tài khoản. Vui lòng thử lại.");
     },
   });
 
   const { form, errors, onChange, onSubmit } = useForm<RegisterForm>(
-    initForm,
-
-    (f) => {
-      const errors: Partial<Record<keyof RegisterForm, string>> = {};
-
-      if (!f.fullName.trim()) errors.fullName = "Họ tên không được để trống";
-
-      if (!f.email.trim()) errors.email = "Email không được để trống";
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email))
-        errors.email = "Email không hợp lệ";
-
-      if (!f.phone.trim()) errors.phone = "Số điện thoại không được để trống";
-      else if (!/^\d{9,11}$/.test(f.phone))
-        errors.phone = "Số điện thoại không hợp lệ";
-
-      if (!f.password.trim()) errors.password = "Mật khẩu không được để trống";
-      else if (f.password.length < 6)
-        errors.password = "Mật khẩu tối thiểu 6 ký tự";
-
-      if (!f.confirmPassword.trim())
-        errors.confirmPassword = "Vui lòng nhập lại mật khẩu";
-      else if (f.confirmPassword !== f.password)
-        errors.confirmPassword = "Mật khẩu nhập lại không khớp";
-
-      return errors;
+    initialForm,
+    (values) => {
+      const validationErrors: Partial<Record<keyof RegisterForm, string>> = {};
+      if (!values.fullName.trim()) validationErrors.fullName = "Họ tên không được để trống";
+      if (!values.email.trim()) validationErrors.email = "Email không được để trống";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) validationErrors.email = "Email không hợp lệ";
+      if (!values.phone.trim()) validationErrors.phone = "Số điện thoại không được để trống";
+      else if (!/^\d{9,11}$/.test(values.phone)) validationErrors.phone = "Số điện thoại không hợp lệ";
+      if (!values.password.trim()) validationErrors.password = "Mật khẩu không được để trống";
+      else if (values.password.length < 6) validationErrors.password = "Mật khẩu tối thiểu 6 ký tự";
+      if (!values.confirmPassword.trim()) validationErrors.confirmPassword = "Vui lòng nhập lại mật khẩu";
+      else if (values.confirmPassword !== values.password) validationErrors.confirmPassword = "Mật khẩu nhập lại không khớp";
+      return validationErrors;
     },
-
-    // onSubmit
-    async (values) => {
-      await mRegister.mutateAsync(values);
-    },
+    (values) => mRegister.mutate(values),
   );
 
   return (
     <>
-      <Container maxWidth="md">
-        <Paper elevation={3} sx={{ my: 10, p: 5, borderRadius: 2 }}>
-          <Stack spacing={2} alignItems="center">
-            <Typography variant="h5" fontWeight={700}>
-              Đăng ký
-            </Typography>
-
-            <Typography color="text.secondary">
-              Tạo tài khoản mới tại Diamond Sea
-            </Typography>
-
-            <Box
-              component="form"
-              sx={{ width: "100%", mt: 2 }}
-              onSubmit={onSubmit}
-            >
-              <Stack spacing={2}>
-                {fields.map((f) => (
-                  <Box key={f.name}>
-                    <InputLabel>{f.label}</InputLabel>
-                    <TextField
-                      type={f.type}
-                      name={f.name}
-                      fullWidth
-                      value={form[f.name]}
-                      onChange={onChange}
-                      error={Boolean(errors[f.name])}
-                      helperText={errors[f.name] || ""}
-                    />
-                  </Box>
-                ))}
-
-                <Button
-                  type="submit"
-                  variant="contained"
-                  fullWidth
-                  sx={{ py: 1.2 }}
-                  disabled={mRegister.isPending}
-                >
-                  {mRegister.isPending ? "Đang xử lý..." : "Đăng ký"}
-                </Button>
-              </Stack>
+      <AuthLayout
+        eyebrow="TẠO TÀI KHOẢN"
+        title="Bắt đầu hành trình cùng Diamond Sea."
+        description="Tạo tài khoản để lưu thông tin và quản lý các kỳ nghỉ của bạn thuận tiện hơn."
+      >
+        <Box component="form" onSubmit={onSubmit} noValidate>
+          <Stack spacing={2}>
+            <TextField
+              label="Họ tên"
+              name="fullName"
+              value={form.fullName}
+              onChange={onChange}
+              error={Boolean(errors.fullName)}
+              helperText={errors.fullName}
+              autoComplete="name"
+              autoFocus
+              disabled={mRegister.isPending}
+              fullWidth
+            />
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
+              <TextField
+                label="Email"
+                name="email"
+                type="email"
+                value={form.email}
+                onChange={onChange}
+                error={Boolean(errors.email)}
+                helperText={errors.email}
+                autoComplete="email"
+                disabled={mRegister.isPending}
+                fullWidth
+              />
+              <TextField
+                label="Số điện thoại"
+                name="phone"
+                type="tel"
+                value={form.phone}
+                onChange={onChange}
+                error={Boolean(errors.phone)}
+                helperText={errors.phone}
+                autoComplete="tel"
+                disabled={mRegister.isPending}
+                fullWidth
+              />
             </Box>
-
-            <Stack sx={{ mt: 2 }} alignContent="center">
-              <Typography variant="body2">
-                Đã có tài khoản?{" "}
-                <Link href="/login" underline="hover">
-                  <Typography component="span" variant="body2" color="primary">
-                    Đăng nhập ngay
-                  </Typography>
-                </Link>
-              </Typography>
-            </Stack>
+            <AuthPasswordField
+              label="Mật khẩu"
+              name="password"
+              value={form.password}
+              onChange={onChange}
+              error={errors.password}
+              autoComplete="new-password"
+              disabled={mRegister.isPending}
+            />
+            <AuthPasswordField
+              label="Nhập lại mật khẩu"
+              name="confirmPassword"
+              value={form.confirmPassword}
+              onChange={onChange}
+              error={errors.confirmPassword}
+              autoComplete="new-password"
+              disabled={mRegister.isPending}
+            />
+            <Typography variant="caption" color="text.secondary">Mật khẩu cần có ít nhất 6 ký tự.</Typography>
+            <Button type="submit" variant="contained" fullWidth disabled={mRegister.isPending} sx={{ minHeight: 48, borderRadius: 1.25 }}>
+              {mRegister.isPending ? "Đang tạo tài khoản..." : "Đăng ký"}
+            </Button>
           </Stack>
-        </Paper>
-      </Container>
+        </Box>
 
+        <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ mt: 3 }}>
+          Đã có tài khoản?{" "}
+          <MuiLink component={Link} to="/login" underline="hover" sx={{ fontWeight: 700 }}>Đăng nhập</MuiLink>
+        </Typography>
+      </AuthLayout>
       <GlobalSnackbar alert={alert} closeSnackbar={closeSnackbar} />
     </>
   );

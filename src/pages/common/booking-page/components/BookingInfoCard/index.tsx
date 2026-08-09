@@ -1,126 +1,94 @@
-// BookingInfoCard.tsx
-import {
-  Box,
-  Paper,
-  Typography,
-  TextField,
-  Grid,
-  Divider,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-} from "@mui/material";
-import { BookingForm } from "../../useBooking";
+import { Box, Divider, FormControlLabel, Grid, Radio, RadioGroup, TextField, Typography } from "@mui/material";
+import type { BookingForm } from "../../useBooking";
 
-type Props = {
+interface Props {
   value: BookingForm;
-  onChange: (field: keyof BookingForm, value: any) => void;
+  onChange: <K extends keyof BookingForm>(field: K, value: BookingForm[K]) => void;
   errors: Partial<Record<keyof BookingForm, string>>;
-};
+}
 
-const BookingInfoCard = ({ value, onChange, errors }: Props) => {
-  return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: 3,
-        borderRadius: 3,
-        mb: 3,
-      }}
-      variant="outlined"
-    >
-      <Box mb={2}>
-        <Typography variant="h6" fontWeight={700} mb={0.5}>
-          Thông tin đặt phòng
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Vui lòng kiểm tra thông tin đặt phòng.
-        </Typography>
-      </Box>
+const fieldSx = {
+  "& .MuiOutlinedInput-root": {
+    minHeight: 50,
+    borderRadius: 1.25,
+    bgcolor: "#fff",
+    "& fieldset": { borderColor: "#d8d6cf" },
+    "&:hover fieldset": { borderColor: "#9aa8af" },
+    "&.Mui-focused fieldset": { borderWidth: 1.5 },
+  },
+} as const;
 
-      {/* Họ tên */}
-      <Box mb={2.5}>
-        <Typography fontWeight={600} mb={1} color="#555555" fontSize={14}>
-          Họ tên
-        </Typography>
+const BookingInfoCard = ({ value, onChange, errors }: Props) => (
+  <Box component="section" aria-labelledby="guest-information-title">
+    <Typography id="guest-information-title" component="h2" sx={{ fontSize: { xs: 24, md: 27 }, fontWeight: 650, color: "text.primary" }}>
+      Thông tin khách lưu trú
+    </Typography>
+    <Typography color="text.secondary" sx={{ mt: 1, lineHeight: 1.7 }}>
+      Thông tin này sẽ được dùng để xác nhận và liên hệ về kỳ nghỉ của bạn.
+    </Typography>
+
+    <Grid container spacing={2.5} sx={{ mt: 1.5 }}>
+      <Grid size={12}>
         <TextField
           fullWidth
+          required
+          label="Họ và tên"
           value={value.guestName}
           name="guestName"
-          onChange={(e) => onChange("guestName", e.target.value)}
-          placeholder="Nhập họ tên"
-          error={!!errors["guestName"]}
-          helperText={errors["guestName"]}
+          autoComplete="name"
+          onChange={(event) => onChange("guestName", event.target.value)}
+          error={Boolean(errors.guestName)}
+          helperText={errors.guestName}
+          sx={fieldSx}
         />
-      </Box>
-
-      {/* SĐT + Email */}
-      <Grid container spacing={2.5} mb={2.5}>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Typography fontWeight={600} mb={1} color="#555555" fontSize={14}>
-            Số điện thoại
-          </Typography>
-          <TextField
-            fullWidth
-            value={value.guestPhone}
-            name="guestPhone"
-            onChange={(e) => onChange("guestPhone", e.target.value)}
-            placeholder="+84..."
-            error={!!errors["guestPhone"]}
-            helperText={errors["guestPhone"]}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Typography fontWeight={600} mb={1} color="#555555" fontSize={14}>
-            Email
-          </Typography>
-          <TextField
-            fullWidth
-            value={value.guestEmail}
-            name="guestEmail"
-            onChange={(e) => onChange("guestEmail", e.target.value)}
-            placeholder="email@example.com"
-            error={!!errors["guestEmail"]}
-            helperText={errors["guestEmail"]}
-          />
-        </Grid>
       </Grid>
+      <Grid size={{ xs: 12, sm: 6 }}>
+        <TextField
+          fullWidth
+          required
+          label="Số điện thoại"
+          value={value.guestPhone}
+          name="guestPhone"
+          type="tel"
+          autoComplete="tel"
+          onChange={(event) => onChange("guestPhone", event.target.value)}
+          error={Boolean(errors.guestPhone)}
+          helperText={errors.guestPhone}
+          sx={fieldSx}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 6 }}>
+        <TextField
+          fullWidth
+          required
+          label="Email"
+          value={value.guestEmail}
+          name="guestEmail"
+          type="email"
+          autoComplete="email"
+          onChange={(event) => onChange("guestEmail", event.target.value)}
+          error={Boolean(errors.guestEmail)}
+          helperText={errors.guestEmail}
+          sx={fieldSx}
+        />
+      </Grid>
+    </Grid>
 
-      <Divider sx={{ my: 2 }} />
+    <Divider sx={{ my: { xs: 4, md: 5 } }} />
 
-      {/* Bạn đặt phòng cho ai? */}
-      <Box>
-        <Typography fontWeight={600} mb={0.5}>
-          Bạn đặt phòng cho ai?{" "}
-          <Typography
-            component="span"
-            variant="body2"
-            color="text.secondary"
-            fontWeight={400}
-          >
-            (không bắt buộc)
-          </Typography>
-        </Typography>
-
-        <RadioGroup
-          sx={{ mt: 1 }}
-          value={value.bookingForSomeoneElse}
-          onChange={(e) => onChange("bookingForSomeoneElse", e.target.value)}
-        >
-          <FormControlLabel
-            value="false"
-            control={<Radio />}
-            label="Tôi là khách lưu trú"
-          />
-          <FormControlLabel
-            value="true"
-            control={<Radio />}
-            label="Đặt phòng này là cho người khác"
-          />
-        </RadioGroup>
-      </Box>
-    </Paper>
-  );
-};
+    <Typography component="h3" sx={{ fontSize: 18, fontWeight: 650, color: "text.primary" }}>
+      Bạn đặt phòng cho ai?
+    </Typography>
+    <RadioGroup
+      aria-label="Người lưu trú"
+      value={value.bookingForSomeoneElse ? "other" : "self"}
+      onChange={(event) => onChange("bookingForSomeoneElse", event.target.value === "other")}
+      sx={{ mt: 1.25, gap: 0.25 }}
+    >
+      <FormControlLabel value="self" control={<Radio />} label="Tôi là khách lưu trú" />
+      <FormControlLabel value="other" control={<Radio />} label="Đặt phòng này cho người khác" />
+    </RadioGroup>
+  </Box>
+);
 
 export default BookingInfoCard;

@@ -3,11 +3,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useNavigate } from "react-router-dom";
 import useSnackbar from "@hooks/useSnackbar";
-import { sleep } from "@utils/sleep";
 import MyBookingService from "@services/me/booking.service";
-import { BookingStatus } from "@enums/BookingStatus";
-import { BookingResponse } from "@constant/response/BookingResponse";
-import { BookingCancelRequest } from "@constant/request/BookingCancelRequest";
+import MyReviewService from "@services/me/review.service";
+import type { BookingStatus } from "@enums/BookingStatus";
+import type { BookingResponse } from "@constant/response/BookingResponse";
+import type { BookingCancelRequest } from "@constant/request/BookingCancelRequest";
 
 export type BookingTab = "upcoming" | "done" | "cancelled";
 
@@ -26,19 +26,6 @@ const mapTabToStatus = (tab: BookingTab): BookingStatus | undefined => {
   }
 };
 
-const mapTabToHeading = (tab: BookingTab): string => {
-  switch (tab) {
-    case "upcoming":
-      return "Lịch đặt phòng sắp tới";
-    case "done":
-      return "Phòng đã lưu trú";
-    case "cancelled":
-      return "Đặt phòng đã huỷ";
-    default:
-      return "";
-  }
-};
-
 const useMyBooking = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -49,11 +36,9 @@ const useMyBooking = () => {
   const { alert, showSuccess, showError, closeSnackbar } = useSnackbar();
 
   // --- DANH SÁCH BOOKING ---
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading, isFetching, isError, refetch } = useQuery({
     queryKey: ["my-bookings", tab, page, PAGE_SIZE],
     queryFn: async () => {
-      // fake delay 1s
-      await sleep(1000);
       return MyBookingService.getList({
         page,
         limit: PAGE_SIZE,
@@ -68,9 +53,17 @@ const useMyBooking = () => {
 
     return booking.status === bookingStatus;
   });
+  const hasReviewedBookings = bookings.some(
+    (booking) => booking.status === "CHECKED_OUT" && booking.hasReview,
+  );
+  const { data: reviews } = useQuery({
+    queryKey: ["my-review-index"],
+    queryFn: () => MyReviewService.getAllForCurrentCustomer(),
+    enabled: hasReviewedBookings,
+    staleTime: 5 * 60 * 1000,
+  });
   const meta = data?.pagination;
   const totalPages = meta?.totalPages ?? 0;
-  const heading = mapTabToHeading(tab);
 
   const changeTab = (next: BookingTab) => {
     setTab(next);
@@ -105,11 +98,8 @@ const useMyBooking = () => {
       closeCancelDialog();
       await queryClient.invalidateQueries({ queryKey: ["my-bookings"] });
     },
-    onError: (err: any) => {
-      const msg =
-        err?.response?.data?.message ||
-        "Hủy đặt phòng thất bại, vui lòng thử lại.";
-      showError(msg);
+    onError: () => {
+      showError("Không thể hủy đặt phòng lúc này. Vui lòng thử lại.");
     },
   });
 
@@ -133,6 +123,9 @@ const useMyBooking = () => {
       },
     });
 
+  const onViewReview = (reviewId: number) =>
+    navigate(`/account/reviews/${reviewId}`);
+
   const onReBook = (roomTypeId: number, nights: number) => {
     navigate("/search", {
       state: {
@@ -146,16 +139,19 @@ const useMyBooking = () => {
     // list + tab
     tab,
     changeTab,
-    heading,
     bookings,
     page,
     totalPages,
     setPage,
     meta,
     loading: isLoading,
+    error: isError,
+    retry: refetch,
     fetching: isFetching,
     onSelectBooking,
     onReview,
+    onViewReview,
+    reviews,
     onReBook,
 
     // cancel dialog

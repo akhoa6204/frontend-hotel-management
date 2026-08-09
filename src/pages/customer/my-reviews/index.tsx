@@ -1,88 +1,80 @@
-import { Box, Paper, Stack, Typography } from "@mui/material";
-import useMyReview from "./useMyReview";
 import Pager from "@components/pager";
-import ReviewCard from "./components/review-card";
+import { Box, Button, Stack, Typography } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 import ReviewCardSkeleton from "./components/ReviewCardSkeleton";
-import { formatDate } from "@utils/format";
+import ReviewCard from "./components/review-card";
+import useMyReview from "./useMyReview";
 
 const MyReviewPage = () => {
   const {
     reviews,
     loading,
+    error,
+    retry,
     totalPages,
-    fetching,
     page,
     onChangePage,
     onClickReviewCard,
   } = useMyReview();
 
   return (
-    <>
-      <Paper
-        elevation={0}
-        sx={{
-          borderRadius: 2,
-          border: "1px solid",
-          borderColor: "grey.200",
-          p: 3,
-        }}
-      >
-        <Typography variant="h6" fontWeight={700} mb={2}>
+    <Box sx={{ width: 1, pb: { xs: 4, md: 7 } }}>
+      <Box component="header" sx={{ mb: { xs: 3.5, md: 4.5 } }}>
+        <Typography sx={{ color: "primary.main", fontSize: 12, fontWeight: 700, letterSpacing: ".16em", mb: 1 }}>
+          TRẢI NGHIỆM CỦA BẠN
+        </Typography>
+        <Typography component="h1" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 32, md: 42 }, lineHeight: 1.15 }}>
           Đánh giá của tôi
         </Typography>
+        <Typography color="text.secondary" sx={{ mt: 1.25, maxWidth: 650, lineHeight: 1.7 }}>
+          Nhìn lại và chia sẻ cảm nhận về những kỳ nghỉ của bạn tại Diamond Sea.
+        </Typography>
+      </Box>
 
-        {loading && fetching ? (
-          <Stack spacing={2}>
-            {Array.from({ length: 3 }).map((_, idx) => (
-              <ReviewCardSkeleton key={idx} />
+      {loading ? (
+        <Stack spacing={{ xs: 2.5, md: 3 }} aria-label="Đang tải danh sách đánh giá">
+          {Array.from({ length: 3 }).map((_, index) => <ReviewCardSkeleton key={index} />)}
+        </Stack>
+      ) : error ? (
+        <Box sx={{ py: { xs: 5, md: 7 }, borderTop: "1px solid", borderColor: "divider" }}>
+          <Typography component="h2" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 24 }}>
+            Không thể tải đánh giá
+          </Typography>
+          <Typography color="text.secondary" sx={{ mt: 1, mb: 2.5, lineHeight: 1.7 }}>
+            Những chia sẻ của bạn hiện chưa thể truy cập. Vui lòng thử lại.
+          </Typography>
+          <Button variant="outlined" onClick={() => retry()}>Thử lại</Button>
+        </Box>
+      ) : reviews.length === 0 ? (
+        <Box sx={{ py: { xs: 5, md: 7 }, borderTop: "1px solid", borderColor: "divider", maxWidth: 620 }}>
+          <Typography component="h2" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 24, sm: 27 } }}>
+            Chưa có đánh giá nào
+          </Typography>
+          <Typography color="text.secondary" sx={{ mt: 1, mb: 2.75, lineHeight: 1.7 }}>
+            Cảm nhận về kỳ nghỉ đầu tiên của bạn sẽ được lưu lại tại đây sau khi hoàn tất lưu trú.
+          </Typography>
+          <Button component={RouterLink} to="/search" variant="outlined">Khám phá phòng</Button>
+        </Box>
+      ) : (
+        <>
+          <Stack spacing={{ xs: 2.5, md: 3 }}>
+            {reviews.map((review) => (
+              <ReviewCard
+                key={review.id}
+                review={review}
+                onView={() => onClickReviewCard(review.id, review.bookingId)}
+              />
             ))}
           </Stack>
-        ) : (
-          <>
-            {reviews.length === 0 ? (
-              <Typography color="text.secondary">
-                Bạn chưa có đánh giá nào.
-              </Typography>
-            ) : (
-              <Stack spacing={2}>
-                {reviews.map((r) => (
-                  <ReviewCard
-                    key={r.id}
-                    image={
-                      r.booking.room.roomType.roomTypeImages?.[0]?.url ||
-                      "/images/placeholder-room.jpg"
-                    }
-                    roomName={r.booking.room.name}
-                    roomType={r.booking.room.roomType.name}
-                    fromDate={formatDate(r.booking.checkInDate, {
-                      withWeekday: true,
-                    })}
-                    toDate={formatDate(r.booking.checkOutDate, {
-                      withWeekday: true,
-                    })}
-                    comment={r.comment}
-                    rating={r.overall}
-                    onClick={() => onClickReviewCard(r.id)}
-                  />
-                ))}
-              </Stack>
-            )}
 
-            {totalPages > 1 ? (
-              <Box mt={3} display="flex" justifyContent="flex-end">
-                <Pager
-                  page={page}
-                  totalPages={totalPages}
-                  onChange={onChangePage}
-                />
-              </Box>
-            ) : (
-              ""
-            )}
-          </>
-        )}
-      </Paper>
-    </>
+          {totalPages > 1 && (
+            <Box sx={{ mt: 4, display: "flex", justifyContent: { xs: "center", sm: "flex-end" } }}>
+              <Pager page={page} totalPages={totalPages} onChange={onChangePage} />
+            </Box>
+          )}
+        </>
+      )}
+    </Box>
   );
 };
 

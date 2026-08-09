@@ -1,13 +1,10 @@
 import {
   Avatar,
   Box,
-  Card,
-  Divider,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Stack,
   Typography,
 } from "@mui/material";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
@@ -17,10 +14,11 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { useLocation, useNavigate, Link as RouterLink } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@hooks/useRedux";
 import { logout } from "@store/slice/account.slice";
+import type { ReactElement } from "react";
 
 type NavItem = {
   label: string;
-  icon: React.ReactElement;
+  icon: ReactElement;
   to?: string;
   action?: "logout";
 };
@@ -54,7 +52,7 @@ const AccountSidebar = () => {
   const dispatch = useAppDispatch();
 
   const user = useAppSelector((state) => state.account.user);
-  const fullName = user?.fullName || user?.name || "User";
+  const fullName = user?.fullName || "User";
 
   const handleLogOut = () => {
     localStorage.removeItem("accessToken");
@@ -68,43 +66,86 @@ const AccountSidebar = () => {
   };
 
   return (
-    <Card
-      elevation={0}
+    <Box
+      component="nav"
+      aria-label="Điều hướng tài khoản khách hàng"
       sx={{
-        borderRadius: 2,
-        border: "1px solid",
-        borderColor: "grey.200",
-        overflow: "hidden",
+        minWidth: 0,
+        borderRadius: { xs: 1.5, lg: 0 },
+        border: { xs: "1px solid rgba(23, 60, 75, 0.08)", lg: "none" },
+        bgcolor: { xs: "rgba(255,255,255,.62)", lg: "transparent" },
       }}
     >
-      {/* Header user */}
-      <Box px={2.5} py={2} display="flex" alignItems="center" gap={1.5}>
-        <Avatar sx={{ bgcolor: "#2E90FA", width: 36, height: 36 }}>
+      <Box sx={{ px: { xs: 1.75, lg: 1 }, pb: { xs: 1.25, lg: 2.25 }, pt: { xs: 1.25, lg: 0.5 }, display: "flex", alignItems: "center", gap: 1.25 }}>
+        <Avatar sx={{ bgcolor: "#DDE9ED", color: "text.primary", width: 32, height: 32, fontSize: 13, fontWeight: 700 }}>
           {fullName[0]?.toUpperCase() ?? "U"}
         </Avatar>
-        <Typography fontWeight={600}>{fullName}</Typography>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography sx={{ color: "text.primary", fontSize: 14, fontWeight: 650, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {fullName}
+          </Typography>
+          <Typography sx={{ color: "text.secondary", fontSize: 11.5, mt: 0.15 }}>
+            Tài khoản khách hàng
+          </Typography>
+        </Box>
       </Box>
-
-      <Divider />
-
-      {/* Menu items */}
-      <List disablePadding>
+      <List
+        disablePadding
+        sx={{
+          display: { xs: "flex", lg: "block" },
+          overflowX: { xs: "auto", lg: "visible" },
+          borderTop: { xs: "1px solid rgba(23, 60, 75, 0.07)", lg: "none" },
+          p: { xs: 0.65, lg: 0 },
+          gap: { xs: 0.5, lg: 0 },
+          scrollbarWidth: "thin",
+        }}
+      >
         {navItems.map((item) => {
           const active = isActivePath(item.to);
+          const isLogout = item.action === "logout";
 
           const commonProps = {
             sx: {
-              py: 1.1,
-              px: 2.5,
-              borderRadius: 0,
-              bgcolor: active ? "#2E90FA" : "transparent",
-              color: active ? "common.white" : "text.primary",
+              minWidth: { xs: "max-content", lg: "auto" },
+              py: 0.95,
+              px: { xs: 1.4, lg: 1.25 },
+              mt: { xs: 0, lg: isLogout ? 1.5 : 0.2 },
+              borderTop: { xs: "none", lg: isLogout ? "1px solid rgba(23, 60, 75, 0.08)" : "none" },
+              borderRadius: 0.75,
+              bgcolor: active ? "rgba(46, 144, 250, 0.075)" : "transparent",
+              color: active ? "primary.main" : "text.primary",
+              position: "relative",
               "& .MuiListItemIcon-root": {
-                color: active ? "common.white" : "text.secondary",
-                minWidth: 32,
+                color: active ? "primary.main" : isLogout ? "#72777D" : "#6B7378",
+                minWidth: 29,
+                "& .MuiSvgIcon-root": { fontSize: 19 },
               },
+              "& .MuiListItemText-primary": { fontSize: 13.5, fontWeight: active ? 650 : 500 },
+              ...(active
+                ? {
+                    "&::before": {
+                      content: '""',
+                      position: "absolute",
+                      left: { xs: 9, lg: 0 },
+                      right: { xs: 10, lg: "auto" },
+                      bottom: { xs: 0, lg: 9 },
+                      width: { xs: "auto", lg: 3 },
+                      height: { xs: 2, lg: 20 },
+                      borderRadius: 4,
+                      bgcolor: "primary.main",
+                    },
+                  }
+                : {}),
               "&:hover": {
-                bgcolor: active ? "#2E90FA6d" : "grey.50",
+                bgcolor: isLogout
+                  ? "rgba(180, 58, 58, 0.055)"
+                  : active
+                    ? "rgba(46, 144, 250, 0.11)"
+                    : "rgba(46, 144, 250, 0.045)",
+                color: isLogout ? "error.main" : active ? "primary.main" : "text.primary",
+                "& .MuiListItemIcon-root": {
+                  color: isLogout ? "#9B3B38" : active ? "primary.main" : "#53656C",
+                },
               },
             },
           };
@@ -135,7 +176,7 @@ const AccountSidebar = () => {
           );
         })}
       </List>
-    </Card>
+    </Box>
   );
 };
 

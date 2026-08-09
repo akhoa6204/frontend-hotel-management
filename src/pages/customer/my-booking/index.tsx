@@ -1,28 +1,29 @@
-import { Box, Stack, Typography, Tabs, Tab } from "@mui/material";
-import useMyBooking, { BookingTab } from "./useMyBooking";
+import { Box, Button, Stack, Tab, Tabs, Typography } from "@mui/material";
+import GlobalSnackbar from "@components/GlobalSnackbar";
+import Pager from "@components/pager";
+import CancelBookingDialog from "../booking-detail/components/CancelBookingDialog";
 import BookingCard from "./components/BookingCard";
 import BookingCardSkeleton from "./components/BookingCardSkeleton";
-import Pager from "@components/pager";
-import CancelBookingDialog from "./components/CancelBookingDialog";
-import GlobalSnackbar from "@components/GlobalSnackbar";
 import NoBooking from "./components/NoBooking";
-import { diffNights, formatDate } from "@utils/format";
+import useMyBooking, { type BookingTab } from "./useMyBooking";
+import { diffNights } from "@utils/format";
 
 const MyBookingPage = () => {
   const {
     tab,
     changeTab,
-    heading,
     bookings,
     page,
     totalPages,
     setPage,
     loading,
+    error,
+    retry,
     onSelectBooking,
     onReview,
+    onViewReview,
+    reviews,
     onReBook,
-
-    // cancel
     cancelOpen,
     bookingToCancel,
     cancelReason,
@@ -30,102 +31,98 @@ const MyBookingPage = () => {
     openCancelDialog,
     closeCancelDialog,
     confirmCancel,
-
-    // snackbar
+    cancelLoading,
     alert,
     closeSnackbar,
   } = useMyBooking();
 
   return (
-    <>
-      {/* Tabs */}
-      <Box
-        sx={{
-          borderRadius: 2,
-          border: "1px solid",
-          borderColor: "grey.200",
-          bgcolor: "grey.50",
-          mb: 3,
-        }}
-      >
-        <Tabs
-          value={tab}
-          onChange={(_, v) => changeTab(v as BookingTab)}
-          variant="fullWidth"
-          indicatorColor="primary"
-          textColor="primary"
-          sx={{
-            minHeight: 48,
-            "& .MuiTab-root": {
-              textTransform: "none",
-              fontWeight: 600,
-              minHeight: 48,
-            },
-          }}
-        >
-          <Tab value="upcoming" label="Sắp tới" />
-          <Tab value="done" label="Hoàn tất" />
-          <Tab value="cancelled" label="Đã huỷ" />
-        </Tabs>
-      </Box>
-
-      {/* Phần nội dung chính */}
-      <Box
-        sx={{
-          borderRadius: 2,
-          border: "1px solid",
-          borderColor: "grey.200",
-          p: 2.5,
-          bgcolor: "#fff",
-        }}
-      >
-        <Typography variant="h6" fontWeight={700} mb={2}>
-          {heading}
+    <Box sx={{ width: 1, pb: { xs: 4, md: 7 } }}>
+      <Box component="header" sx={{ mb: { xs: 3, md: 4 } }}>
+        <Typography sx={{ color: "primary.main", fontSize: 12, fontWeight: 700, letterSpacing: ".16em", mb: 1 }}>
+          KỲ NGHỈ CỦA BẠN
         </Typography>
-
-        {loading ? (
-          // Loading lần đầu: show 3 skeleton cards
-          <Stack spacing={2}>
-            {Array.from({ length: 3 }).map((_, i) => (
-              <BookingCardSkeleton key={i} />
-            ))}
-          </Stack>
-        ) : bookings.length === 0 ? (
-          <NoBooking step={tab} />
-        ) : (
-          <>
-            {/* Danh sách booking */}
-            <Stack spacing={2}>
-              {bookings.map((b) => (
-                <BookingCard
-                  key={b.id}
-                  booking={b}
-                  onCancel={
-                    tab === "upcoming" ? () => openCancelDialog(b) : undefined
-                  }
-                  onClick={() => onSelectBooking(b.id)}
-                  onReview={() => onReview(b.id)}
-                  onReBook={() =>
-                    onReBook(
-                      b.room.roomType.id,
-                      diffNights(b.checkInDate, b.checkOutDate),
-                    )
-                  }
-                />
-              ))}
-            </Stack>
-
-            {/* Phân trang */}
-            {totalPages > 1 && (
-              <Box mt={3} display="flex" justifyContent="flex-end">
-                <Pager page={page} totalPages={totalPages} onChange={setPage} />
-              </Box>
-            )}
-          </>
-        )}
+        <Typography component="h1" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 32, md: 42 }, lineHeight: 1.15 }}>
+          Đặt phòng của tôi
+        </Typography>
+        <Typography color="text.secondary" sx={{ mt: 1.25, maxWidth: 650, lineHeight: 1.7 }}>
+          Theo dõi những kỳ nghỉ sắp tới và lịch sử lưu trú tại Diamond Sea.
+        </Typography>
       </Box>
 
-      {/* Dialog hủy phòng */}
+      <Tabs
+        value={tab}
+        onChange={(_, value: BookingTab) => changeTab(value)}
+        aria-label="Danh mục đặt phòng"
+        variant="scrollable"
+        scrollButtons={false}
+        sx={{
+          minHeight: 44,
+          mb: { xs: 3, md: 4 },
+          borderBottom: "1px solid rgba(23, 60, 75, 0.10)",
+          "& .MuiTabs-indicator": { height: 2, borderRadius: 2 },
+          "& .MuiTab-root": {
+            minHeight: 44,
+            minWidth: "auto",
+            px: 0,
+            mr: { xs: 3, sm: 4.5 },
+            color: "text.secondary",
+            fontSize: 14,
+            fontWeight: 550,
+            textTransform: "none",
+            "&.Mui-selected": { color: "primary.main", fontWeight: 700 },
+          },
+        }}
+      >
+        <Tab value="upcoming" label="Sắp tới" />
+        <Tab value="done" label="Hoàn tất" />
+        <Tab value="cancelled" label="Đã hủy" />
+      </Tabs>
+
+      {loading ? (
+        <Stack spacing={{ xs: 2.5, md: 3 }} aria-label="Đang tải danh sách đặt phòng">
+          {Array.from({ length: 3 }).map((_, index) => <BookingCardSkeleton key={index} />)}
+        </Stack>
+      ) : error ? (
+        <Box sx={{ py: { xs: 6, md: 8 }, borderTop: "1px solid", borderColor: "divider" }}>
+          <Typography component="h2" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 24 }}>
+            Không thể tải đặt phòng
+          </Typography>
+          <Typography color="text.secondary" sx={{ mt: 1, mb: 2.5 }}>
+            Thông tin kỳ nghỉ hiện chưa thể truy cập. Vui lòng thử lại.
+          </Typography>
+          <Button variant="outlined" onClick={() => retry()}>Thử lại</Button>
+        </Box>
+      ) : bookings.length === 0 ? (
+        <NoBooking step={tab} />
+      ) : (
+        <>
+          <Stack spacing={{ xs: 2.5, md: 3 }}>
+            {bookings.map((booking) => {
+              const review = reviews?.find((item) => item.bookingId === booking.id);
+              return (
+                <BookingCard
+                  key={booking.id}
+                  booking={booking}
+                  reviewId={review?.id}
+                  onCancel={tab === "upcoming" ? () => openCancelDialog(booking) : undefined}
+                  onClick={() => onSelectBooking(booking.id)}
+                  onReview={() => onReview(booking.id)}
+                  onViewReview={review ? () => onViewReview(review.id) : undefined}
+                  onReBook={() => onReBook(booking.room.roomType.id, diffNights(booking.checkInDate, booking.checkOutDate))}
+                />
+              );
+            })}
+          </Stack>
+
+          {totalPages > 1 && (
+            <Box sx={{ mt: 4, display: "flex", justifyContent: { xs: "center", sm: "flex-end" } }}>
+              <Pager page={page} totalPages={totalPages} onChange={setPage} />
+            </Box>
+          )}
+        </>
+      )}
+
       {bookingToCancel && (
         <CancelBookingDialog
           open={cancelOpen}
@@ -133,12 +130,12 @@ const MyBookingPage = () => {
           onConfirm={confirmCancel}
           reason={cancelReason}
           onChangeReason={setCancelReason}
+          loading={cancelLoading}
         />
       )}
 
-      {/* Snackbar */}
       <GlobalSnackbar alert={alert} closeSnackbar={closeSnackbar} />
-    </>
+    </Box>
   );
 };
 

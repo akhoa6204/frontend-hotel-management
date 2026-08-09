@@ -1,46 +1,33 @@
-import { Box, List, ListItem, Paper, Typography } from "@mui/material";
+import NightsStayOutlinedIcon from "@mui/icons-material/NightsStayOutlined";
+import PetsOutlinedIcon from "@mui/icons-material/PetsOutlined";
+import { Box, Stack, Typography } from "@mui/material";
 
-const RulesCard = () => {
-  return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: 3,
-        borderRadius: 3,
-      }}
-      variant="outlined"
-    >
-      <Typography variant="h6" fontWeight={700} mb={1.5}>
-        Xem lại quy tắc chung
-      </Typography>
+const policies = [
+  { label: "Thời gian yên lặng", value: "22:00–06:00", icon: NightsStayOutlinedIcon },
+  { label: "Thú cưng", value: "Không được phép", icon: PetsOutlinedIcon },
+];
 
-      <Typography variant="body2" mb={1}>
-        Chủ chỗ nghỉ muốn bạn đồng ý với các quy tắc chung này:
-      </Typography>
-
-      <List dense sx={{ mb: 1, pl: 2 }}>
-        <ListItem
-          sx={{ display: "list-item", listStyleType: "disc", pl: 0, py: 0.5 }}
-        >
-          <Typography variant="body2">
-            Thời gian yên lặng từ{" "}
-            <Box component="span" fontWeight={600}>
-              22:00 đến 06:00
-            </Box>
-          </Typography>
-        </ListItem>
-        <ListItem
-          sx={{ display: "list-item", listStyleType: "disc", pl: 0, py: 0.5 }}
-        >
-          <Typography variant="body2">Không cho phép thú cưng</Typography>
-        </ListItem>
-      </List>
-
-      <Typography variant="body2" fontWeight={600}>
-        Khi tiếp tục các bước tiếp theo, bạn đồng ý với các quy tắc chung này.
-      </Typography>
-    </Paper>
-  );
-};
+const RulesCard = () => (
+  <Box component="section" aria-labelledby="stay-policies-title">
+    <Typography id="stay-policies-title" component="h2" sx={{ fontSize: { xs: 24, md: 27 }, fontWeight: 650, color: "text.primary" }}>
+      Quy tắc lưu trú
+    </Typography>
+    <Typography color="text.secondary" sx={{ mt: 1, lineHeight: 1.7 }}>
+      Vui lòng xem lại các quy tắc hiện áp dụng cho kỳ nghỉ này.
+    </Typography>
+    <Stack spacing={1.75} sx={{ mt: 2.5 }}>
+      {policies.map(({ label, value, icon: Icon }) => (
+        <Stack key={label} direction="row" spacing={1.5} alignItems="center">
+          <Icon sx={{ color: "primary.main", fontSize: 21 }} />
+          <Typography sx={{ minWidth: { sm: 170 }, color: "text.secondary" }}>{label}</Typography>
+          <Typography fontWeight={650} color="text.primary">{value}</Typography>
+        </Stack>
+      ))}
+    </Stack>
+    <Typography variant="body2" color="text.secondary" sx={{ mt: 2.5, lineHeight: 1.7 }}>
+      Khi tiếp tục, bạn xác nhận đã xem lại các quy tắc lưu trú trên.
+    </Typography>
+  </Box>
+);
 
 export default RulesCard;

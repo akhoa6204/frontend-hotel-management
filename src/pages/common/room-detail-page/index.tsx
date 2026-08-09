@@ -1,4 +1,5 @@
-import { Box, Container } from "@mui/material";
+import { Box, Breadcrumbs, Container, Link as MuiLink, Typography } from "@mui/material";
+import { Link } from "react-router-dom";
 import useRoomDetail from "./useRoomDetail";
 
 import ImageGallery from "./components/image-gallery";
@@ -11,6 +12,7 @@ import Pager from "@components/pager";
 import ImageGallerySkeleton from "./components/ImageGallerySkeleton";
 import RoomDescriptionSkeleton from "./components/RoomDescriptionSkeleton";
 import ReviewSectionSkeleton from "./components/ReviewSectionSkeleton";
+import RelatedRooms from "./components/related-rooms";
 
 const RoomDetail = () => {
   const {
@@ -19,14 +21,15 @@ const RoomDetail = () => {
     reviewStats,
     reviewPage,
     totalReviewPages,
+    relatedRooms,
     handleChangePage,
 
     loadingRoom,
     loadingReviews,
     loadingStats,
-    fetchingReviews,
-
+    loadingRelatedRooms,
     handleBookingRoom,
+    handleRelatedRoomBooking,
   } = useRoomDetail();
 
   const loadingRoomBlock = loadingRoom && !room;
@@ -34,14 +37,16 @@ const RoomDetail = () => {
     (loadingReviews || loadingStats) && !reviews.length;
 
   return (
-    <Container sx={{ py: 4 }}>
+    <Box component="main" sx={{ bgcolor: "background.default" }}>
+    <Container maxWidth="lg" sx={{ pt: { xs: 3, md: 5 }, pb: { xs: 8, md: 12 } }}>
+      <Breadcrumbs aria-label="Điều hướng" sx={{ mb: 2.5, color: "text.secondary", fontSize: 14 }}><MuiLink component={Link} to="/" underline="hover">Trang chủ</MuiLink><MuiLink component={Link} to="/#rooms" underline="hover">Phòng nghỉ</MuiLink><Typography variant="body2" color="text.primary">{room?.name || "Chi tiết phòng"}</Typography></Breadcrumbs>
       {loadingRoomBlock ? (
         <ImageGallerySkeleton />
       ) : (
-        <ImageGallery images={room?.roomTypeImages ?? []} />
+        <ImageGallery images={room?.roomTypeImages ?? []} roomName={room?.name ?? "Phòng Diamond Sea"} />
       )}
 
-      <Box mt={4}>
+      <Box>
         {loadingRoomBlock || !room ? (
           <RoomDescriptionSkeleton />
         ) : (
@@ -53,26 +58,18 @@ const RoomDetail = () => {
             discount={room.discountAmount || 0}
             amenities={room.amenities}
             rating={reviewStats?.avgOverall || 0}
+            totalReviews={reviewStats?.totalReviews || 0}
             handleBookingRoom={handleBookingRoom}
           />
         )}
       </Box>
 
       {/* ===== REVIEW ===== */}
-      <Box mt={4}>
+      <Box component="section" aria-label="Đánh giá của khách">
         {loadingReviewBlock ? (
           <ReviewSectionSkeleton />
         ) : reviews.length === 0 ? (
-          <Box
-            sx={{
-              py: 6,
-              textAlign: "center",
-              color: "text.secondary",
-              fontSize: 16,
-            }}
-          >
-            Chưa có đánh giá cho loại phòng này.
-          </Box>
+          <Box sx={{ py: 4.5, borderTop: "1px solid", borderColor: "divider" }}><Typography component="h2" variant="h2" sx={{ fontSize: { xs: 28, md: 32 } }}>Đánh giá của khách</Typography><Typography color="text.secondary" sx={{ mt: 1 }}>Chưa có đánh giá cho hạng phòng này.</Typography></Box>
         ) : (
           <>
             <ReviewSection stats={reviewStats} reviews={reviews} />
@@ -91,7 +88,9 @@ const RoomDetail = () => {
           </>
         )}
       </Box>
+      <RelatedRooms rooms={relatedRooms} loading={loadingRelatedRooms} onBooking={(relatedRoom) => handleRelatedRoomBooking(relatedRoom.id, relatedRoom.capacity)} />
     </Container>
+    </Box>
   );
 };
 

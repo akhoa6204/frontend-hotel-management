@@ -1,25 +1,11 @@
-import {
-  Box,
-  Button,
-  Container,
-  Grid,
-  Stack,
-  Typography,
-  Skeleton,
-} from "@mui/material";
-import useBooking from "./useBooking";
-
-import BookingInfoCard from "./components/BookingInfoCard";
+import { Box, Container, Divider, Grid, Stack, Typography } from "@mui/material";
+import { GlobalSnackbar, Loading } from "@components";
 import ArrivalTimeCard from "./components/ArrivalTimeCard";
+import BookingInfoCard from "./components/BookingInfoCard";
+import ReservationSummary from "./components/ReservationSummary";
+import ReservationSummarySkeleton from "./components/ReservationSummarySkeleton";
 import RulesCard from "./components/RulesCard";
-import RoomCard from "./components/RoomCard";
-import BookingDetailCard from "./components/BookingDetailCard";
-import PriceSummaryCard from "./components/PriceSummaryCard";
-import { ArrowForward } from "@mui/icons-material";
-
-import RoomCardSkeleton from "./components/RoomCardSkeleton";
-import PriceSummarySkeleton from "./components/PriceSummarySkeleton";
-import { BookingStepper, GlobalSnackbar, Loading } from "@components";
+import useBooking from "./useBooking";
 
 const BookingPage = () => {
   const {
@@ -27,107 +13,61 @@ const BookingPage = () => {
     bookingForm,
     onChangeField,
     errors,
-
     alert,
     closeSnackbar,
-
     pricing,
-
     loadingRoomDetail,
     loadingCreateBooking,
     loadingQuote,
-
     onSubmit,
   } = useBooking();
 
   return (
-    <>
-      <Container>
-        <BookingStepper activeStep={2} />
-      </Container>
+    <Box component="main" sx={{ bgcolor: "background.default", minHeight: "70vh" }}>
+      <Box>
+        <Container maxWidth="lg" sx={{ pt: { xs: 4, md: 5 }, pb: { xs: 8, md: 12 } }}>
+          <Typography sx={{ color: "primary.main", letterSpacing: 2, fontSize: 11, fontWeight: 750 }}>
+            HOÀN TẤT ĐẶT PHÒNG
+          </Typography>
+          <Typography component="h1" sx={{ mt: 1.25, fontFamily: "Georgia, serif", fontSize: { xs: 34, sm: 40, md: 46 }, lineHeight: 1.15, color: "text.primary" }}>
+            Xác nhận kỳ nghỉ của bạn.
+          </Typography>
+          <Typography color="text.secondary" sx={{ mt: 1.5, maxWidth: 620, lineHeight: 1.75 }}>
+            Kiểm tra thông tin phòng và điền thông tin liên hệ để tiếp tục đến bước thanh toán.
+          </Typography>
 
-      <Container sx={{ mt: 3, mb: 4 }}>
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 12, md: 7 }}>
-            <Stack spacing={3}>
-              <BookingInfoCard
-                value={bookingForm}
-                onChange={onChangeField}
-                errors={errors}
-              />
+          <Box component="form" onSubmit={onSubmit} noValidate sx={{ mt: { xs: 4, md: 5.5 } }}>
+            <Grid container spacing={{ xs: 4, md: 5, lg: 7 }} alignItems="flex-start">
+              <Grid size={{ xs: 12, md: 7 }} sx={{ order: { xs: 2, md: 1 } }}>
+                <Stack divider={<Divider flexItem />} spacing={{ xs: 4, md: 5 }}>
+                  <BookingInfoCard value={bookingForm} onChange={onChangeField} errors={errors} />
+                  <ArrivalTimeCard value={bookingForm.estimatedArrivalTime} onChange={onChangeField} checkInDate={bookingForm.checkInDate} />
+                  <RulesCard />
+                </Stack>
+              </Grid>
 
-              <ArrivalTimeCard
-                value={bookingForm.estimatedArrivalTime}
-                onChange={onChangeField}
-                checkInDate={""}
-              />
-
-              <RulesCard />
-            </Stack>
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 5 }}>
-            <Stack spacing={2.5}>
-              {loadingRoomDetail ? (
-                <>
-                  <RoomCardSkeleton />
-                </>
-              ) : (
-                room && (
-                  <RoomCard
-                    name={room.roomType.name}
-                    image={room.roomType.roomTypeImages?.[0]?.url}
-                    capacity={room.roomType.capacity}
+              <Grid size={{ xs: 12, md: 5 }} sx={{ order: { xs: 1, md: 2 } }}>
+                {loadingRoomDetail || !room ? (
+                  <ReservationSummarySkeleton />
+                ) : (
+                  <ReservationSummary
+                    room={room}
+                    checkIn={bookingForm.checkInDate}
+                    checkOut={bookingForm.checkOutDate}
+                    pricing={pricing}
+                    loadingPricing={loadingQuote}
+                    submitting={loadingCreateBooking}
                   />
-                )
-              )}
-              <BookingDetailCard
-                checkIn={bookingForm.checkInDate}
-                checkOut={bookingForm.checkOutDate}
-                guests={room?.roomType.capacity}
-              />
-              {loadingQuote ? (
-                <>
-                  <PriceSummarySkeleton />
-                  <Skeleton
-                    variant="rectangular"
-                    height={48}
-                    sx={{ borderRadius: 1.5 }}
-                  />
-                </>
-              ) : (
-                <Box component={"form"} onSubmit={onSubmit}>
-                  <PriceSummaryCard
-                    originalPrice={pricing?.subtotal || 0}
-                    discount={pricing?.totalDiscount || 0}
-                  />
-
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      borderRadius: 1.5,
-                    }}
-                    type="submit"
-                    disabled={!pricing}
-                  >
-                    <Typography>Tiếp theo thanh toán</Typography>
-                    <ArrowForward />
-                  </Button>
-                </Box>
-              )}
-            </Stack>
-          </Grid>
-        </Grid>
-      </Container>
+                )}
+              </Grid>
+            </Grid>
+          </Box>
+        </Container>
+      </Box>
 
       {loadingCreateBooking && <Loading content="Đang tạo đặt phòng..." />}
-
       <GlobalSnackbar alert={alert} closeSnackbar={closeSnackbar} />
-    </>
+    </Box>
   );
 };
 

@@ -1,178 +1,104 @@
-// src/pages/auth/ResetPasswordPage.tsx
+import type { AxiosError } from "axios";
+import AuthLayout from "@components/auth/AuthLayout";
+import AuthPasswordField from "@components/auth/AuthPasswordField";
 import GlobalSnackbar from "@components/GlobalSnackbar";
 import useForm from "@hooks/useForm";
 import useSnackbar from "@hooks/useSnackbar";
-import {
-  Box,
-  Button,
-  Container,
-  InputLabel,
-  Link,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { useMutation } from "@tanstack/react-query";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { Alert, Box, Button, Link as MuiLink, Stack, Typography } from "@mui/material";
 import AuthService from "@services/auth/auth.service";
-import ProfileService from "@services/me/profile.service";
+import { useMutation } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
-const fields = [
-  {
-    name: "password",
-    label: "Mật khẩu mới",
-    type: "password",
-    placeholder: "Mật khẩu mới",
-  },
-  {
-    name: "confirmPassword",
-    label: "Nhập lại mật khẩu mới",
-    type: "password",
-    placeholder: "Nhập lại mật khẩu mới",
-  },
-];
+interface ResetPasswordForm {
+  password: string;
+  confirmPassword: string;
+}
 
 const ResetPasswordPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { alert, closeSnackbar, showError, showSuccess } = useSnackbar();
-
+  const [searchParams] = useSearchParams();
+  const { alert, closeSnackbar, showError } = useSnackbar();
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const t = searchParams.get("token");
-    if (!t) {
+    const resetToken = searchParams.get("token");
+    if (!resetToken) {
       navigate("/login", { replace: true });
       return;
     }
 
-    setToken(t);
-
-    searchParams.delete("token");
-    const newSearch = searchParams.toString();
-    const newUrl = `${location.pathname}${newSearch ? `?${newSearch}` : ""}`;
-
-    window.history.replaceState({}, "", newUrl);
-  }, [location.pathname, searchParams]);
-
-  const initForm = {
-    password: "",
-    confirmPassword: "",
-  };
+    setToken(resetToken);
+    const sanitizedParams = new URLSearchParams(searchParams);
+    sanitizedParams.delete("token");
+    const remainingQuery = sanitizedParams.toString();
+    window.history.replaceState({}, "", `${location.pathname}${remainingQuery ? `?${remainingQuery}` : ""}`);
+  }, [location.pathname, navigate, searchParams]);
 
   const mResetPassword = useMutation({
-    mutationFn: async (payload: { newPassword: string }) => {
-      if (!token) {
-        throw new Error("Mã đặt lại mật khẩu không hợp lệ hoặc đã hết hạn");
-      }
-      return AuthService.resetPassword({
-        token,
-        password: payload.newPassword,
-      });
+    mutationFn: (password: string) => {
+      if (!token) throw new Error("Missing reset token");
+      return AuthService.resetPassword({ token, password });
     },
-    onSuccess: () => {
-      showSuccess("Đổi mật khẩu thành công. Vui lòng đăng nhập lại.");
-      navigate("/login");
-    },
-    onError: (err: any) => {
-      const msg =
-        err?.response?.data?.message ||
-        "Không thể đặt lại mật khẩu, vui lòng thử lại!";
-      showError(msg);
+    onSuccess: () => navigate("/login", { replace: true, state: { passwordReset: true } }),
+    onError: (error: AxiosError<{ message?: string }>) => {
+      showError(error.response?.data?.message || "Không thể đặt lại mật khẩu. Liên kết có thể đã hết hạn.");
     },
   });
 
-  // ===== FORM + VALIDATE =====
-  const { form, errors, onChange, onSubmit } = useForm(
-    initForm,
-    (f) => {
-      const errors: Record<string, string> = {};
-
-      if (!f.password.trim()) errors.password = "Mật khẩu không được để trống";
-      else if (f.password.length < 6)
-        errors.password = "Mật khẩu tối thiểu 6 ký tự";
-
-      if (!f.confirmPassword.trim())
-        errors.confirmPassword = "Vui lòng nhập lại mật khẩu";
-      else if (f.confirmPassword !== f.password)
-        errors.confirmPassword = "Mật khẩu nhập lại không khớp";
-
-      if (!token) {
-        errors.token = "Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn";
-      }
-
-      return errors;
+  const { form, errors, onChange, onSubmit } = useForm<ResetPasswordForm>(
+    { password: "", confirmPassword: "" },
+    (values) => {
+      const validationErrors: Partial<Record<keyof ResetPasswordForm, string>> = {};
+      if (!values.password.trim()) validationErrors.password = "Mật khẩu không được để trống";
+      else if (values.password.length < 6) validationErrors.password = "Mật khẩu tối thiểu 6 ký tự";
+      if (!values.confirmPassword.trim()) validationErrors.confirmPassword = "Vui lòng nhập lại mật khẩu";
+      else if (values.confirmPassword !== values.password) validationErrors.confirmPassword = "Mật khẩu nhập lại không khớp";
+      return validationErrors;
     },
-    async (values) => {
-      await mResetPassword.mutateAsync({ newPassword: values.password });
-    },
+    (values) => mResetPassword.mutate(values.password),
   );
 
   return (
     <>
-      <Container maxWidth="md">
-        <Paper elevation={3} sx={{ my: 10, p: 5, borderRadius: 2 }}>
-          <Stack spacing={2} alignItems="center">
-            <Typography variant="h5" fontWeight={700}>
-              Đặt lại mật khẩu
-            </Typography>
-            <Typography color="text.secondary">
-              Nhập mật khẩu mới cho tài khoản của bạn
-            </Typography>
-
-            <Box
-              component="form"
-              sx={{ width: "100%", mt: 2 }}
-              onSubmit={onSubmit}
-            >
-              <Stack spacing={2}>
-                {fields.map((f) => (
-                  <Box key={f.name}>
-                    <InputLabel>{f.label}</InputLabel>
-                    <TextField
-                      type={f.type}
-                      name={f.name}
-                      fullWidth
-                      value={form[f.name]}
-                      onChange={onChange}
-                      placeholder={f.placeholder}
-                      error={Boolean(errors[f.name])}
-                      helperText={errors[f.name] || ""}
-                    />
-                  </Box>
-                ))}
-
-                <Button
-                  type="submit"
-                  variant="contained"
-                  fullWidth
-                  sx={{ py: 1.2 }}
-                  disabled={mResetPassword.isPending}
-                >
-                  {mResetPassword.isPending ? "Đang xử lý..." : "Đổi mật khẩu"}
-                </Button>
-              </Stack>
-            </Box>
-
-            <Link href="/login" textAlign="center">
-              <Typography
-                color="text.secondary"
-                sx={{
-                  "&:hover": {
-                    color: "#2E90FA",
-                  },
-                }}
-              >
-                Quay lại đăng nhập
-              </Typography>
-            </Link>
+      <AuthLayout
+        eyebrow="BẢO MẬT TÀI KHOẢN"
+        title="Đặt lại mật khẩu."
+        description="Chọn mật khẩu mới cho tài khoản Diamond Sea của bạn."
+      >
+        <Alert severity="info" sx={{ mb: 3, borderRadius: 1.25 }}>
+          Mật khẩu mới cần có ít nhất 6 ký tự.
+        </Alert>
+        <Box component="form" onSubmit={onSubmit} noValidate>
+          <Stack spacing={2.25}>
+            <AuthPasswordField
+              label="Mật khẩu mới"
+              name="password"
+              value={form.password}
+              onChange={onChange}
+              error={errors.password}
+              autoComplete="new-password"
+              disabled={mResetPassword.isPending || !token}
+            />
+            <AuthPasswordField
+              label="Nhập lại mật khẩu mới"
+              name="confirmPassword"
+              value={form.confirmPassword}
+              onChange={onChange}
+              error={errors.confirmPassword}
+              autoComplete="new-password"
+              disabled={mResetPassword.isPending || !token}
+            />
+            <Button type="submit" variant="contained" fullWidth disabled={mResetPassword.isPending || !token} sx={{ minHeight: 48, borderRadius: 1.25 }}>
+              {mResetPassword.isPending ? "Đang cập nhật..." : "Đặt lại mật khẩu"}
+            </Button>
           </Stack>
-        </Paper>
-      </Container>
-
+        </Box>
+        <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ mt: 3 }}>
+          <MuiLink component={Link} to="/login" underline="hover" sx={{ fontWeight: 700 }}>Quay lại đăng nhập</MuiLink>
+        </Typography>
+      </AuthLayout>
       <GlobalSnackbar alert={alert} closeSnackbar={closeSnackbar} />
     </>
   );

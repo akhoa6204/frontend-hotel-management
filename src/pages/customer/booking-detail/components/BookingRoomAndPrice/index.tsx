@@ -1,111 +1,45 @@
+import type { BookingResponse } from "@constant/response/BookingResponse";
 import { Box, Divider, Stack, Typography } from "@mui/material";
-import { CalendarMonthRounded, Person } from "@mui/icons-material";
-import { fmtVND, formatDate } from "@utils/format";
-import { BookingResponse } from "@constant/response/BookingResponse";
-import { InvoiceResponse } from "@constant/response/InvoiceResponse";
+import { fmtVND } from "@utils/format";
 
-type Props = {
-  booking: BookingResponse;
-};
+interface Props { booking: BookingResponse }
+
+const MoneyRow = ({ label, value, accent }: { label: string; value: number; accent?: boolean }) => (
+  <Stack direction="row" justifyContent="space-between" spacing={2}>
+    <Typography color="text.secondary">{label}</Typography>
+    <Typography color={accent ? "success.main" : "text.primary"} fontWeight={500} textAlign="right">
+      {accent ? "−" : ""}{fmtVND(value)} VND
+    </Typography>
+  </Stack>
+);
 
 const BookingRoomAndPrice = ({ booking }: Props) => {
+  const roomAmount = Number(booking.roomAmount ?? 0);
+  const discount = Number(booking.roomDiscountAmount ?? 0);
+  const total = Number(booking.finalAmount ?? booking.roomFinalAmount ?? Math.max(0, roomAmount - discount));
+  const paid = Number(booking.roomPaymentPaidAmount ?? booking.depositPaidAmount ?? 0);
+  const remaining = Number(booking.remainingAmount ?? Math.max(0, total - paid));
+
   return (
-    <Box
-      sx={{
-        borderRadius: 2,
-        border: "1px solid",
-        borderColor: "grey.200",
-        p: 3,
-        bgcolor: "white",
-      }}
-    >
-      <Stack direction="row" spacing={3} mb={3}>
-        <Box
-          component="img"
-          src={booking.room.roomType.roomTypeImages?.[0]?.url}
-          sx={{
-            width: 260,
-            height: 180,
-            borderRadius: 2,
-            objectFit: "cover",
-            flexShrink: 0,
-          }}
-        />
-
-        <Stack sx={{ flex: 1 }} spacing={1} justifyContent={"space-between"}>
-          <Box flex={1}>
-            <Typography fontWeight={600} fontSize={18}>
-              Phòng {booking.room.name}
-            </Typography>
-            <Typography color="text.secondary" mb={1}>
-              {booking.room.roomType.name}
-            </Typography>
-
-            <Stack spacing={0.5}>
-              <Stack direction="row" spacing={1} alignItems="center">
-                <CalendarMonthRounded
-                  fontSize="small"
-                  sx={{ color: "text.secondary" }}
-                />
-                <Typography variant="body2" color="text.secondary">
-                  {formatDate(booking.checkInDate)} -{" "}
-                  {formatDate(booking.checkOutDate)}
-                </Typography>
-              </Stack>
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Person fontSize="small" sx={{ color: "text.secondary" }} />
-                <Typography variant="body2" color="text.secondary">
-                  {booking.room.roomType.capacity} khách
-                </Typography>
-              </Stack>
-            </Stack>
-          </Box>
-          <Box textAlign="right" minWidth={200}>
-            <Typography variant="body2" color="text.secondary">
-              Tổng giá
-            </Typography>
-            <Typography fontSize={22} fontWeight={700} color="primary">
-              {Number(booking.room.roomType.basePrice).toLocaleString("vi-VN")}{" "}
-              VND
-            </Typography>
-          </Box>
+    <Box component="aside" aria-label="Tóm tắt thanh toán" sx={{ bgcolor: "rgba(239, 234, 224, 0.56)", p: { xs: 2.5, sm: 3, xl: 3.5 }, alignSelf: "stretch", minWidth: 0 }}>
+      <Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', color: "text.primary", fontSize: 25, mb: 3 }}>Tóm tắt thanh toán</Typography>
+      <Stack spacing={1.6}>
+        <MoneyRow label="Tiền phòng" value={roomAmount} />
+        {discount > 0 && <MoneyRow label={booking.promotionCode ? `Ưu đãi (${booking.promotionCode})` : "Ưu đãi"} value={discount} accent />}
+        <Divider sx={{ my: .5 }} />
+        <Stack direction="row" justifyContent="space-between" alignItems="baseline" spacing={2}>
+          <Typography fontWeight={650}>Tổng giá trị</Typography>
+          <Typography sx={{ color: "text.primary", fontSize: 20, fontWeight: 700, textAlign: "right" }}>{fmtVND(total)} VND</Typography>
+        </Stack>
+        {(booking.depositPaidAmount !== undefined || booking.roomPaymentPaidAmount !== undefined) && <MoneyRow label="Đã thanh toán" value={paid} />}
+        <Stack direction="row" justifyContent="space-between" spacing={2} sx={{ pt: 1.5 }}>
+          <Typography fontWeight={650}>Còn lại</Typography>
+          <Typography fontWeight={remaining > 0 ? 700 : 500} color={remaining > 0 ? "text.primary" : "text.secondary"} textAlign="right">{fmtVND(remaining)} VND</Typography>
         </Stack>
       </Stack>
-
-      <Divider sx={{ mb: 2 }} />
-
-      <Stack spacing={1}>
-        <Stack direction="row" justifyContent="space-between">
-          <Typography>Tổng tiền</Typography>
-          <Typography>{fmtVND(booking.roomAmount || 0)} VND</Typography>
-        </Stack>
-
-        <Stack direction="row" justifyContent="space-between">
-          <Typography>Khuyến mãi</Typography>
-          <Typography color="success.main">
-            -{fmtVND(booking.roomDiscountAmount || 0)} VND
-          </Typography>
-        </Stack>
-
-        <Stack direction="row" justifyContent="space-between">
-          <Typography>Đã thanh toán tiền cọc phòng</Typography>
-          <Typography>
-            {fmtVND(booking.roomPaymentPaidAmount || 0)} VND
-          </Typography>
-        </Stack>
-        <Stack direction="row" justifyContent="space-between" mt={1}>
-          <Typography fontWeight={600}>
-            Trả phần còn lại khi check-in
-          </Typography>
-          <Typography fontWeight={700}>
-            {fmtVND(
-              (booking.roomAmount || 0) -
-                (booking.roomDiscountAmount || 0) -
-                (booking.roomPaymentPaidAmount || 0),
-            )}
-          </Typography>
-        </Stack>
-      </Stack>
+      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 2, lineHeight: 1.6 }}>
+        Số tiền hiển thị theo thông tin thanh toán hiện tại của đặt phòng.
+      </Typography>
     </Box>
   );
 };

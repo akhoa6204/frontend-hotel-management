@@ -1,125 +1,99 @@
-import { BookingStepper, GlobalSnackbar, Loading } from "@components";
-import { Button, Container, Grid, Stack, Typography } from "@mui/material";
-import DepositNoticeCard from "./components/DepositNoticeCard";
-import PaymentSummarySkeleton from "./components/PaymentSummarySkeleton";
-import PaymentSummaryCard from "./components/PaymentSummaryCard";
-import BookingSummaryCardSkeleton from "./components/BookingSummaryCardSkeleton";
-import BookingSummaryCard from "./components/BookingSummaryCard";
-import usePayment from "./usePayment";
+import { GlobalSnackbar, Loading } from "@components";
+import { Box, Button, Container, Dialog, DialogActions, DialogContent, Typography } from "@mui/material";
+import PaymentDetails from "./components/PaymentDetails";
 import PaymentQrDialog from "./components/PaymentQrDialog";
+import PaymentReservationSummary from "./components/PaymentReservationSummary";
+import usePayment from "./usePayment";
 
 const PaymentPage = () => {
   const {
     booking,
-
+    depositAmount,
+    finalTotal,
+    remainingBalance,
     onPayment,
     loadingPayment,
-
     alert,
     closeSnackbar,
-
     showNotice,
     backToHome,
-
     qrState,
     closePaymentDialog,
-
     isPendingCreateQr,
   } = usePayment();
+
+  if (!booking) {
+    return <Loading content="Đang tải thông tin thanh toán..." />;
+  }
+
   return (
     <>
-      <Container>
-        <BookingStepper activeStep={3} />
-      </Container>
+      <Box component="main" sx={{ bgcolor: "background.default", color: "text.primary", minHeight: "72vh", py: { xs: 5, sm: 6, md: 8 } }}>
+        <Container maxWidth="lg">
+          <Box sx={{ maxWidth: 760 }}>
+            <Typography sx={{ color: "primary.main", letterSpacing: 2, fontSize: 11, fontWeight: 750 }}>
+              THANH TOÁN ĐẶT PHÒNG
+            </Typography>
+            <Typography
+              component="h1"
+              sx={{ mt: 1.25, fontFamily: "Georgia, serif", fontSize: { xs: 38, sm: 48, md: 56 }, lineHeight: 1.08, fontWeight: 400 }}
+            >
+              Hoàn tất khoản cọc cho kỳ nghỉ của bạn.
+            </Typography>
+            <Typography color="text.secondary" sx={{ mt: 2, maxWidth: 660, fontSize: { xs: 15, sm: 17 }, lineHeight: 1.7 }}>
+              Kiểm tra lại thông tin kỳ nghỉ và thanh toán khoản cọc để giữ phòng. Trạng thái sẽ được cập nhật sau khi hệ thống xác nhận giao dịch.
+            </Typography>
+          </Box>
 
-      <Container sx={{ mt: 3, mb: 4 }}>
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 12, md: 7 }}>
-            <DepositNoticeCard />
-            {!booking.finalAmount ? (
-              <PaymentSummarySkeleton />
-            ) : (
-              <Stack spacing={2.5}>
-                <PaymentSummaryCard total={booking.finalAmount} />
-              </Stack>
-            )}
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 5 }}>
-            <Stack spacing={2.5}>
-              <BookingSummaryCard
-                roomName={booking.room.roomType.name}
-                checkIn={booking.checkInDate}
-                checkOut={booking.checkOutDate}
-                capacity={booking.room.roomType.capacity}
-                guestName={booking.guestName}
-                guestPhone={booking.guestPhone}
-                guestEmail={booking.guestEmail}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "minmax(0, 7fr) minmax(340px, 5fr)" },
+              gap: { xs: 5, md: 6, lg: 8 },
+              alignItems: "start",
+              mt: { xs: 5, md: 7 },
+            }}
+          >
+            <Box sx={{ order: { xs: 2, md: 1 }, minWidth: 0 }}>
+              <PaymentDetails
+                finalTotal={finalTotal}
+                depositAmount={depositAmount}
+                remainingBalance={remainingBalance}
+                loading={loadingPayment}
+                onPayment={onPayment}
               />
-              <Button
-                variant="contained"
-                fullWidth
-                sx={{ borderRadius: 1.5 }}
-                onClick={onPayment}
-                disabled={loadingPayment}
-              >
-                <Typography>Tiến hành thanh toán</Typography>
-              </Button>
-            </Stack>
-          </Grid>
-        </Grid>
-      </Container>
+            </Box>
+            <Box sx={{ order: { xs: 1, md: 2 }, minWidth: 0 }}>
+              <PaymentReservationSummary booking={booking} finalTotal={finalTotal} />
+            </Box>
+          </Box>
+        </Container>
+      </Box>
 
-      {loadingPayment && <Loading content="Đang tạo thanh toán..." />}
-
+      {loadingPayment && <Loading content="Đang khởi tạo thanh toán..." />}
       <GlobalSnackbar alert={alert} closeSnackbar={closeSnackbar} />
 
-      {showNotice.open && (
-        <Stack
-          position="fixed"
-          top={0}
-          left={0}
-          width="100vw"
-          height="100vh"
-          bgcolor="rgba(0,0,0,0.5)"
-          zIndex={2000}
-          alignItems="center"
-          justifyContent="center"
-        >
-          <Stack
-            bgcolor="white"
-            p={4}
-            borderRadius={2}
-            spacing={2}
-            alignItems="center"
-            maxWidth={400}
-            width="90%"
-          >
-            <Typography variant="h6" fontWeight={600} textAlign="center">
-              {showNotice.type === "success"
-                ? "Thanh toán thành công 🎉"
-                : "Thanh toán thất bại"}
-            </Typography>
+      <Dialog open={showNotice.open} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: 2, p: 1 } }}>
+        <DialogContent>
+          <Typography component="h2" sx={{ fontFamily: "Georgia, serif", fontSize: 28, color: "text.primary", textAlign: "center" }}>
+            {showNotice.type === "success" ? "Thanh toán thành công" : "Thanh toán chưa hoàn tất"}
+          </Typography>
+          <Typography color="text.secondary" sx={{ mt: 1.5, lineHeight: 1.7, textAlign: "center" }}>
+            {showNotice.type === "success"
+              ? "Hệ thống đã xác nhận giao dịch và cập nhật trạng thái thanh toán cho đặt phòng của bạn."
+              : "Giao dịch chưa được xác nhận. Vui lòng thử lại hoặc quay về để tiếp tục sau."}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5 }}>
+          <Button variant="contained" fullWidth onClick={backToHome} sx={{ minHeight: 48, borderRadius: 1.25 }}>
+            {showNotice.type === "success" ? "Xem đặt phòng" : "Quay lại"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-            <Typography variant="body2" textAlign="center">
-              {showNotice.type === "success"
-                ? "Đặt phòng của bạn đã được xác nhận. Chúng tôi đã gửi thông tin chi tiết đến email của bạn."
-                : "Thanh toán chưa hoàn tất. Vui lòng thử lại hoặc quay về trang chủ để tiếp tục."}
-            </Typography>
-
-            <Button variant="contained" fullWidth onClick={backToHome}>
-              {showNotice.type === "success" ? "Về trang chủ" : "Quay lại"}
-            </Button>
-          </Stack>
-        </Stack>
-      )}
-
-      <PaymentQrDialog
-        qrState={qrState}
-        closePaymentDialog={closePaymentDialog}
-        isPendingCreateQr={isPendingCreateQr}
-      />
+      <PaymentQrDialog qrState={qrState} closePaymentDialog={closePaymentDialog} isPendingCreateQr={isPendingCreateQr} />
     </>
   );
 };
+
 export default PaymentPage;

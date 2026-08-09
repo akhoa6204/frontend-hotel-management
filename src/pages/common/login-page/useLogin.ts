@@ -1,14 +1,14 @@
-import { Errors } from "@constant/internal/Errors";
+import type { AxiosError } from "axios";
+import type { Errors } from "@constant/internal/Errors";
 import useForm from "@hooks/useForm";
-import { useAppDispatch, useAppSelector } from "@hooks/useRedux";
+import { useAppDispatch } from "@hooks/useRedux";
 import useSnackbar from "@hooks/useSnackbar";
 import AuthService from "@services/auth/auth.service";
 import { loginSuccess } from "@store/slice/account.slice";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { LoginRequest } from "@constant/request/LoginRequest";
-import { AuthenticationResponse } from "@constant/response/AuthenticationResponse";
+import type { LoginRequest } from "@constant/request/LoginRequest";
+import type { AuthenticationResponse } from "@constant/response/AuthenticationResponse";
 
 const initialForm: LoginRequest = { email: "", password: "" };
 
@@ -22,7 +22,7 @@ const validate = (f: LoginRequest): Errors<LoginRequest> => {
 const useLogin = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { alert, closeSnackbar, showSuccess, showError } = useSnackbar();
+  const { alert, closeSnackbar, showError } = useSnackbar();
   const callback = async (form: LoginRequest) => {
     await mLogin.mutateAsync(form);
   };
@@ -53,8 +53,8 @@ const useLogin = () => {
 
       navigate("/", { replace: true });
     },
-    onError: (e: any) => {
-      const msg = e?.response?.data?.message || "Đăng nhập thất bại";
+    onError: (error: AxiosError<{ message?: string }>) => {
+      const msg = error.response?.data?.message || "Không thể đăng nhập. Vui lòng kiểm tra thông tin và thử lại.";
       showError(msg);
     },
   });
@@ -66,13 +66,17 @@ const useLogin = () => {
     callback,
   );
 
-  useEffect(() => {
-    if (location.state?.result) {
-      showSuccess("Đăng kí tài khoản thành công. Đăng nhập để tiếp tục");
-    }
-  }, [location.state]);
-
-  return { form, errors, onChange, onSubmit, alert, closeSnackbar };
+  return {
+    form,
+    errors,
+    onChange,
+    onSubmit,
+    alert,
+    closeSnackbar,
+    isPending: mLogin.isPending,
+    registrationCompleted: Boolean(location.state?.result),
+    passwordReset: Boolean(location.state?.passwordReset),
+  };
 };
 
 export default useLogin;

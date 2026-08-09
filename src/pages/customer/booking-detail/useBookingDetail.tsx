@@ -1,11 +1,11 @@
 import useSnackbar from "@hooks/useSnackbar";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { sleep } from "@utils/sleep";
+import { useNavigate, useParams } from "react-router-dom";
+import { useState } from "react";
 import { diffNights } from "@utils/format";
 import MyBookingService from "@services/me/booking.service";
-import { BookingCancelRequest } from "@constant/request/BookingCancelRequest";
+import MyReviewService from "@services/me/review.service";
+import type { BookingCancelRequest } from "@constant/request/BookingCancelRequest";
 
 const useBookingDetail = () => {
   const queryClient = useQueryClient();
@@ -14,7 +14,7 @@ const useBookingDetail = () => {
 
   const { alert, closeSnackbar, showError, showSuccess } = useSnackbar();
 
-  const { data: booking, isLoading } = useQuery({
+  const { data: booking, isLoading, isError } = useQuery({
     queryKey: ["booking-detail", id],
     queryFn: async () => {
       if (!id) return;
@@ -23,12 +23,24 @@ const useBookingDetail = () => {
     enabled: !!id,
   });
 
+  const { data: reviews, isLoading: loadingReviews } = useQuery({
+    queryKey: ["my-review-index"],
+    queryFn: () => MyReviewService.getAllForCurrentCustomer(),
+    enabled: booking?.status === "CHECKED_OUT" && booking.hasReview === true,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const existingReview = reviews?.find((review) => review.bookingId === booking?.id);
+
   const onBack = () => navigate("/account/bookings");
 
   const onReview = () =>
     navigate("/account/reviews/create", {
       state: { bookingId: id },
     });
+
+  const onViewReview = (reviewId: number) =>
+    navigate(`/account/reviews/${reviewId}`);
 
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
@@ -51,11 +63,8 @@ const useBookingDetail = () => {
       closeCancelDialog();
       await queryClient.invalidateQueries({ queryKey: ["booking-detail", id] });
     },
-    onError: (err: any) => {
-      const msg =
-        err?.response?.data?.message ||
-        "Hủy đặt phòng thất bại, vui lòng thử lại.";
-      showError(msg);
+    onError: () => {
+      showError("Không thể hủy đặt phòng lúc này. Vui lòng thử lại.");
     },
   });
 
@@ -85,14 +94,19 @@ const useBookingDetail = () => {
 
   return {
     booking,
+    existingReview,
+    loadingReviews,
     loadingBooking: isLoading,
+    bookingError: isError,
     onBack,
     onReview,
+    onViewReview,
     alert,
     closeSnackbar,
 
     onReBook,
     confirmCancel,
+    cancelling: cancelMutation.isPending,
 
     cancelOpen,
     cancelReason,

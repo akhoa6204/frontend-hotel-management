@@ -1,75 +1,75 @@
-import {
-  Box,
-  Button,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Button, CircularProgress, Stack, TextField, Typography } from "@mui/material";
 
-type Props = {
+interface Props {
   comment: string;
   canEdit?: boolean;
+  reviewDate?: string;
   onChange?: (value: string) => void;
   onCancel?: () => void;
   onSubmit?: () => void;
   submitting?: boolean;
-};
+}
+
+const displayDate = (value: string) =>
+  new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(value));
 
 const ReviewCommentSection = ({
   comment,
   canEdit = false,
+  reviewDate,
   onChange,
   onCancel,
   onSubmit,
-  submitting,
-}: Props) => {
-  return (
-    <Paper sx={{ p: 2.5 }} elevation={0}>
-      <Typography variant="h6" fontWeight={600} mb={1}>
-        Nhận xét của bạn
-      </Typography>
+  submitting = false,
+}: Props) => (
+  <Box component="section" aria-labelledby="review-comment-title" sx={{ pt: { xs: 4, md: 5 } }}>
+    <Typography id="review-comment-title" component="h2" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 24, md: 28 } }}>
+      {canEdit ? "Chia sẻ thêm về trải nghiệm của bạn" : "Nhận xét của bạn"}
+    </Typography>
+    {canEdit ? (
+      <>
+        <Typography color="text.secondary" sx={{ mt: 0.75, mb: 2.25, lineHeight: 1.65 }}>
+          Những điều bạn yêu thích hoặc điều Diamond Sea có thể cải thiện.
+        </Typography>
+        <TextField
+          multiline
+          minRows={5}
+          fullWidth
+          placeholder="Hãy chia sẻ trải nghiệm của bạn tại khách sạn."
+          value={comment}
+          onChange={(event) => onChange?.(event.target.value)}
+          inputProps={{ "aria-label": "Nhận xét về kỳ nghỉ" }}
+          sx={{ "& .MuiOutlinedInput-root": { bgcolor: "rgba(255,255,255,.55)", borderRadius: 1.5, alignItems: "flex-start" } }}
+        />
 
-      <TextField
-        multiline
-        minRows={5}
-        fullWidth
-        placeholder="Hãy chia sẻ trải nghiệm của bạn tại khách sạn."
-        value={comment}
-        onChange={(e) => onChange?.(e.target.value)}
-        InputProps={{
-          readOnly: !canEdit,
-        }}
-      />
-
-      <Box
-        mt={1}
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        {canEdit && (
-          <Stack direction="row" spacing={1.5}>
-            <Button
-              variant="outlined"
-              onClick={onCancel}
-              disabled={submitting}
-              sx={{ textTransform: "none" }}
-            >
-              Hủy
-            </Button>
-            <Button
-              variant="contained"
-              onClick={onSubmit}
-              sx={{ textTransform: "none" }}
-            >
-              Gửi đánh giá
-            </Button>
-          </Stack>
-        )}
+        <Stack
+          direction={{ xs: "column-reverse", sm: "row" }}
+          spacing={1.25}
+          justifyContent="flex-end"
+          alignItems={{ xs: "center", sm: "stretch" }}
+          sx={{
+            width: 1,
+            mt: 2.5,
+            "& .MuiButton-root": { minHeight: 44, px: 2.75 },
+            "& .MuiButton-contained": { width: { xs: 1, sm: "auto" } },
+            "& .MuiButton-text": { width: "auto" },
+          }}
+        >
+          <Button variant="text" onClick={onCancel} disabled={submitting}>Hủy</Button>
+          <Button variant="contained" onClick={onSubmit} disabled={submitting} startIcon={submitting ? <CircularProgress size={17} color="inherit" /> : undefined}>
+            {submitting ? "Đang gửi…" : "Gửi đánh giá"}
+          </Button>
+        </Stack>
+      </>
+    ) : (
+      <Box sx={{ mt: 2 }}>
+        <Typography sx={{ color: "#465960", fontSize: { xs: 16, md: 17 }, lineHeight: 1.8, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>
+          {comment || "Bạn chưa để lại nhận xét bằng văn bản cho kỳ nghỉ này."}
+        </Typography>
+        {reviewDate && <Typography variant="body2" color="text.secondary" sx={{ mt: 2.25 }}>Đánh giá ngày {displayDate(reviewDate)}</Typography>}
       </Box>
-    </Paper>
-  );
-};
+    )}
+  </Box>
+);
 
 export default ReviewCommentSection;

@@ -1,101 +1,74 @@
-import React from "react";
-import {
-  Box,
-  Button,
-  Container,
-  Stack,
-  TextField,
-  Typography,
-  Link,
-  Paper,
-} from "@mui/material";
-import useLogin from "./useLogin";
-import useSnackbar from "@hooks/useSnackbar";
+import AuthLayout from "@components/auth/AuthLayout";
+import AuthPasswordField from "@components/auth/AuthPasswordField";
 import GlobalSnackbar from "@components/GlobalSnackbar";
+import { Alert, Box, Button, Link as MuiLink, Stack, TextField, Typography } from "@mui/material";
+import { Link } from "react-router-dom";
+import useLogin from "./useLogin";
 
 const LoginPage = () => {
-  const { form, onChange, onSubmit, alert, closeSnackbar, errors } = useLogin();
+  const { form, onChange, onSubmit, alert, closeSnackbar, errors, isPending, registrationCompleted, passwordReset } = useLogin();
+
   return (
     <>
-      <Container maxWidth="md">
-        <Paper
-          elevation={3}
-          sx={{
-            mt: 10,
-            p: 5,
-            borderRadius: 2,
-          }}
-        >
-          <Stack spacing={2} alignItems="center">
-            <Typography variant="h5" fontWeight={700}>
-              Đăng nhập
-            </Typography>
-            <Typography color="text.secondary">
-              Chào mừng bạn quay trở lại Diamond Sea
-            </Typography>
+      <AuthLayout
+        eyebrow="TÀI KHOẢN KHÁCH HÀNG"
+        title="Chào mừng bạn trở lại."
+        description="Đăng nhập để xem và quản lý những kỳ nghỉ đã đặt tại Diamond Sea."
+      >
+        {registrationCompleted && (
+          <Alert severity="success" sx={{ mb: 3, borderRadius: 1.25 }}>
+            Tài khoản đã được tạo. Bạn có thể đăng nhập để tiếp tục.
+          </Alert>
+        )}
+        {passwordReset && (
+          <Alert severity="success" sx={{ mb: 3, borderRadius: 1.25 }}>
+            Mật khẩu đã được cập nhật. Bạn có thể đăng nhập bằng mật khẩu mới.
+          </Alert>
+        )}
 
-            <Box
-              component="form"
-              sx={{ width: "100%", mt: 2 }}
-              onSubmit={onSubmit}
-            >
-              <Stack spacing={2}>
-                <TextField
-                  label="Email"
-                  placeholder="example@email.com"
-                  fullWidth
-                  name="email"
-                  onChange={onChange}
-                  value={form.email}
-                  error={!!errors.email}
-                  helperText={errors.email}
-                />
-                <TextField
-                  label="Mật khẩu"
-                  type="password"
-                  fullWidth
-                  name="password"
-                  onChange={onChange}
-                  value={form.password}
-                  error={!!errors.password}
-                  helperText={errors.password}
-                />
+        <Box component="form" onSubmit={onSubmit} noValidate>
+          <Stack spacing={2.25}>
+            <TextField
+              label="Email"
+              placeholder="example@email.com"
+              name="email"
+              type="email"
+              autoComplete="email"
+              autoFocus
+              fullWidth
+              disabled={isPending}
+              onChange={onChange}
+              value={form.email}
+              error={Boolean(errors.email)}
+              helperText={errors.email}
+            />
+            <AuthPasswordField
+              label="Mật khẩu"
+              name="password"
+              value={form.password}
+              onChange={onChange}
+              error={errors.password}
+              autoComplete="current-password"
+              disabled={isPending}
+            />
 
-                <Button
-                  type="submit"
-                  variant="contained"
-                  fullWidth
-                  sx={{ py: 1.2 }}
-                >
-                  Đăng nhập
-                </Button>
-              </Stack>
-            </Box>
+            <MuiLink component={Link} to="/forgot-password" underline="hover" sx={{ alignSelf: "flex-end", fontSize: 14, fontWeight: 650 }}>
+              Quên mật khẩu?
+            </MuiLink>
 
-            <Stack sx={{ mt: 2 }} alignContent={"center"}>
-              <Link
-                href="/forgot-password"
-                underline="hover"
-                className="text-center !mb-2"
-              >
-                <Typography color="primary">Quên mật khẩu?</Typography>
-              </Link>
-              <Typography variant="body2">
-                Chưa có tài khoản?{" "}
-                <Link href="/register" underline="hover">
-                  <Typography
-                    component={"span"}
-                    variant="body2"
-                    color="primary"
-                  >
-                    Đăng ký ngay
-                  </Typography>
-                </Link>
-              </Typography>
-            </Stack>
+            <Button type="submit" variant="contained" fullWidth disabled={isPending} sx={{ minHeight: 48, borderRadius: 1.25 }}>
+              {isPending ? "Đang đăng nhập..." : "Đăng nhập"}
+            </Button>
           </Stack>
-        </Paper>
-      </Container>
+        </Box>
+
+        <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ mt: 3 }}>
+          Chưa có tài khoản?{" "}
+          <MuiLink component={Link} to="/register" underline="hover" sx={{ fontWeight: 700 }}>
+            Đăng ký
+          </MuiLink>
+        </Typography>
+      </AuthLayout>
       <GlobalSnackbar alert={alert} closeSnackbar={closeSnackbar} />
     </>
   );
