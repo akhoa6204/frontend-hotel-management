@@ -23,7 +23,7 @@ const ReviewCommentSection = ({
   submitting = false,
 }: Props) => (
   <Box component="section" aria-labelledby="review-comment-title" sx={{ pt: { xs: 4, md: 5 } }}>
-    <Typography id="review-comment-title" component="h2" sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 24, md: 28 } }}>
+    <Typography id="review-comment-title" component="h2" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 24, md: 28 } }}>
       {canEdit ? "Chia sẻ thêm về trải nghiệm của bạn" : "Nhận xét của bạn"}
     </Typography>
     {canEdit ? (

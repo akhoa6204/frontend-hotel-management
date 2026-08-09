@@ -23,7 +23,7 @@ const MyReviewPage = () => {
         <Typography sx={{ color: "primary.main", fontSize: 12, fontWeight: 700, letterSpacing: ".16em", mb: 1 }}>
           TRẢI NGHIỆM CỦA BẠN
         </Typography>
-        <Typography component="h1" sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 32, md: 42 }, lineHeight: 1.15 }}>
+        <Typography component="h1" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 32, md: 42 }, lineHeight: 1.15 }}>
           Đánh giá của tôi
         </Typography>
         <Typography color="text.secondary" sx={{ mt: 1.25, maxWidth: 650, lineHeight: 1.7 }}>
@@ -37,7 +37,7 @@ const MyReviewPage = () => {
         </Stack>
       ) : error ? (
         <Box sx={{ py: { xs: 5, md: 7 }, borderTop: "1px solid", borderColor: "divider" }}>
-          <Typography component="h2" sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 24 }}>
+          <Typography component="h2" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 24 }}>
             Không thể tải đánh giá
           </Typography>
           <Typography color="text.secondary" sx={{ mt: 1, mb: 2.5, lineHeight: 1.7 }}>
@@ -47,7 +47,7 @@ const MyReviewPage = () => {
         </Box>
       ) : reviews.length === 0 ? (
         <Box sx={{ py: { xs: 5, md: 7 }, borderTop: "1px solid", borderColor: "divider", maxWidth: 620 }}>
-          <Typography component="h2" sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 24, sm: 27 } }}>
+          <Typography component="h2" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 24, sm: 27 } }}>
             Chưa có đánh giá nào
           </Typography>
           <Typography color="text.secondary" sx={{ mt: 1, mb: 2.75, lineHeight: 1.7 }}>

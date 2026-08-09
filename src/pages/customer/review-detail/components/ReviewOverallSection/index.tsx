@@ -12,7 +12,7 @@ const ReviewOverallSection = ({ overall, canEdit = false, error, onChange }: Pro
     <Typography
       id="overall-rating-title"
       component="h2"
-      sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 26, md: 32 }, lineHeight: 1.25 }}
+      sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 26, md: 32 }, lineHeight: 1.25 }}
     >
       {canEdit ? "Bạn đánh giá kỳ nghỉ này thế nào?" : "Đánh giá tổng quan"}
     </Typography>
@@ -30,7 +30,7 @@ const ReviewOverallSection = ({ overall, canEdit = false, error, onChange }: Pro
         }}
         sx={{ color: "#B78945", fontSize: { xs: 38, sm: 42 }, "& .MuiRating-iconEmpty": { color: "rgba(183, 137, 69, .28)" } }}
       />
-      <Typography aria-live="polite" sx={{ color: "#173C4B", fontWeight: 700 }}>
+      <Typography aria-live="polite" sx={{ color: "text.primary", fontWeight: 700 }}>
         {overall}/5
       </Typography>
     </Box>

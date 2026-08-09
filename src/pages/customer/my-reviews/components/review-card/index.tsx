@@ -46,7 +46,7 @@ const ReviewCard = ({ review, onView }: ReviewCardProps) => {
 
       <Stack sx={{ p: { xs: 2.25, sm: 2.75, lg: 3 }, minWidth: 0 }} spacing={2.1} justifyContent="space-between">
         <Box sx={{ minWidth: 0 }}>
-          <Typography component="h2" sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 23, sm: 26 }, lineHeight: 1.2, overflowWrap: "anywhere" }}>
+          <Typography component="h2" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 23, sm: 26 }, lineHeight: 1.2, overflowWrap: "anywhere" }}>
             {booking.room.roomType.name}
           </Typography>
           <Typography color="text.secondary" variant="body2" sx={{ mt: 0.5, overflowWrap: "anywhere" }}>
@@ -71,7 +71,7 @@ const ReviewCard = ({ review, onView }: ReviewCardProps) => {
               aria-label={`${review.overall} trên 5 điểm`}
               sx={{ color: "#B78945", fontSize: 21 }}
             />
-            <Typography sx={{ color: "#173C4B", fontSize: 14, fontWeight: 700 }}>
+            <Typography sx={{ color: "text.primary", fontSize: 14, fontWeight: 700 }}>
               {review.overall}/5
             </Typography>
           </Stack>

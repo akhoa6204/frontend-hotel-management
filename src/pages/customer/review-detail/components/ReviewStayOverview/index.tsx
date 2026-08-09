@@ -50,7 +50,7 @@ const ReviewStayOverview = ({ booking }: ReviewStayOverviewProps) => {
         <Typography
           component="h2"
           sx={{
-            color: "#173C4B",
+            color: "text.primary",
             fontFamily: 'Georgia, "Times New Roman", serif',
             fontSize: { xs: 24, md: 28 },
             lineHeight: 1.2,

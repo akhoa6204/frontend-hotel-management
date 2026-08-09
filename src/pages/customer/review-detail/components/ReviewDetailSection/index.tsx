@@ -26,7 +26,7 @@ const ReviewDetailSection = ({ values, canEdit = true, errors = {}, onChangeFiel
 
   return (
     <Box component="section" aria-labelledby="detail-rating-title" sx={{ py: { xs: 4, md: 5 }, borderBottom: "1px solid", borderColor: "divider" }}>
-      <Typography id="detail-rating-title" component="h2" sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 24, md: 28 } }}>
+      <Typography id="detail-rating-title" component="h2" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 24, md: 28 } }}>
         Đánh giá chi tiết
       </Typography>
       <Typography color="text.secondary" sx={{ mt: 0.75, mb: 3, lineHeight: 1.65 }}>
@@ -46,7 +46,7 @@ const ReviewDetailSection = ({ values, canEdit = true, errors = {}, onChangeFiel
                   onChange={handleRatingChange(key)}
                   sx={{ color: "#B78945", fontSize: { xs: 29, sm: 27 }, "& .MuiRating-iconEmpty": { color: "rgba(183, 137, 69, .25)" } }}
                 />
-                {!canEdit && <Typography variant="body2" fontWeight={700} color="#173C4B">{values[key]}/5</Typography>}
+                {!canEdit && <Typography variant="body2" fontWeight={700} color="text.primary">{values[key]}/5</Typography>}
               </Box>
             </Box>
             {errors[key] && <Typography role="alert" color="error" variant="caption" sx={{ display: "block", mt: 0.5 }}>{errors[key]}</Typography>}
