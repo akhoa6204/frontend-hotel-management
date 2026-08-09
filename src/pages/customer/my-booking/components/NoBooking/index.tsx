@@ -13,7 +13,7 @@ const NoBooking = ({ step }: { step: BookingTab }) => {
   const content = messages[step];
   return (
     <Box sx={{ py: { xs: 6, md: 8 }, borderTop: "1px solid rgba(23, 60, 75, 0.10)" }}>
-      <Typography component="h2" sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 23, md: 26 } }}>{content.title}</Typography>
+      <Typography component="h2" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 23, md: 26 } }}>{content.title}</Typography>
       <Typography color="text.secondary" sx={{ mt: 1, maxWidth: 560, lineHeight: 1.7 }}>{content.description}</Typography>
       {step === "upcoming" && <Button variant="contained" onClick={() => navigate("/search")} sx={{ mt: 2.5 }}>Khám phá phòng</Button>}
     </Box>

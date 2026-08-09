@@ -79,7 +79,7 @@ const BookingCard = ({ booking, onCancel, onClick, onReview, onViewReview, onReB
         <Box>
           <Stack direction={{ xs: "column-reverse", sm: "row" }} justifyContent="space-between" alignItems={{ sm: "flex-start" }} gap={1.5}>
             <Box sx={{ minWidth: 0 }}>
-              <Typography component="h2" sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 23, sm: 26 }, lineHeight: 1.2, overflowWrap: "anywhere" }}>
+              <Typography component="h2" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 23, sm: 26 }, lineHeight: 1.2, overflowWrap: "anywhere" }}>
                 {booking.room.roomType.name}
               </Typography>
               <Typography color="text.secondary" variant="body2" sx={{ mt: 0.5, overflowWrap: "anywhere" }}>
@@ -105,7 +105,7 @@ const BookingCard = ({ booking, onCancel, onClick, onReview, onViewReview, onReB
         <Stack direction={{ xs: "column", sm: "row" }} alignItems={{ sm: "flex-end" }} justifyContent="space-between" gap={2} sx={{ pt: 1.75, borderTop: "1px solid rgba(23, 60, 75, 0.09)" }}>
           <Box>
             <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: ".06em", textTransform: "uppercase" }}>Tổng giá trị</Typography>
-            <Typography sx={{ color: "#173C4B", fontSize: 19, fontWeight: 700, mt: 0.25 }}>{fmtVND(total)} VND</Typography>
+            <Typography sx={{ color: "text.primary", fontSize: 19, fontWeight: 700, mt: 0.25 }}>{fmtVND(total)} VND</Typography>
             {discount > 0 && <Typography variant="caption" color="success.main">Ưu đãi −{fmtVND(discount)} VND</Typography>}
             {remaining > 0 && <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.25 }}>Còn lại {fmtVND(remaining)} VND</Typography>}
           </Box>

@@ -42,7 +42,7 @@ const MyBookingPage = () => {
         <Typography sx={{ color: "primary.main", fontSize: 12, fontWeight: 700, letterSpacing: ".16em", mb: 1 }}>
           KỲ NGHỈ CỦA BẠN
         </Typography>
-        <Typography component="h1" sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 32, md: 42 }, lineHeight: 1.15 }}>
+        <Typography component="h1" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 32, md: 42 }, lineHeight: 1.15 }}>
           Đặt phòng của tôi
         </Typography>
         <Typography color="text.secondary" sx={{ mt: 1.25, maxWidth: 650, lineHeight: 1.7 }}>
@@ -85,7 +85,7 @@ const MyBookingPage = () => {
         </Stack>
       ) : error ? (
         <Box sx={{ py: { xs: 6, md: 8 }, borderTop: "1px solid", borderColor: "divider" }}>
-          <Typography component="h2" sx={{ color: "#173C4B", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 24 }}>
+          <Typography component="h2" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 24 }}>
             Không thể tải đặt phòng
           </Typography>
           <Typography color="text.secondary" sx={{ mt: 1, mb: 2.5 }}>
