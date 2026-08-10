@@ -9,20 +9,25 @@ import AuthService from "@services/auth/auth.service";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface ForgotPasswordForm {
   email: string;
 }
 
 const ForgotPasswordPage = () => {
+  const { t, i18n } = useTranslation("client");
   const [requestedEmail, setRequestedEmail] = useState("");
   const { alert, closeSnackbar, showError } = useSnackbar();
 
   const mRequestReset = useMutation({
-    mutationFn: (email: string) => AuthService.requestResetPassword(email),
+    mutationFn: (email: string) => AuthService.requestResetPassword(
+      email,
+      i18n.resolvedLanguage === "en" ? "EN" : "VI",
+    ),
     onSuccess: (_data, email) => setRequestedEmail(email),
     onError: (error: AxiosError<{ message?: string }>) => {
-      showError(error.response?.data?.message || "Không thể gửi yêu cầu đặt lại mật khẩu. Vui lòng thử lại.");
+      showError(error.response?.data?.message || t("forgotPassword.errors.requestFailed"));
     },
   });
 
@@ -30,8 +35,8 @@ const ForgotPasswordPage = () => {
     { email: "" },
     (values) => {
       const validationErrors: Partial<Record<keyof ForgotPasswordForm, string>> = {};
-      if (!values.email.trim()) validationErrors.email = "Email không được để trống";
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) validationErrors.email = "Email không hợp lệ";
+      if (!values.email.trim()) validationErrors.email = t("forgotPassword.validation.emailRequired");
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) validationErrors.email = t("forgotPassword.validation.emailInvalid");
       return validationErrors;
     },
     (values) => mRequestReset.mutate(values.email),
@@ -40,22 +45,22 @@ const ForgotPasswordPage = () => {
   return (
     <>
       <AuthLayout
-        eyebrow="KHÔI PHỤC TÀI KHOẢN"
-        title={requestedEmail ? "Kiểm tra email của bạn." : "Quên mật khẩu?"}
+        eyebrow={t("forgotPassword.eyebrow")}
+        title={requestedEmail ? t("forgotPassword.success.title") : t("forgotPassword.title")}
         description={requestedEmail
-          ? "Nếu địa chỉ này khớp với tài khoản, hướng dẫn đặt lại mật khẩu sẽ được gửi đến hộp thư của bạn."
-          : "Nhập email gắn với tài khoản và chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu."}
+          ? t("forgotPassword.success.description")
+          : t("forgotPassword.description")}
       >
         {requestedEmail ? (
           <Stack spacing={3} alignItems="flex-start">
-            <Box sx={{ display: "grid", placeItems: "center", width: 52, height: 52, borderRadius: "50%", bgcolor: "#edf8f1", color: "#2f7d4a" }}>
+            <Box sx={{ display: "grid", placeItems: "center", alignSelf: "center", width: 52, height: 52, borderRadius: "50%", bgcolor: "#edf8f1", color: "#2f7d4a" }}>
               <CheckCircleOutlineRoundedIcon sx={{ fontSize: 30 }} />
             </Box>
             <Typography color="text.secondary" sx={{ lineHeight: 1.7 }}>
-              Yêu cầu khôi phục cho <Box component="span" sx={{ color: "#153746", fontWeight: 700 }}>{requestedEmail}</Box> đã được tiếp nhận. Vui lòng kiểm tra cả thư mục spam.
+              {t("forgotPassword.success.received", { email: requestedEmail })}
             </Typography>
             <Button component={Link} to="/login" variant="contained" fullWidth sx={{ minHeight: 48, borderRadius: 1.25 }}>
-              Quay lại đăng nhập
+              {t("forgotPassword.actions.backToLogin")}
             </Button>
           </Stack>
         ) : (
@@ -63,10 +68,10 @@ const ForgotPasswordPage = () => {
             <Box component="form" onSubmit={onSubmit} noValidate>
               <Stack spacing={2.25}>
                 <TextField
-                  label="Email"
+                  label={t("forgotPassword.fields.email")}
                   name="email"
                   type="email"
-                  placeholder="example@email.com"
+                  placeholder={t("forgotPassword.fields.emailPlaceholder")}
                   value={form.email}
                   onChange={onChange}
                   error={Boolean(errors.email)}
@@ -77,12 +82,12 @@ const ForgotPasswordPage = () => {
                   fullWidth
                 />
                 <Button type="submit" variant="contained" fullWidth disabled={mRequestReset.isPending} sx={{ minHeight: 48, borderRadius: 1.25 }}>
-                  {mRequestReset.isPending ? "Đang gửi hướng dẫn..." : "Gửi hướng dẫn"}
+                  {mRequestReset.isPending ? t("forgotPassword.actions.sending") : t("forgotPassword.actions.sendInstructions")}
                 </Button>
               </Stack>
             </Box>
             <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ mt: 3 }}>
-              <MuiLink component={Link} to="/login" underline="hover" sx={{ fontWeight: 700 }}>Quay lại đăng nhập</MuiLink>
+              <MuiLink component={Link} to="/login" underline="hover" sx={{ fontWeight: 700 }}>{t("forgotPassword.actions.backToLogin")}</MuiLink>
             </Typography>
           </>
         )}

@@ -41,9 +41,9 @@ class AuthService {
     return data;
   }
 
-  static async requestResetPassword(email: string) {
+  static async requestResetPassword(email: string, locale: "VI" | "EN") {
     try {
-      await httpPublic.post(`${BASE_URL}/password-reset-requests`, { email });
+      await httpPublic.post(`${BASE_URL}/password-reset-requests`, { email, locale });
     } catch (e) {
       throw e;
     }

@@ -9,6 +9,7 @@ import { Box, Button, Link as MuiLink, Stack, TextField, Typography } from "@mui
 import AuthService from "@services/auth/auth.service";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 type RegisterForm = RegisterRequest & { confirmPassword: string };
 
@@ -21,6 +22,7 @@ const initialForm: RegisterForm = {
 };
 
 const RegisterPage = () => {
+  const { t } = useTranslation("client");
   const navigate = useNavigate();
   const { alert, closeSnackbar, showError } = useSnackbar();
 
@@ -36,7 +38,7 @@ const RegisterPage = () => {
     },
     onSuccess: () => navigate("/login", { state: { result: true } }),
     onError: (error: AxiosError<{ message?: string }>) => {
-      showError(error.response?.data?.message || "Không thể tạo tài khoản. Vui lòng thử lại.");
+      showError(error.response?.data?.message || t("register.errors.registrationFailed"));
     },
   });
 
@@ -44,15 +46,15 @@ const RegisterPage = () => {
     initialForm,
     (values) => {
       const validationErrors: Partial<Record<keyof RegisterForm, string>> = {};
-      if (!values.fullName.trim()) validationErrors.fullName = "Họ tên không được để trống";
-      if (!values.email.trim()) validationErrors.email = "Email không được để trống";
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) validationErrors.email = "Email không hợp lệ";
-      if (!values.phone.trim()) validationErrors.phone = "Số điện thoại không được để trống";
-      else if (!/^\d{9,11}$/.test(values.phone)) validationErrors.phone = "Số điện thoại không hợp lệ";
-      if (!values.password.trim()) validationErrors.password = "Mật khẩu không được để trống";
-      else if (values.password.length < 6) validationErrors.password = "Mật khẩu tối thiểu 6 ký tự";
-      if (!values.confirmPassword.trim()) validationErrors.confirmPassword = "Vui lòng nhập lại mật khẩu";
-      else if (values.confirmPassword !== values.password) validationErrors.confirmPassword = "Mật khẩu nhập lại không khớp";
+      if (!values.fullName.trim()) validationErrors.fullName = t("register.validation.fullNameRequired");
+      if (!values.email.trim()) validationErrors.email = t("register.validation.emailRequired");
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) validationErrors.email = t("register.validation.emailInvalid");
+      if (!values.phone.trim()) validationErrors.phone = t("register.validation.phoneRequired");
+      else if (!/^\d{9,11}$/.test(values.phone)) validationErrors.phone = t("register.validation.phoneInvalid");
+      if (!values.password.trim()) validationErrors.password = t("register.validation.passwordRequired");
+      else if (values.password.length < 6) validationErrors.password = t("register.validation.passwordLength");
+      if (!values.confirmPassword.trim()) validationErrors.confirmPassword = t("register.validation.confirmPasswordRequired");
+      else if (values.confirmPassword !== values.password) validationErrors.confirmPassword = t("register.validation.passwordMismatch");
       return validationErrors;
     },
     (values) => mRegister.mutate(values),
@@ -61,14 +63,14 @@ const RegisterPage = () => {
   return (
     <>
       <AuthLayout
-        eyebrow="TẠO TÀI KHOẢN"
-        title="Bắt đầu hành trình cùng Diamond Sea."
-        description="Tạo tài khoản để lưu thông tin và quản lý các kỳ nghỉ của bạn thuận tiện hơn."
+        eyebrow={t("register.eyebrow")}
+        title={t("register.title")}
+        description={t("register.description")}
       >
         <Box component="form" onSubmit={onSubmit} noValidate>
           <Stack spacing={2}>
             <TextField
-              label="Họ tên"
+              label={t("register.fields.fullName")}
               name="fullName"
               value={form.fullName}
               onChange={onChange}
@@ -81,7 +83,7 @@ const RegisterPage = () => {
             />
             <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
               <TextField
-                label="Email"
+                label={t("register.fields.email")}
                 name="email"
                 type="email"
                 value={form.email}
@@ -93,7 +95,7 @@ const RegisterPage = () => {
                 fullWidth
               />
               <TextField
-                label="Số điện thoại"
+                label={t("register.fields.phone")}
                 name="phone"
                 type="tel"
                 value={form.phone}
@@ -106,7 +108,7 @@ const RegisterPage = () => {
               />
             </Box>
             <AuthPasswordField
-              label="Mật khẩu"
+              label={t("register.fields.password")}
               name="password"
               value={form.password}
               onChange={onChange}
@@ -115,7 +117,7 @@ const RegisterPage = () => {
               disabled={mRegister.isPending}
             />
             <AuthPasswordField
-              label="Nhập lại mật khẩu"
+              label={t("register.fields.confirmPassword")}
               name="confirmPassword"
               value={form.confirmPassword}
               onChange={onChange}
@@ -123,16 +125,16 @@ const RegisterPage = () => {
               autoComplete="new-password"
               disabled={mRegister.isPending}
             />
-            <Typography variant="caption" color="text.secondary">Mật khẩu cần có ít nhất 6 ký tự.</Typography>
+            <Typography variant="caption" color="text.secondary">{t("register.passwordRequirement")}</Typography>
             <Button type="submit" variant="contained" fullWidth disabled={mRegister.isPending} sx={{ minHeight: 48, borderRadius: 1.25 }}>
-              {mRegister.isPending ? "Đang tạo tài khoản..." : "Đăng ký"}
+              {mRegister.isPending ? t("register.actions.creating") : t("register.actions.signUp")}
             </Button>
           </Stack>
         </Box>
 
         <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ mt: 3 }}>
-          Đã có tài khoản?{" "}
-          <MuiLink component={Link} to="/login" underline="hover" sx={{ fontWeight: 700 }}>Đăng nhập</MuiLink>
+          {t("register.signInPrompt")}{" "}
+          <MuiLink component={Link} to="/login" underline="hover" sx={{ fontWeight: 700 }}>{t("register.actions.signIn")}</MuiLink>
         </Typography>
       </AuthLayout>
       <GlobalSnackbar alert={alert} closeSnackbar={closeSnackbar} />

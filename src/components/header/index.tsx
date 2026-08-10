@@ -29,6 +29,8 @@ import { motion, useReducedMotion } from "framer-motion";
 import useAuth from "@hooks/useAuth";
 import { useAppDispatch } from "@hooks/useRedux";
 import { logout } from "@store/slice/account.slice";
+import { useTranslation } from "react-i18next";
+import type { AppLanguage } from "../../i18n";
 
 const MotionBox = motion(Box);
 const MotionIconButton = motion(IconButton);
@@ -44,12 +46,53 @@ function HideOnScroll({ children }: { children: React.ReactElement }) {
 }
 
 const navLinks = [
-  { label: "Trang chủ", link: "/" },
-  { label: "Phòng", link: "/#rooms" },
-  { label: "Tiện nghi", link: "/#facilities" },
-  { label: "Về chúng tôi", link: "/#about" },
-  { label: "Liên hệ", link: "/#contact" },
+  { labelKey: "navigation.home", link: "/" },
+  { labelKey: "navigation.rooms", link: "/#rooms" },
+  { labelKey: "navigation.amenities", link: "/#facilities" },
+  { labelKey: "navigation.about", link: "/#about" },
+  { labelKey: "navigation.contact", link: "/#contact" },
 ];
+
+function LanguageSwitcher() {
+  const { t, i18n } = useTranslation("client");
+  const language: AppLanguage = i18n.resolvedLanguage === "en" ? "en" : "vi";
+
+  return (
+    <Box
+      role="group"
+      aria-label={t("header.language.label")}
+      sx={{ display: "flex", alignItems: "center", p: 0.25, bgcolor: "rgba(46, 144, 250, 0.07)", borderRadius: "6px" }}
+    >
+      {(["vi", "en"] as const).map((option) => (
+        <Box
+          component="button"
+          type="button"
+          key={option}
+          aria-label={t(`header.language.${option}`)}
+          aria-pressed={language === option}
+          onClick={() => void i18n.changeLanguage(option)}
+          sx={{
+            border: 0,
+            minWidth: 32,
+            height: 28,
+            px: 0.75,
+            borderRadius: "5px",
+            bgcolor: language === option ? "background.paper" : "transparent",
+            color: language === option ? "primary.main" : "text.secondary",
+            boxShadow: language === option ? "0 1px 3px rgba(22, 59, 71, 0.12)" : "none",
+            font: "inherit",
+            fontSize: 11.5,
+            fontWeight: 700,
+            cursor: "pointer",
+            "&:focus-visible": { outline: "2px solid", outlineColor: "primary.main", outlineOffset: 1 },
+          }}
+        >
+          {option.toUpperCase()}
+        </Box>
+      ))}
+    </Box>
+  );
+}
 
 function UserMenu({
   userName,
@@ -62,6 +105,7 @@ function UserMenu({
   onChangePassword: () => void;
   onLogout: () => void;
 }) {
+  const { t } = useTranslation("client");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -69,6 +113,9 @@ function UserMenu({
     <>
       <button
         type="button"
+        aria-label={t("header.account.openMenu", { name: userName })}
+        aria-haspopup="menu"
+        aria-expanded={open}
         onClick={(e) => setAnchorEl(e.currentTarget)}
         className="flex items-center gap-2 cursor-pointer bg-transparent border-0 outline-none"
       >
@@ -101,7 +148,7 @@ function UserMenu({
           <ListItemIcon>
             <PersonOutline fontSize="small" />
           </ListItemIcon>
-          <ListItemText primary="Thông tin cá nhân" />
+          <ListItemText primary={t("header.account.profile")} />
         </MenuItem>
 
         <MenuItem
@@ -113,7 +160,7 @@ function UserMenu({
           <ListItemIcon>
             <LockReset fontSize="small" />
           </ListItemIcon>
-          <ListItemText primary="Đổi mật khẩu" />
+          <ListItemText primary={t("header.account.changePassword")} />
         </MenuItem>
 
         <Divider />
@@ -127,7 +174,7 @@ function UserMenu({
           <ListItemIcon>
             <Logout fontSize="small" />
           </ListItemIcon>
-          <ListItemText primary="Đăng xuất" />
+          <ListItemText primary={t("header.account.logout")} />
         </MenuItem>
       </Menu>
     </>
@@ -135,6 +182,7 @@ function UserMenu({
 }
 
 const Header = () => {
+  const { t } = useTranslation("client");
   const [open, setOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -193,7 +241,7 @@ const Header = () => {
                   isActive ? "after:scale-x-100" : "after:scale-x-0",
                 ].join(" ")}
               >
-                {n.label}
+                {t(`header.${n.labelKey}`)}
               </span>
             </a>
           </MotionBox>
@@ -238,7 +286,7 @@ const Header = () => {
             {/* Logo */}
             <Typography
               variant="h5"
-              color="#153746"
+              color="primary.main"
               fontWeight={600}
               sx={{ cursor: "pointer", fontFamily: "Georgia, serif", letterSpacing: ".02em" }}
               onClick={() => navigate("/")}
@@ -253,10 +301,11 @@ const Header = () => {
                   {renderNav(false)}
                 </Stack>
 
-                <Stack direction="row" spacing={1.5} alignItems="center">
+                <Stack direction="row" spacing={1.25} alignItems="center">
+                <LanguageSwitcher />
                 {user ? (
                   <UserMenu
-                    userName={user.fullName || "User"}
+                    userName={user.fullName || t("header.account.guest")}
                     onProfile={goProfile}
                     onChangePassword={goChangePassword}
                     onLogout={handleLogOut}
@@ -273,11 +322,11 @@ const Header = () => {
                       fullWidth
                       variant="text"
                     >
-                      Đăng nhập
+                      {t("header.actions.signIn")}
                     </Button>
                   </MotionBox>
                 )}
-                <MotionBox whileHover={reducedMotion ? undefined : { y: -1 }} whileTap={reducedMotion ? undefined : { scale: 0.99 }} transition={{ duration: 0.18 }}><Button component={Link} to="/search" variant="contained" sx={{ borderRadius: 1, px: 2.5 }}>Đặt ngay</Button></MotionBox>
+                <MotionBox whileHover={reducedMotion ? undefined : { y: -1 }} whileTap={reducedMotion ? undefined : { scale: 0.99 }} transition={{ duration: 0.18 }}><Button component={Link} to="/search" variant="contained" sx={{ borderRadius: 1, px: 2.5 }}>{t("header.actions.bookNow")}</Button></MotionBox>
                 </Stack>
               </>
             )}
@@ -288,7 +337,7 @@ const Header = () => {
                 onClick={() => setOpen(true)}
                 whileHover={reducedMotion ? undefined : { scale: 1.025 }}
                 whileTap={reducedMotion ? undefined : { scale: 0.98 }}
-                aria-label="Mở menu"
+                aria-label={t("header.mobile.openMenu")}
                 aria-haspopup="dialog"
                 aria-expanded={open}
                 sx={{ width: 44, height: 44, color: "text.primary" }}
@@ -338,7 +387,7 @@ const Header = () => {
             >
               <Typography
                 variant="h5"
-                color="#153746"
+                color="primary.main"
                 fontWeight={600}
                 sx={{ cursor: "pointer", fontFamily: "Georgia, serif", letterSpacing: ".02em" }}
                 onClick={() => {
@@ -350,7 +399,7 @@ const Header = () => {
               </Typography>
               <IconButton
                 onClick={() => setOpen(false)}
-                aria-label="Đóng menu"
+                aria-label={t("header.mobile.closeMenu")}
                 sx={{ width: 44, height: 44, color: "text.primary" }}
               >
                 <CloseIcon />
@@ -360,6 +409,9 @@ const Header = () => {
             {renderNav(true)}
 
             <Box mt="auto" pt={4} pb={1}>
+              <Box sx={{ mb: 1.5, display: "flex", justifyContent: "flex-start" }}>
+                <LanguageSwitcher />
+              </Box>
               {user ? (
                 <Stack spacing={1}>
                   <Button
@@ -371,7 +423,7 @@ const Header = () => {
                     }}
                     sx={{ minHeight: 46, borderRadius: 1, color: "text.primary", borderColor: "divider" }}
                   >
-                    Thông tin cá nhân
+                    {t("header.account.profile")}
                   </Button>
                   <Button
                     fullWidth
@@ -382,7 +434,7 @@ const Header = () => {
                     }}
                     sx={{ minHeight: 46, borderRadius: 1, color: "text.primary", borderColor: "divider" }}
                   >
-                    Đổi mật khẩu
+                    {t("header.account.changePassword")}
                   </Button>
                   <Button
                     fullWidth
@@ -394,7 +446,7 @@ const Header = () => {
                     }}
                     sx={{ minHeight: 46, borderRadius: 1 }}
                   >
-                    Đăng xuất
+                    {t("header.account.logout")}
                   </Button>
                 </Stack>
               ) : (
@@ -406,7 +458,7 @@ const Header = () => {
                   onClick={() => setOpen(false)}
                   sx={{ minHeight: 46, borderRadius: 1, color: "text.primary", borderColor: "divider" }}
                 >
-                  Đăng nhập
+                  {t("header.actions.signIn")}
                 </Button>
               )}
               <Button
@@ -417,7 +469,7 @@ const Header = () => {
                 onClick={() => setOpen(false)}
                 sx={{ mt: 1.25, minHeight: 46, borderRadius: 1 }}
               >
-                Đặt ngay
+                {t("header.actions.bookNow")}
               </Button>
             </Box>
           </MotionBox>

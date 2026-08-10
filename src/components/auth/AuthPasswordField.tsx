@@ -2,6 +2,7 @@ import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { IconButton, InputAdornment, TextField } from "@mui/material";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   label: string;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 const AuthPasswordField = ({ label, name, value, error, autoComplete, disabled, onChange }: Props) => {
+  const { t } = useTranslation("client");
   const [visible, setVisible] = useState(false);
 
   return (
@@ -36,7 +38,7 @@ const AuthPasswordField = ({ label, name, value, error, autoComplete, disabled, 
                 type="button"
                 edge="end"
                 onClick={() => setVisible((current) => !current)}
-                aria-label={visible ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                aria-label={visible ? t("auth.password.hide") : t("auth.password.show")}
               >
                 {visible ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
               </IconButton>

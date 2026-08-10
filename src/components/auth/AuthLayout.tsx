@@ -3,6 +3,7 @@ import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import { Box, Link as MuiLink, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const CUSTOMER_HEADER_HEIGHT = 68;
 
@@ -13,7 +14,10 @@ interface Props {
   children: ReactNode;
 }
 
-const AuthLayout = ({ eyebrow, title, description, children }: Props) => (
+const AuthLayout = ({ eyebrow, title, description, children }: Props) => {
+  const { t } = useTranslation("client");
+
+  return (
   <Box
     component="main"
     sx={{
@@ -40,12 +44,12 @@ const AuthLayout = ({ eyebrow, title, description, children }: Props) => (
       }}
     >
       <Box sx={{ position: "relative", maxWidth: 480, color: "#fff" }}>
-        <Typography sx={{ color: "inherit", fontSize: 12, fontWeight: 700, letterSpacing: 2.2 }}>DIAMOND SEA ĐÀ NẴNG</Typography>
+        <Typography sx={{ color: "inherit", fontSize: 12, fontWeight: 700, letterSpacing: 2.2 }}>{t("auth.hero.eyebrow")}</Typography>
         <Typography sx={{ mt: 2, color: "inherit", fontFamily: "Georgia, serif", fontSize: { md: 38, lg: 48 }, lineHeight: 1.12 }}>
-          Một kỳ nghỉ nhẹ nhàng bắt đầu từ đây.
+          {t("auth.hero.title")}
         </Typography>
         <Typography sx={{ mt: 2, color: "rgba(255,255,255,.84)", lineHeight: 1.75 }}>
-          Quản lý đặt phòng và chuẩn bị cho hành trình bên biển trong một không gian riêng tư, thuận tiện.
+          {t("auth.hero.description")}
         </Typography>
       </Box>
     </Box>
@@ -54,7 +58,7 @@ const AuthLayout = ({ eyebrow, title, description, children }: Props) => (
       <Box sx={{ width: 1, maxWidth: 460, mx: "auto" }}>
         <MuiLink component={Link} to="/" underline="none" sx={{ display: "inline-flex", alignItems: "center", gap: 0.75, color: "text.secondary", fontSize: 14, mb: { xs: 4, md: 5 }, "&:hover": { color: "primary.main" } }}>
           <ArrowBackRoundedIcon sx={{ fontSize: 18 }} />
-          Về trang chủ
+          {t("auth.backToHome")}
         </MuiLink>
 
         <Stack spacing={1.5} sx={{ mb: 4 }}>
@@ -69,6 +73,7 @@ const AuthLayout = ({ eyebrow, title, description, children }: Props) => (
       </Box>
     </Box>
   </Box>
-);
+  );
+};
 
 export default AuthLayout;
