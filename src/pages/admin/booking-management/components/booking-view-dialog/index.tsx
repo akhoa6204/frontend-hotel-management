@@ -275,9 +275,7 @@ export default function BookingViewDialog() {
   };
   const status = statusStyles[bookingDetail.status] ?? statusStyles.PENDING;
   const nights = Math.max(1, dayjs(bookingDetail.checkOutDate).diff(dayjs(bookingDetail.checkInDate), "day"));
-  const showFooterAction =
-    (bookingViewTab === "info" && bookingDetail.status !== "CHECKED_IN") ||
-    (bookingViewTab === "housekeeping" && bookingDetail.status === "CHECKED_IN");
+  const footerAction = renderActionButton();
 
   return (
     <Dialog
@@ -335,7 +333,7 @@ export default function BookingViewDialog() {
         </TabPanel>
       </DialogContent>
 
-      {showFooterAction && <DialogActions sx={{ position: "sticky", bottom: 0, zIndex: 2, minHeight: 64, px: { xs: 2, sm: 3 }, py: 1.25, bgcolor: "#FFFFFF", borderTop: "1px solid #E4E7EC" }}>{renderActionButton()}</DialogActions>}
+      {footerAction && <DialogActions sx={{ position: "sticky", bottom: 0, zIndex: 2, minHeight: 64, px: { xs: 2, sm: 3 }, py: 1.25, bgcolor: "#FFFFFF", borderTop: "1px solid #E4E7EC" }}>{footerAction}</DialogActions>}
     </Dialog>
   );
 }
