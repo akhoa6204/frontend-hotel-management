@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { useNavigate } from "react-router-dom";
-import { SearchFilter } from "@constant/internal/SearchFilter";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
 import StaffStatService from "@services/staff/stat.service";
 
 const PAGE_SIZE = 5;
@@ -25,14 +25,14 @@ const useFrontDesk = () => {
     limit: PAGE_SIZE,
   };
 
-  const { data: summary, isLoading: loadingSummary } = useQuery({
+  const { data: summary, isLoading: loadingSummary, isError: summaryError, refetch: refetchSummary } = useQuery({
     queryKey: SUMMARY_QK,
     queryFn: StaffStatService.getOverview,
     staleTime: 30_000,
     retry: 1,
   });
 
-  const { data: checkinsRes, isLoading: loadingCheckins } = useQuery({
+  const { data: checkinsRes, isLoading: loadingCheckins, isError: checkinsError, refetch: refetchCheckins } = useQuery({
     queryKey: CHECKINS_QK(checkinsParams),
     queryFn: () => StaffStatService.getCheckins(checkinsParams),
     staleTime: 15_000,
@@ -41,7 +41,7 @@ const useFrontDesk = () => {
   const checkins = checkinsRes?.data ?? [];
   const checkinsMeta = checkinsRes?.pagination;
 
-  const { data: checkoutsRes, isLoading: loadingCheckouts } = useQuery({
+  const { data: checkoutsRes, isLoading: loadingCheckouts, isError: checkoutsError, refetch: refetchCheckouts } = useQuery({
     queryKey: CHECKOUTS_QK(checkoutsParams),
     queryFn: () => StaffStatService.getCheckouts(checkoutsParams),
     staleTime: 15_000,
@@ -53,30 +53,40 @@ const useFrontDesk = () => {
   const handleChangeCheckinPage = (page: number) => setCheckinPage(page);
   const handleChangeCheckoutPage = (page: number) => setCheckoutPage(page);
 
-  const handleCheckin = (id: number) => {
+  const handleCheckin = (id: string) => {
     navigate("/manager/bookings", {
       state: { bookingId: id, action: "CHECK_IN" },
     });
   };
-  const handleCheckout = (id: number) => {
+  const handleCheckout = (id: string) => {
     navigate("/manager/bookings", {
       state: { bookingId: id, action: "CHECK_OUT" },
     });
   };
 
+  const retry = () => Promise.all([
+    refetchSummary(),
+    refetchCheckins(),
+    refetchCheckouts(),
+  ]);
+
   return {
     summary,
     loadingSummary,
+    summaryError,
     checkins,
     loadingCheckins,
+    checkinsError,
     checkinsMeta,
     handleChangeCheckinPage,
     checkouts,
     loadingCheckouts,
+    checkoutsError,
     checkoutsMeta,
     handleChangeCheckoutPage,
     handleCheckin,
     handleCheckout,
+    retry,
   };
 };
 

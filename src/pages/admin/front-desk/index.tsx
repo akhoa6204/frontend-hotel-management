@@ -1,86 +1,107 @@
-import Title from "@components/Title";
+import BedOutlinedIcon from "@mui/icons-material/BedOutlined";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
+import CleaningServicesOutlinedIcon from "@mui/icons-material/CleaningServicesOutlined";
 import StatCard from "./components/StatCard";
-import { Box, Grid, Paper, Typography } from "@mui/material";
+import { Alert, Box, Button, Grid, Typography } from "@mui/material";
 import PagedSection from "./components/PagedSection";
 import BookingItemCard from "./components/BookingItemCard";
 import useFrontDesk from "./useFrontDesk";
+import { useTranslation } from "react-i18next";
 
 const FrontDesk = () => {
+  const { t } = useTranslation("receptionist");
   const {
     summary,
     loadingSummary,
+    summaryError,
     checkins,
     loadingCheckins,
+    checkinsError,
     checkinsMeta,
     handleChangeCheckinPage,
     checkouts,
     loadingCheckouts,
+    checkoutsError,
     checkoutsMeta,
     handleChangeCheckoutPage,
     handleCheckin,
     handleCheckout,
+    retry,
   } = useFrontDesk();
 
+  const hasError = summaryError || checkinsError || checkoutsError;
+
   return (
-    <>
-      <Box sx={{ mb: 2.5 }}>
-        <Title
-          title="Hoạt động lễ tân hôm nay"
-          subTitle="Quản lý check-in, check-out và khách lưu trú"
-        />
+    <Box component="main" sx={{ color: "#1F2937" }}>
+      <Box component="header" sx={{ mb: 2 }}>
+        <Typography component="h1" sx={{ color: "#163B47", fontSize: { xs: 27, md: 30 }, lineHeight: 1.2, fontWeight: 700 }}>
+          {t("title")}
+        </Typography>
+        <Typography sx={{ mt: 0.5, color: "#667085", fontSize: 13.5 }}>
+          {t("subtitle")}
+        </Typography>
+      </Box>
 
-        <Grid container spacing={3.25} sx={{ mb: 2 }}>
-          <Grid size={{ xs: 12, md: 3 }}>
+      {hasError && (
+        <Alert severity="error" action={<Button color="inherit" size="small" onClick={() => void retry()}>{t("actions.retry")}</Button>} sx={{ mb: 2, border: "1px solid #F4C7C7", borderRadius: "9px", boxShadow: "none" }}>
+          {t("states.loadError")}
+        </Alert>
+      )}
+
+      <Grid container spacing={1.75}>
+          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <StatCard
-              label="Booking hôm nay"
-              value={summary?.todayBookings ?? 0}
-              delta={summary?.bookingsDeltaPct}
-              deltaText="so với hôm qua"
+              label={t("todayBookings")}
+              value={summaryError ? "—" : summary?.todayBookings ?? 0}
               loading={loadingSummary}
+              icon={<CalendarMonthOutlinedIcon />}
             />
           </Grid>
 
-          <Grid size={{ xs: 12, md: 3 }}>
+          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <StatCard
-              label="Phòng còn trống"
-              value={`${summary?.availableRooms ?? 0}/${
-                summary?.totalRooms ?? 0
-              }`}
-              delta={summary?.availableRoomsDelta}
-              deltaText="so với hôm qua"
-              suffix=""
-              loading={loadingSummary}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 3 }}>
-            <StatCard
-              label="Phòng đang được dọn"
-              value={`${summary?.totalCleanRooms ?? 0}/${
+              label={t("availableRooms")}
+              value={summaryError ? "—" : `${summary?.availableRooms ?? 0}/${
                 summary?.totalRooms ?? 0
               }`}
               loading={loadingSummary}
+              icon={<BedOutlinedIcon />}
             />
           </Grid>
-        </Grid>
 
-        <Grid container spacing={3.25} alignItems="stretch">
+          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+            <StatCard
+              label={t("cleanRooms")}
+              value={summaryError ? "—" : `${summary?.totalCleanRooms ?? 0}/${
+                summary?.totalRooms ?? 0
+              }`}
+              loading={loadingSummary}
+              icon={<CleaningServicesOutlinedIcon />}
+            />
+          </Grid>
+      </Grid>
+
+      <Box component="section" aria-labelledby="front-desk-operations" sx={{ mt: 3 }}>
+        <Typography id="front-desk-operations" component="h2" sx={{ color: "#163B47", fontSize: 19, fontWeight: 650 }}>
+          {t("activity.title")}
+        </Typography>
+        <Typography sx={{ mt: 0.25, mb: 1.5, color: "#667085", fontSize: 13 }}>
+          {t("activity.subtitle")}
+        </Typography>
+        <Grid container spacing={2} alignItems="flex-start">
           <Grid size={{ xs: 12, md: 6 }}>
             <PagedSection
-              title="Check-in hôm nay"
+              title={t("activity.checkInsTitle")}
               items={checkins}
               meta={checkinsMeta}
               loading={loadingCheckins}
-              emptyText="Hôm nay chưa có khách check-in."
+              emptyText={t("activity.noCheckIns")}
               onChangePage={handleChangeCheckinPage}
               renderItem={(b) => (
                 <BookingItemCard
                   booking={b}
-                  handleOnClick={
-                    b.status === "CONFIRMED"
-                      ? () => handleCheckin(b.id)
-                      : undefined
-                  }
+                  operationContext="CHECK_IN"
+                  handleOnClick={() => handleCheckin(b.id)}
                 />
               )}
             />
@@ -88,27 +109,24 @@ const FrontDesk = () => {
 
           <Grid size={{ xs: 12, md: 6 }}>
             <PagedSection
-              title="Check-out hôm nay"
+              title={t("activity.checkOutsTitle")}
               items={checkouts}
               meta={checkoutsMeta}
               loading={loadingCheckouts}
-              emptyText="Hôm nay chưa có khách check-out."
+              emptyText={t("activity.noCheckOuts")}
               onChangePage={handleChangeCheckoutPage}
               renderItem={(b) => (
                 <BookingItemCard
                   booking={b}
-                  handleOnClick={
-                    b.status === "CHECKED_IN"
-                      ? () => handleCheckout(b.id)
-                      : undefined
-                  }
+                  operationContext="CHECK_OUT"
+                  handleOnClick={() => handleCheckout(b.id)}
                 />
               )}
             />
           </Grid>
         </Grid>
       </Box>
-    </>
+    </Box>
   );
 };
 

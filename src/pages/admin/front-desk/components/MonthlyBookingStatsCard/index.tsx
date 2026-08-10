@@ -1,15 +1,15 @@
 // components/dashboard/MonthlyBookingStatsCard.tsx
-import { MonthlyBookingStats } from "@constant/types";
+import type { MonthlyBookingStatsResponse } from "@constant/response/MonthlyBookingStatsResponse";
 import {
   Paper,
-  CardContent,
   Typography,
   Box,
   CircularProgress,
 } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 type Props = {
-  data?: MonthlyBookingStats;
+  data?: MonthlyBookingStatsResponse;
   loading?: boolean;
 };
 
@@ -50,6 +50,8 @@ const StatRow = ({
 );
 
 const MonthlyBookingStatsCard = ({ data, loading }: Props) => {
+  const { t } = useTranslation("receptionist");
+
   if (loading)
     return (
       <Paper
@@ -64,7 +66,7 @@ const MonthlyBookingStatsCard = ({ data, loading }: Props) => {
     return (
       <Paper variant="outlined" sx={{ p: 3 }}>
         <Typography variant="body2" color="text.secondary">
-          Không có dữ liệu
+          {t("states.noData")}
         </Typography>
       </Paper>
     );
@@ -73,27 +75,27 @@ const MonthlyBookingStatsCard = ({ data, loading }: Props) => {
     <Paper variant="outlined" sx={{ p: 2, borderRadius: 2.5, height: "100%" }}>
       <Box>
         <Typography variant="body2" fontWeight={600} mb={2} fontSize={20}>
-          Thống kê booking
+          {t("bookingStats.title")}
         </Typography>
         <Box mb={2}>
-          <StatRow label="Tổng booking" value={data.total ?? 0} />
+          <StatRow label={t("bookingStats.total")} value={data.total ?? 0} />
         </Box>
         <Box mb={2}>
           <StatRow
-            label="Booking thành công"
+            label={t("bookingStats.successful")}
             value={data.success ?? 0}
             color="primary"
           />
         </Box>
         <Box mb={2}>
           <StatRow
-            label="Booking bị hủy"
+            label={t("bookingStats.cancelled")}
             value={data.cancelled ?? 0}
             color="error.main"
           />{" "}
         </Box>
         <Box>
-          <StatRow label="Tỷ lệ hủy" value={`${data.cancelRate ?? 0}%`} />
+          <StatRow label={t("bookingStats.cancellationRate")} value={`${data.cancelRate ?? 0}%`} />
         </Box>
       </Box>
     </Paper>

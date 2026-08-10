@@ -1,82 +1,29 @@
-import { Box, Stack, Typography, Chip } from "@mui/material";
-import { BookingResponse } from "@constant/response/BookingResponse";
-import { BookingStatus } from "@enums/BookingStatus";
+import type { BookingResponse } from "@constant/response/BookingResponse";
+import AdminBookingOperation, { type BookingOperationContext } from "@components/admin-booking-operation";
+import { Box, Stack, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
-const STATUS_UI: Record<
-  BookingStatus,
-  { label: string; color: string; border: string; bg: string }
-> = {
-  PENDING: {
-    label: "Đang chờ xác nhận",
-    color: "#9E9E9E",
-    border: "#BDBDBD",
-    bg: "#F5F5F5",
-  },
-  CONFIRMED: {
-    label: "Check-in",
-    color: "#2E90FA",
-    border: "#2E90FA",
-    bg: "#2E90FA0d",
-  },
-  CHECKED_IN: {
-    label: "Đã nhận phòng",
-    color: "#ED6C02",
-    border: "#ED6C02",
-    bg: "rgba(237, 108, 2, 0.1)",
-  },
-  CHECKED_OUT: {
-    label: "Đã trả phòng",
-    color: "#2E7D32",
-    border: "#2E7D32",
-    bg: "rgba(46, 125, 50, 0.1)",
-  },
-  CANCELLED: {
-    label: "Đã hủy phòng",
-    color: "#D32F2F",
-    border: "#D32F2F",
-    bg: "rgba(211, 47, 47, 0.1)",
-  },
+interface Props {
+  booking: BookingResponse;
+  operationContext: BookingOperationContext;
+  handleOnClick: () => void;
+}
+
+const BookingItemCard = ({ booking, operationContext, handleOnClick }: Props) => {
+  const { t } = useTranslation("dashboard");
+  return (
+    <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2} sx={{ px: 0.25, py: 1.35, opacity: booking.status === "CANCELLED" ? 0.72 : 1 }}>
+      <Box sx={{ minWidth: 0 }}>
+        <Typography sx={{ color: "text.primary", fontSize: 14, fontWeight: 600 }} noWrap>
+          {booking.room?.name ?? "—"} · {booking.room?.roomType?.name ?? "—"}
+        </Typography>
+        <Typography sx={{ mt: 0.25, color: "text.secondary", fontSize: 12.5 }} noWrap>
+          {booking.guestName || t("activity.unknownGuest")}
+        </Typography>
+      </Box>
+      <AdminBookingOperation booking={booking} context={operationContext} onAction={handleOnClick} />
+    </Stack>
+  );
 };
 
-export default function BookingItemCard({
-  booking,
-  handleOnClick,
-}: {
-  booking: BookingResponse;
-  handleOnClick?: () => void;
-}) {
-  const ui = STATUS_UI[booking?.status];
-
-  return (
-    <Box
-      sx={{
-        border: "1px solid #2E90FA",
-        borderRadius: 2.5,
-        p: 2,
-      }}
-    >
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Box>
-          <Typography fontWeight={600}>{booking.guestName}</Typography>
-          <Typography variant="body2" color="text.secondary">
-            Phòng {booking.room?.name} — {booking.room?.roomType?.name ?? "-"}
-          </Typography>
-        </Box>
-
-        <Chip
-          label={ui.label}
-          size="small"
-          sx={{
-            fontWeight: 600,
-            color: ui.color,
-            borderColor: ui.border,
-            borderWidth: 1.5,
-            borderStyle: "solid",
-            backgroundColor: ui.bg,
-          }}
-          onClick={handleOnClick}
-        />
-      </Stack>
-    </Box>
-  );
-}
+export default BookingItemCard;

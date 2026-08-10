@@ -1,28 +1,40 @@
-// pages/admin/dashboard/components/TopCustomersList.tsx
-import { TopCustomers } from "@constant/types";
-import { Paper, Box, Typography, Avatar, Divider } from "@mui/material";
+import { Paper, Box, Typography, Avatar } from "@mui/material";
 import { formatMoneyShort } from "@utils/format";
+import { useTranslation } from "react-i18next";
+
+interface TopCustomerItem {
+  rank: number;
+  name: string;
+  bookings: number;
+  totalPaid: number;
+}
+
+interface TopCustomersData {
+  items: TopCustomerItem[];
+}
 
 export default function TopCustomersList({
   data,
   loading,
 }: {
-  data?: TopCustomers;
+  data?: TopCustomersData;
   loading?: boolean;
 }) {
+  const { t } = useTranslation("receptionist");
+
   return (
     <Paper variant="outlined" sx={{ p: 2, borderRadius: 2.5 }}>
       <Typography sx={{ fontWeight: 600, fontSize: 20, mb: 1.5 }}>
-        Top khách hàng
+        {t("topCustomers.title")}
       </Typography>
 
       {loading ? (
         <Typography color="text.secondary" sx={{ py: 2 }}>
-          Đang tải…
+          {t("states.loading")}
         </Typography>
       ) : !data?.items?.length ? (
         <Typography color="text.secondary" sx={{ py: 2 }}>
-          Không có dữ liệu
+          {t("states.noData")}
         </Typography>
       ) : (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
@@ -54,7 +66,7 @@ export default function TopCustomersList({
                 <Box>
                   <Typography sx={{ fontWeight: 600 }}>{c.name}</Typography>
                   <Typography variant="body2" color="primary">
-                    {c.bookings} booking
+                    {t("topCustomers.bookingCount", { count: c.bookings })}
                   </Typography>
                 </Box>
               </Box>
