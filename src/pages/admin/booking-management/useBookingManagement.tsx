@@ -47,6 +47,12 @@ const defaultBookingFilter: SearchFilter = {
 
 export type ServiceFilter = SearchExtraService & SearchFilter;
 
+type BookingInspectionSocketResponse = {
+  bookingId: string;
+  inspectionTaskId: number;
+  inspected: boolean;
+};
+
 const validateBookingForm = (form: BookingForm, translate: (key: string) => string) => {
   const errors: Record<string, string> = {};
   if (!form.roomId) {
@@ -656,10 +662,11 @@ export default function useBookingManagement() {
   });
   const mConfirmCheckIn = useMutation({
     mutationFn: (bookingId: string) => StaffBookingService.checkin(bookingId),
-    onSuccess: (_data) => {
+    onSuccess: (data, bookingId) => {
       showSuccess(t("messages.checkInSuccess"));
+      qc.setQueryData<BookingResponse>(["booking-detail", bookingId], data);
       qc.invalidateQueries({ queryKey: ["admin-bookings", filter] });
-      qc.invalidateQueries({ queryKey: ["booking-detail", selectedBookingId] });
+      qc.invalidateQueries({ queryKey: ["booking-detail", bookingId] });
       qc.invalidateQueries({ queryKey: ["dashboard", "summary"] });
       qc.invalidateQueries({ queryKey: ["dashboard", "checkins"] });
       qc.invalidateQueries({ queryKey: ["dashboard", "checkouts"] });
@@ -674,8 +681,9 @@ export default function useBookingManagement() {
 
   const mConfirmCheckOut = useMutation({
     mutationFn: (bookingId: string) => StaffBookingService.checkout(bookingId),
-    onSuccess: (_data, bookingId) => {
+    onSuccess: (data, bookingId) => {
       showSuccess(t("messages.checkOutSuccess"));
+      qc.setQueryData<BookingResponse>(["booking-detail", bookingId], data);
       qc.invalidateQueries({ queryKey: ["admin-bookings", filter] });
       qc.invalidateQueries({ queryKey: ["booking-detail", bookingId] });
       qc.invalidateQueries({ queryKey: ["dashboard", "summary"] });
@@ -756,12 +764,23 @@ export default function useBookingManagement() {
     onChangeField(field, value);
   };
 
-  useSocket({
+  useSocket<BookingInspectionSocketResponse>({
     topic: selectedBookingId
       ? `/topic/bookings/${selectedBookingId}/inspection`
       : undefined,
     handler: (data) => {
       if (data.bookingId === selectedBookingId) {
+        qc.setQueryData<BookingResponse>(
+          ["booking-detail", selectedBookingId],
+          (current) =>
+            current
+              ? {
+                  ...current,
+                  inspected: data.inspected,
+                  inspectionTaskId: data.inspectionTaskId,
+                }
+              : current,
+        );
         qc.invalidateQueries({
           queryKey: ["booking-detail", selectedBookingId],
         });
@@ -778,14 +797,28 @@ export default function useBookingManagement() {
   const mCreateHousekeepingTask = useMutation({
     mutationFn: async (data: HousekeepingCreationRequest) =>
       await StaffHousekeepingService.create(data),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data.staff?.id) {
         showSuccess(t("messages.housekeepingTaskCreated"));
       } else {
         showWarning(t("messages.noHousekeepingStaffOnShift"));
       }
 
-      qc.invalidateQueries({
+      if (data.type === "INSPECTION" && selectedBookingId) {
+        qc.setQueryData<BookingResponse>(
+          ["booking-detail", selectedBookingId],
+          (current) =>
+            current
+              ? {
+                  ...current,
+                  inspected: data.status === "COMPLETED",
+                  inspectionTaskId: data.id,
+                }
+              : current,
+        );
+      }
+
+      await qc.invalidateQueries({
         queryKey: ["booking-detail", selectedBookingId],
       });
       qc.invalidateQueries({
@@ -812,9 +845,38 @@ export default function useBookingManagement() {
   const mUpdateInspectionTask = useMutation({
     mutationFn: async (data: HousekeepingUpdateRequest) =>
       await StaffHousekeepingService.update(data),
-    onSuccess: () => {
-      qc.invalidateQueries({
+    onSuccess: async (updatedTask) => {
+      qc.setQueryData(
+        ["housekeeping-detail", selectedBookingId, updatedTask.id],
+        updatedTask,
+      );
+
+      if (
+        updatedTask.type === "INSPECTION" &&
+        updatedTask.bookingId === selectedBookingId
+      ) {
+        qc.setQueryData<BookingResponse>(
+          ["booking-detail", selectedBookingId],
+          (current) =>
+            current
+              ? {
+                  ...current,
+                  inspected: updatedTask.status === "COMPLETED",
+                  inspectionTaskId: updatedTask.id,
+                }
+              : current,
+        );
+
+        await qc.invalidateQueries({
+          queryKey: ["booking-detail", selectedBookingId],
+        });
+      }
+
+      await qc.invalidateQueries({
         queryKey: ["housekeeping-detail", selectedBookingId, selectedTaskId],
+      });
+      qc.invalidateQueries({
+        queryKey: ["housekeeping-list", selectedBookingId],
       });
     },
   });
