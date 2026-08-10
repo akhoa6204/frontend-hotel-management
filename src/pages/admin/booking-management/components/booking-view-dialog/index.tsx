@@ -8,13 +8,18 @@ import {
   Box,
   Button,
   Stack,
+  Typography,
+  IconButton,
+  Chip,
 } from "@mui/material";
+import { Close } from "@mui/icons-material";
 import dayjs from "dayjs";
 import BookingInfoTab from "./booking-info-tab";
 import BookingServiceTab from "./booking-service-tab";
 import BookingPaymentTab from "./booking-payment-tab";
 import HousekeepingTab from "./housekeeping-tab";
 import { useBookingManagementContext } from "@context/booking-management";
+import { useTranslation } from "react-i18next";
 
 function TabPanel({
   children,
@@ -31,6 +36,7 @@ function TabPanel({
 }
 
 export default function BookingViewDialog() {
+  const { t } = useTranslation(["bookings", "common"]);
   const {
     dialog,
     closeDialog,
@@ -42,6 +48,8 @@ export default function BookingViewDialog() {
     openCancelDialog,
     handleCheckIn,
     handleCheckout,
+    isCheckingIn,
+    isCheckingOut,
     invoiceSummary,
   } = useBookingManagementContext();
 
@@ -77,12 +85,13 @@ export default function BookingViewDialog() {
               px: 2,
             }}
           >
-            Hủy phòng
+            {t("actions.cancel", { ns: "bookings" })}
           </Button>
           <Button
             size="small"
             variant="outlined"
             color="primary"
+            disabled={isCheckingIn}
             onClick={() =>
               bookingDetail.id &&
               invoiceDetail &&
@@ -95,7 +104,7 @@ export default function BookingViewDialog() {
               px: 2,
             }}
           >
-            Check-in
+            {t(isCheckingIn ? "actions.checkingIn" : "actions.checkIn", { ns: "bookings" })}
           </Button>
         </Stack>
       );
@@ -115,7 +124,7 @@ export default function BookingViewDialog() {
               px: 2,
             }}
           >
-            Hủy phòng
+            {t("actions.cancel", { ns: "bookings" })}
           </Button>
 
           <Button
@@ -136,7 +145,7 @@ export default function BookingViewDialog() {
               },
             }}
           >
-            Chưa đến giờ
+            {t("actions.tooEarly", { ns: "bookings" })}
           </Button>
         </Box>
       );
@@ -155,7 +164,7 @@ export default function BookingViewDialog() {
             px: 2,
           }}
         >
-          Quá hạn
+          {t("detail.overdue", { ns: "bookings" })}
         </Button>
       );
     }
@@ -174,7 +183,7 @@ export default function BookingViewDialog() {
               px: 2,
             }}
           >
-            Phòng đang được kiểm tra
+            {t("actions.roomInspectionInProgress", { ns: "bookings" })}
           </Button>
         );
       }
@@ -200,7 +209,7 @@ export default function BookingViewDialog() {
               px: 2,
             }}
           >
-            Kiểm tra phòng
+            {t("actions.inspectRoom", { ns: "bookings" })}
           </Button>
         );
       }
@@ -210,6 +219,7 @@ export default function BookingViewDialog() {
           size="small"
           variant="outlined"
           color="warning"
+          disabled={isCheckingOut}
           onClick={() =>
             bookingDetail.id &&
             invoiceDetail &&
@@ -222,7 +232,7 @@ export default function BookingViewDialog() {
             px: 2,
           }}
         >
-          Check-out
+          {t(isCheckingOut ? "actions.checkingOut" : "actions.checkOut", { ns: "bookings" })}
         </Button>
       );
     }
@@ -235,7 +245,7 @@ export default function BookingViewDialog() {
           color="success"
           sx={{ pointerEvents: "none", borderRadius: 1.5, py: 1, px: 2 }}
         >
-          Hoàn tất
+          {t("actions.completed", { ns: "bookings" })}
         </Button>
       );
     }
@@ -248,7 +258,7 @@ export default function BookingViewDialog() {
           color="error"
           sx={{ pointerEvents: "none", borderRadius: 1.5, py: 1, px: 2 }}
         >
-          Đã hủy phòng
+          {t("actions.cancelled", { ns: "bookings" })}
         </Button>
       );
     }
@@ -256,30 +266,62 @@ export default function BookingViewDialog() {
     return null;
   };
 
+  const statusStyles: Record<string, { background: string; color: string }> = {
+    PENDING: { background: "#FFF5E5", color: "#9A6518" },
+    CONFIRMED: { background: "#EAF6F0", color: "#246548" },
+    CANCELLED: { background: "#FDECEC", color: "#A43B3B" },
+    CHECKED_IN: { background: "#EAF4FF", color: "#1D6FC2" },
+    CHECKED_OUT: { background: "#F2F4F7", color: "#475467" },
+  };
+  const status = statusStyles[bookingDetail.status] ?? statusStyles.PENDING;
+  const nights = Math.max(1, dayjs(bookingDetail.checkOutDate).diff(dayjs(bookingDetail.checkInDate), "day"));
+  const showFooterAction =
+    (bookingViewTab === "info" && bookingDetail.status !== "CHECKED_IN") ||
+    (bookingViewTab === "housekeeping" && bookingDetail.status === "CHECKED_IN");
+
   return (
     <Dialog
       open={dialog.open && dialog.mode === "VIEW"}
       onClose={closeDialog}
       maxWidth="lg"
       fullWidth
+      PaperProps={{ sx: { width: "min(1080px, calc(100vw - 64px))", maxHeight: "88dvh", borderRadius: "12px", m: { xs: 1.5, sm: 3 }, overflow: "hidden" } }}
     >
-      <DialogTitle>Xem chi tiết {bookingDetail.bookingCode}</DialogTitle>
+      <DialogTitle sx={{ position: "sticky", top: 0, zIndex: 3, bgcolor: "#FFFFFF", px: { xs: 2, sm: 3 }, py: 2, borderBottom: "1px solid #E4E7EC" }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={2}>
+          <Box minWidth={0}>
+            <Typography sx={{ color: "#667085", fontSize: 11.5, fontWeight: 700, letterSpacing: "0.08em" }}>{t("detail.eyebrow", { ns: "bookings" })}</Typography>
+            <Stack direction="row" alignItems="center" gap={1.5} mt={0.25} flexWrap="wrap">
+              <Typography sx={{ fontSize: { xs: 17, sm: 19 }, fontWeight: 700, overflowWrap: "anywhere" }}>{bookingDetail.bookingCode}</Typography>
+              <Chip label={t(`status.${bookingDetail.status}`, { ns: "bookings" })} size="small" sx={{ height: 25, bgcolor: status.background, color: status.color, fontSize: 12, fontWeight: 650 }} />
+            </Stack>
+            <Typography sx={{ mt: 0.75, fontSize: 13.5, fontWeight: 600 }}>{bookingDetail.guestName}</Typography>
+            <Typography sx={{ mt: 0.25, color: "#667085", fontSize: 12.5 }}>
+              {bookingDetail.room.name} · {bookingDetail.room.roomType.name} · {dayjs(bookingDetail.checkInDate).format("DD/MM/YYYY")} → {dayjs(bookingDetail.checkOutDate).format("DD/MM/YYYY")} · {t("detail.nightCount", { ns: "bookings", count: nights })}
+            </Typography>
+          </Box>
+          <IconButton aria-label={t("actions.close", { ns: "common" })} onClick={closeDialog} size="small"><Close /></IconButton>
+        </Stack>
+      </DialogTitle>
 
       <Tabs
         value={bookingViewTab}
         onChange={(_, v) => onChangeBookingViewTab(v)}
+        variant="scrollable"
+        scrollButtons="auto"
+        sx={{ position: "sticky", top: 0, zIndex: 2, bgcolor: "#FFFFFF", minHeight: 46, px: { xs: 1, sm: 2 }, borderBottom: "1px solid #E4E7EC", "& .MuiTab-root": { minHeight: 46, minWidth: { xs: 100, sm: 120 }, px: 2, fontSize: 13.5, fontWeight: 500 }, "& .Mui-selected": { fontWeight: 650 } }}
       >
-        <Tab label="Thông tin" value="info" />
-        <Tab label="Dịch vụ" value="service" />
-        <Tab label="Buồng phòng" value="housekeeping" />
-        <Tab label="Thanh toán" value="payment" />
+        <Tab label={t("detail.tabs.information", { ns: "bookings" })} value="info" />
+        <Tab label={t("detail.tabs.services", { ns: "bookings" })} value="service" />
+        <Tab label={t("detail.tabs.housekeeping", { ns: "bookings" })} value="housekeeping" />
+        <Tab label={t("detail.tabs.payment", { ns: "bookings" })} value="payment" />
       </Tabs>
-      <DialogContent dividers>
-        {/* Thông tin */}
+      <DialogContent className="admin-scrollbar" sx={{ flex: 1, minHeight: 0, overflowY: "auto", px: { xs: 2, sm: 3 }, py: 2.5, bgcolor: "#FFFFFF" }}>
+        {/* Information */}
         <TabPanel value={bookingViewTab} tab="info">
           <BookingInfoTab />
         </TabPanel>
-        {/* Dịch vụ */}
+        {/* Services */}
         <TabPanel value={bookingViewTab} tab="service">
           <BookingServiceTab />
         </TabPanel>
@@ -293,7 +335,7 @@ export default function BookingViewDialog() {
         </TabPanel>
       </DialogContent>
 
-      <DialogActions>{renderActionButton()}</DialogActions>
+      {showFooterAction && <DialogActions sx={{ position: "sticky", bottom: 0, zIndex: 2, minHeight: 64, px: { xs: 2, sm: 3 }, py: 1.25, bgcolor: "#FFFFFF", borderTop: "1px solid #E4E7EC" }}>{renderActionButton()}</DialogActions>}
     </Dialog>
   );
 }

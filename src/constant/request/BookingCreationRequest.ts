@@ -10,4 +10,5 @@ export type BookingCreationRequest = {
   staffId?: string;
   customerId?: string;
   roomId: number;
+  locale?: "VI" | "EN";
 };

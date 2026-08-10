@@ -14,8 +14,6 @@ import { PaymentCreationRequest } from "@constant/request/PaymentCreationRequest
 import { PaymentMethod } from "@enums/PaymentMethod";
 import { QuoteResponse } from "@constant/response/QuoteResponse";
 import { InvoiceItemUpdateRequest } from "@constant/request/InvoiceItemUpdateRequest";
-import { PaymentStatus } from "@enums/PaymentStatus";
-import { PaymentType } from "@enums/PaymentType";
 import { BookingResponse } from "@constant/response/BookingResponse";
 import { RoomResponse } from "@constant/response/RoomResponse";
 import { HousekeepingCreationRequest } from "@constant/request/HousekeepingCreationRequest";
@@ -33,6 +31,7 @@ import StaffPaymentService from "@services/staff/payment.service";
 import StaffRoomTypeService from "@services/staff/roomType.service";
 import StaffHousekeepingService from "@services/staff/housekeeping.service";
 import { BookingCancelRequest } from "@constant/request/BookingCancelRequest";
+import { useTranslation } from "react-i18next";
 
 export type BookingForm = Omit<BookingCreationRequest, "roomId"> & {
   roomTypeId?: number;
@@ -48,17 +47,17 @@ const defaultBookingFilter: SearchFilter = {
 
 export type ServiceFilter = SearchExtraService & SearchFilter;
 
-const validateBookingForm = (form: BookingForm) => {
+const validateBookingForm = (form: BookingForm, translate: (key: string) => string) => {
   const errors: Record<string, string> = {};
   if (!form.roomId) {
-    errors["roomId"] = "Vui lòng chọn phòng";
+    errors["roomId"] = translate("validation.roomRequired");
   }
   if (!form.checkInDate) {
-    errors["checkInDate"] = "Vui lòng chọn ngày nhận phòng";
+    errors["checkInDate"] = translate("validation.checkInRequired");
   }
 
   if (!form.checkOutDate) {
-    errors["checkOutDate"] = "Vui lòng chọn ngày trả phòng";
+    errors["checkOutDate"] = translate("validation.checkOutRequired");
   }
 
   if (
@@ -66,38 +65,16 @@ const validateBookingForm = (form: BookingForm) => {
     form.checkOutDate &&
     dayjs(form.checkOutDate).isBefore(dayjs(form.checkInDate))
   ) {
-    errors["checkOutDate"] = "Ngày trả phòng phải sau ngày nhận phòng";
+    errors["checkOutDate"] = translate("validation.checkOutAfterCheckIn");
   }
   return errors;
 };
 export default function useBookingManagement() {
+  const { t } = useTranslation("bookings");
   const qc = useQueryClient();
   const { alert, showError, showSuccess, closeSnackbar, showWarning } =
     useSnackbar();
 
-  const getLabelStatus: Partial<Record<PaymentStatus, string>> = {
-    SUCCESS: "Thành công",
-    FAILED: "Thất bại",
-    PENDING: "Đang chờ",
-  };
-  const getLabelMethod: Record<PaymentMethod, string> = {
-    CASH: "Tiền mặt",
-    BANK_TRANSFER: "Chuyển khoản",
-    E_WALLET: "Ví điện tử",
-  };
-  const getLabelType: Record<PaymentType, string> = {
-    DEPOSIT: "Đặt cọc",
-    ROOM_PAYMENT: "Thanh toán tiền phòng",
-    SERVICE_PAYMENT: "Thanh toán dịch vụ",
-    REFUND: "Hoàn tiền",
-  };
-  const getLabeBookinglStatus = {
-    PENDING: "Chờ xác nhận",
-    CONFIRMED: "Đã xác nhận",
-    CANCELLED: "Đã hủy",
-    CHECKED_IN: "Đang ở",
-    CHECKED_OUT: "Đã trả phòng",
-  };
   const [filter, setFilter] = useState<SearchFilter>(defaultBookingFilter);
   const [dialog, setDialog] = useState<DialogState>({ open: false });
   const [selectedBookingId, setSelectedBookingId] = useState<string>();
@@ -138,7 +115,7 @@ export default function useBookingManagement() {
       qc.invalidateQueries({
         queryKey: ["invoice-detail", selectedBookingId],
       });
-      showSuccess("Thanh toán tiền mặt thành công");
+      showSuccess(t("messages.cashPaymentSuccess"));
       return;
     }
 
@@ -199,7 +176,7 @@ export default function useBookingManagement() {
       guestPhone: "",
       paymentMethod: "CASH",
     },
-    validateBookingForm,
+    (form) => validateBookingForm(form, t),
     async (form: BookingForm) => {
       try {
         const { id, invoiceId, remainingAmount } =
@@ -215,17 +192,17 @@ export default function useBookingManagement() {
         if (form.paymentMethod === "CASH") {
           await mMarkPaymentAsPaid.mutateAsync(paymentId);
 
-          showSuccess("Đặt phòng và thanh toán thành công");
+          showSuccess(t("messages.bookingAndPaymentSuccess"));
           resetForm();
           return;
         }
         resetForm();
         showSuccess(
-          "Đặt phòng thành công, tiếp tục thanh toán để xác nhận đặt phòng",
+          t("messages.bookingCreatedContinuePayment"),
         );
         await handleCreateQr(paymentId);
       } catch (error: Error | any) {
-        const msg = error?.message || "Tạo đặt phòng thất bại";
+        const msg = error?.message || t("messages.createBookingError");
         showError(msg);
       }
     },
@@ -337,12 +314,14 @@ export default function useBookingManagement() {
     },
   });
 
-  const { data: bookingListResponse, isLoading: loadingBookingList } = useQuery(
-    {
+  const {
+    data: bookingListResponse,
+    isLoading: loadingBookingList,
+    isError: bookingListError,
+  } = useQuery({
       queryKey: ["admin-bookings", filter],
       queryFn: () => StaffBookingService.getList(filter),
-    },
-  );
+  });
 
   const bookings = bookingListResponse?.data || ([] as BookingResponse[]);
   const pagination = bookingListResponse?.pagination;
@@ -493,7 +472,7 @@ export default function useBookingManagement() {
 
   const mQuoteBooking = useMutation({
     mutationFn: async () => {
-      if (!canQuote) showError("Thiếu thông tin phòng hoặc ngày");
+      if (!canQuote) showError(t("validation.missingRoomOrDates"));
       return await StaffBookingService.quote({
         roomId: Number(bookingForm.roomId),
         startDate: bookingForm.checkInDate,
@@ -505,20 +484,19 @@ export default function useBookingManagement() {
       setPricing(data);
       if (bookingForm.promotionCode) {
         if (data.totalDiscount > 0) {
-          showSuccess(
-            `Áp dụng mã ${
-              bookingForm.promotionCode
-            } thành công, giảm ${data.totalDiscount.toLocaleString()}₫`,
-          );
+          showSuccess(t("messages.promotionApplied", {
+            code: bookingForm.promotionCode,
+            discount: data.totalDiscount.toLocaleString(),
+          }));
         } else {
-          showError("Mã giảm giá không áp dụng cho đơn này");
+          showError(t("messages.promotionNotApplicable"));
         }
       }
     },
     onError: (err: any) => {
       const msg =
         err?.response?.data?.message ||
-        "Không áp dụng được mã khuyến mãi. Vui lòng kiểm tra lại.";
+        t("messages.promotionApplyError");
       showError(msg);
     },
   });
@@ -540,7 +518,7 @@ export default function useBookingManagement() {
 
   const handleApplyPromo = async () => {
     if (!canQuote) {
-      showError("Vui lòng chọn phòng và ngày nhận trả phòng hợp lệ");
+      showError(t("validation.validRoomAndDatesRequired"));
       return;
     }
 
@@ -549,7 +527,7 @@ export default function useBookingManagement() {
 
   const mCreateBooking = useMutation({
     mutationFn: async (form: BookingForm) => {
-      if (!form.roomId) throw new Error("Thiếu thông tin phòng");
+      if (!form.roomId) throw new Error(t("validation.missingRoom"));
 
       const payload: BookingCreationRequest = {
         ...form,
@@ -564,7 +542,7 @@ export default function useBookingManagement() {
     onError: (err: any) => {
       const msg =
         err?.response?.data?.message ||
-        "Tạo đặt phòng thất bại, vui lòng thử lại";
+        t("messages.createBookingRetryError");
       showError(msg);
     },
   });
@@ -575,7 +553,7 @@ export default function useBookingManagement() {
     },
 
     onError: (err: any) => {
-      const msg = err?.response?.data?.message || "Tạo thanh toán thất bại";
+      const msg = err?.response?.data?.message || t("messages.createPaymentError");
       showError(msg);
     },
   });
@@ -592,10 +570,10 @@ export default function useBookingManagement() {
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ["admin-bookings", filter] });
       qc.invalidateQueries({ queryKey: ["available-rooms-create"] });
-      showSuccess(`Thanh toán thành công`);
+      showSuccess(t("messages.paymentSuccess"));
     },
     onError: () => {
-      showError("Thanh toán đã hoàn thành thất bại");
+      showError(t("messages.completePaymentError"));
     },
   });
 
@@ -607,10 +585,10 @@ export default function useBookingManagement() {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-bookings", filter] });
-      showSuccess("Hủy thanh toán thành công");
+      showSuccess(t("messages.cancelPaymentSuccess"));
     },
     onError: () => {
-      showError("Hủy thanh toán thất bại");
+      showError(t("messages.cancelPaymentError"));
     },
   });
 
@@ -645,7 +623,7 @@ export default function useBookingManagement() {
     },
 
     onError: () => {
-      showError("Tạo thanh toán online thất bại");
+      showError(t("messages.createOnlinePaymentError"));
     },
   });
   const handleCreateQr = async (paymentId: number) =>
@@ -659,7 +637,7 @@ export default function useBookingManagement() {
       });
     },
     onSuccess: async (_data) => {
-      showSuccess("Thay đổi phòng thành công");
+      showSuccess(t("messages.changeRoomSuccess"));
 
       await qc.invalidateQueries({
         queryKey: ["booking-detail", selectedBookingId],
@@ -672,31 +650,43 @@ export default function useBookingManagement() {
       });
     },
     onError: (e: any) => {
-      const msg = e.response?.data?.message || "Thay đổi phòng thất bại";
+      const msg = e.response?.data?.message || t("messages.changeRoomError");
       showError(msg);
     },
   });
   const mConfirmCheckIn = useMutation({
     mutationFn: (bookingId: string) => StaffBookingService.checkin(bookingId),
     onSuccess: (_data) => {
-      showSuccess("Nhận phòng thành công");
+      showSuccess(t("messages.checkInSuccess"));
       qc.invalidateQueries({ queryKey: ["admin-bookings", filter] });
       qc.invalidateQueries({ queryKey: ["booking-detail", selectedBookingId] });
+      qc.invalidateQueries({ queryKey: ["dashboard", "summary"] });
+      qc.invalidateQueries({ queryKey: ["dashboard", "checkins"] });
+      qc.invalidateQueries({ queryKey: ["dashboard", "checkouts"] });
+      qc.invalidateQueries({ queryKey: ["rooms"] });
+      qc.invalidateQueries({ queryKey: ["available-rooms-create"] });
+      qc.invalidateQueries({ queryKey: ["available-rooms-change"] });
     },
     onError: () => {
-      showError("Nhận phòng thất bại");
+      showError(t("messages.checkInError"));
     },
   });
 
   const mConfirmCheckOut = useMutation({
     mutationFn: (bookingId: string) => StaffBookingService.checkout(bookingId),
     onSuccess: (_data, bookingId) => {
-      showSuccess("Trả phòng thành công");
+      showSuccess(t("messages.checkOutSuccess"));
       qc.invalidateQueries({ queryKey: ["admin-bookings", filter] });
       qc.invalidateQueries({ queryKey: ["booking-detail", bookingId] });
+      qc.invalidateQueries({ queryKey: ["dashboard", "summary"] });
+      qc.invalidateQueries({ queryKey: ["dashboard", "checkins"] });
+      qc.invalidateQueries({ queryKey: ["dashboard", "checkouts"] });
+      qc.invalidateQueries({ queryKey: ["rooms"] });
+      qc.invalidateQueries({ queryKey: ["available-rooms-create"] });
+      qc.invalidateQueries({ queryKey: ["available-rooms-change"] });
     },
     onError: () => {
-      showError("Trả phòng thất bại");
+      showError(t("messages.checkOutError"));
     },
   });
 
@@ -704,13 +694,13 @@ export default function useBookingManagement() {
     mutationFn: (body: BookingCancelRequest) =>
       StaffBookingService.cancel(body),
     onSuccess: (_data, bookingId) => {
-      showSuccess("Hủy phòng thành công");
+      showSuccess(t("messages.cancelBookingSuccess"));
       closeCancelDialog();
       qc.invalidateQueries({ queryKey: ["admin-bookings", filter] });
       qc.invalidateQueries({ queryKey: ["booking-detail", selectedBookingId] });
     },
     onError: () => {
-      showError("Hủy phòng thất bại");
+      showError(t("messages.cancelBookingError"));
     },
   });
   const handleChangeRoom = async (roomId: number) => {
@@ -724,7 +714,7 @@ export default function useBookingManagement() {
   const handleCheckout = async (bookingId: string, remain: number) => {
     if (remain) {
       setBookingViewTab("payment");
-      showError("Yêu cầu thanh toán toàn bộ hóa đơn trước khi trả phòng");
+      showError(t("messages.paymentRequiredBeforeCheckOut"));
       return;
     }
     await mConfirmCheckOut.mutateAsync(bookingId);
@@ -733,7 +723,7 @@ export default function useBookingManagement() {
   const handleCheckIn = async (bookingId: string, remain: number) => {
     if (remain) {
       setBookingViewTab("payment");
-      showError("Yêu cầu thanh toán tiền phòng trước khi nhận phòng");
+      showError(t("messages.paymentRequiredBeforeCheckIn"));
       return;
     }
     await mConfirmCheckIn.mutateAsync(bookingId);
@@ -780,7 +770,7 @@ export default function useBookingManagement() {
           queryKey: ["housekeeping-detail", selectedBookingId],
         });
 
-        showSuccess("Phòng đã được kiểm tra xong");
+        showSuccess(t("messages.roomInspectionComplete"));
       }
     },
   });
@@ -790,9 +780,9 @@ export default function useBookingManagement() {
       await StaffHousekeepingService.create(data),
     onSuccess: (data) => {
       if (data.staff?.id) {
-        showSuccess("Tạo nhiệm vụ dọn phòng thành công");
+        showSuccess(t("messages.housekeepingTaskCreated"));
       } else {
-        showWarning("Không có nhân viên dọn phòng đang trong ca làm!");
+        showWarning(t("messages.noHousekeepingStaffOnShift"));
       }
 
       qc.invalidateQueries({
@@ -814,7 +804,7 @@ export default function useBookingManagement() {
       const msg =
         error?.response?.data?.message ||
         error?.message ||
-        "Tạo nhiệm vụ buồng phòng thất bại";
+        t("messages.createHousekeepingTaskError");
       showError(msg);
     },
   });
@@ -886,7 +876,7 @@ export default function useBookingManagement() {
 
   const confirmCancel = () => {
     if (!cancelReason.trim()) {
-      showError("Vui lòng nhập lý do hủy phòng.");
+      showError(t("validation.cancelReasonRequired"));
       return;
     }
     if (!selectedBookingId) return;
@@ -928,7 +918,7 @@ export default function useBookingManagement() {
           });
         }
       } catch (error) {
-        console.error("Kiểm tra trạng thái thanh toán thất bại", error);
+        console.error("Payment status check failed", error);
       }
     }, 15_000);
 
@@ -1044,6 +1034,7 @@ export default function useBookingManagement() {
     roomTypes,
     bookings,
     loadingBookingList,
+    bookingListError,
     alert,
     closeSnackbar,
     pagination,
@@ -1054,11 +1045,14 @@ export default function useBookingManagement() {
     loadingCheckInDetail,
     handleCheckIn,
     handleCheckout,
+    isCheckingIn: mConfirmCheckIn.isPending,
+    isCheckingOut: mConfirmCheckOut.isPending,
     handleCancelled,
     handleChangeRoom,
     showLoadingOverlay: mMarkPaymentAsPaid.isPending,
     onChangePageService,
     services,
+    loadingServices,
     onView,
     filterService,
     onChangeTabService,
@@ -1106,11 +1100,8 @@ export default function useBookingManagement() {
     closePaymentDialog,
     handleCreateQr,
     invoiceSummary,
-    getLabelMethod,
-    getLabelStatus,
-    getLabelType,
-    getLabeBookinglStatus,
     isPendingCreateQr: mCreatePaymentOnline.isPending,
+    isPendingMarkPaymentAsPaid: mMarkPaymentAsPaid.isPending,
     handleMarkPaymentAsPaid,
   };
 }

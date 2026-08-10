@@ -10,10 +10,11 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import { useState } from "react";
 import { useBookingManagementContext } from "@context/booking-management";
+import { useTranslation } from "react-i18next";
 
 const CancelBookingDialog = () => {
+  const { t } = useTranslation(["bookings", "common"]);
   const {
     cancelOpen,
     closeCancelDialog,
@@ -31,7 +32,7 @@ const CancelBookingDialog = () => {
         sx: { borderRadius: 2, p: 0, overflow: "visible" },
       }}
     >
-      {/* nút X */}
+      {/* Close control */}
       <IconButton
         size="small"
         onClick={confirmCancel}
@@ -41,7 +42,7 @@ const CancelBookingDialog = () => {
       </IconButton>
 
       <DialogContent sx={{ pt: 5, pb: 3, px: 4 }}>
-        {/* icon tròn đỏ */}
+        {/* Destructive action icon */}
         <Box display="flex" justifyContent="center" mb={2}>
           <Box
             sx={{
@@ -58,14 +59,14 @@ const CancelBookingDialog = () => {
           </Box>
         </Box>
 
-        {/* tiêu đề + mô tả */}
+        {/* Title and description */}
         <Typography
           align="center"
           fontWeight={600}
           mb={0.5}
           variant="subtitle1"
         >
-          Xác nhận hủy đặt phòng
+          {t("cancelDialog.title", { ns: "bookings" })}
         </Typography>
         <Typography
           align="center"
@@ -73,13 +74,13 @@ const CancelBookingDialog = () => {
           color="text.secondary"
           mb={3}
         >
-          Vui lòng cho chúng tôi biết lý do bạn muốn hủy đặt phòng này.
+          {t("cancelDialog.description", { ns: "bookings" })}
         </Typography>
 
-        {/* lý do hủy */}
+        {/* Cancellation reason */}
         <Stack spacing={1} mb={3}>
           <Typography variant="body2" fontWeight={500}>
-            Lý do hủy phòng{" "}
+            {t("cancelDialog.reason", { ns: "bookings" })}{" "}
             <Box component="span" sx={{ color: "error.main" }}>
               *
             </Box>
@@ -88,13 +89,13 @@ const CancelBookingDialog = () => {
             multiline
             minRows={3}
             fullWidth
-            placeholder="Nhập lý do hủy phòng của bạn…"
+            placeholder={t("cancelDialog.reasonPlaceholder", { ns: "bookings" })}
             value={cancelReason}
             onChange={(e) => setCancelReason(e.target.value)}
           />
         </Stack>
 
-        {/* nút hành động */}
+        {/* Dialog actions */}
         <Stack spacing={1.2} direction={"row"}>
           <Button
             variant="contained"
@@ -106,7 +107,7 @@ const CancelBookingDialog = () => {
               "&:hover": { bgcolor: "#C62828" },
             }}
           >
-            Xác nhận hủy
+            {t("cancelDialog.confirm", { ns: "bookings" })}
           </Button>
 
           <Button
@@ -118,7 +119,7 @@ const CancelBookingDialog = () => {
               bgcolor: "#fafafa",
             }}
           >
-            Giữ đặt phòng
+            {t("cancelDialog.keep", { ns: "bookings" })}
           </Button>
         </Stack>
       </DialogContent>

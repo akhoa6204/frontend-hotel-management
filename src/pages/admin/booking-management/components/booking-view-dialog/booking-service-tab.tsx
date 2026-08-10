@@ -1,4 +1,3 @@
-import { Invoice, Service, ServiceType } from "@constant/types";
 import {
   Box,
   Typography,
@@ -11,14 +10,17 @@ import {
   IconButton,
   Button,
   CircularProgress,
+  Stack,
 } from "@mui/material";
 import { Add, Remove } from "@mui/icons-material";
 import Pager from "@components/pager";
 import { fmtVND } from "@utils/format";
-import { ServiceResponse } from "@constant/response/ServiceResponse";
+import type { ServiceResponse } from "@constant/response/ServiceResponse";
 import { useBookingManagementContext } from "@context/booking-management";
+import { useTranslation } from "react-i18next";
 
 export default function BookingServiceTab() {
+  const { t } = useTranslation(["bookings", "common"]);
   const {
     services,
     invoiceDetail: invoice,
@@ -32,32 +34,32 @@ export default function BookingServiceTab() {
     canEdit,
     addService,
     invoiceDetail,
+    loadingServices,
   } = useBookingManagementContext();
   return (
-    <Grid container spacing={3} alignItems="flex-start">
+    <Grid container spacing={{ xs: 3, md: 2.5 }} alignItems="flex-start">
       <Grid
-        size={6}
+        size={{ xs: 12, md: 7 }}
         sx={{
-          position: "sticky",
-          top: 0,
-          bgcolor: "background.paper",
+          borderRight: { md: "1px solid #E4E7EC" },
+          pr: { md: 2.5 },
         }}
       >
-        <Typography fontWeight={600} mb={1}>
-          Dịch vụ khách sạn
+        <Typography fontSize={15} fontWeight={650}>
+          {t("detail.hotelServices", { ns: "bookings" })}
         </Typography>
 
         <Tabs
           value={filterService.type}
           onChange={(_, v) => onChangeTabService(v)}
-          sx={{ mb: 1 }}
+          sx={{ minHeight: 40, mt: 0.5, mb: 0.5, "& .MuiTab-root": { minHeight: 40, minWidth: 100, px: 1.5, fontSize: 13 } }}
         >
-          <Tab value="SERVICE" label="Dịch vụ" />
-          <Tab value="EXTRA_FEE" label="Phí phát sinh" />
+          <Tab value="SERVICE" label={t("detail.serviceTab", { ns: "bookings" })} />
+          <Tab value="EXTRA_FEE" label={t("detail.incidentalsTab", { ns: "bookings" })} />
         </Tabs>
 
-        <List sx={{ height: 320 }}>
-          {Array.isArray(services) && services.length > 0
+        <List className="admin-scrollbar" disablePadding sx={{ minHeight: 260, maxHeight: 360, overflowY: "auto" }}>
+          {loadingServices ? <Stack alignItems="center" justifyContent="center" spacing={1} py={5}><CircularProgress size={24} /><Typography variant="body2" color="text.secondary">{t("detail.loadingServices", { ns: "bookings" })}</Typography></Stack> : Array.isArray(services) && services.length > 0
             ? services
                 .filter((s: ServiceResponse) => s.type === filterService.type)
                 .map((s: ServiceResponse) => {
@@ -70,10 +72,12 @@ export default function BookingServiceTab() {
                       key={s.id}
                       divider
                       sx={{
+                        px: 0,
+                        py: 1.25,
                         cursor: canEdit ? "pointer" : "not-allowed",
                         transition: "all .15s ease",
                         "&:hover": {
-                          bgcolor: "#f5f5f5",
+                          bgcolor: "#F9FAFB",
                         },
                       }}
                       onClick={() => {
@@ -83,7 +87,7 @@ export default function BookingServiceTab() {
                       }}
                       secondaryAction={
                         <Typography fontWeight={600}>
-                          {fmtVND(s.basePrice)} đ
+                          {fmtVND(s.basePrice)} {t("currency.symbol", { ns: "bookings" })}
                         </Typography>
                       }
                     >
@@ -97,10 +101,10 @@ export default function BookingServiceTab() {
                                 px={1}
                                 py={0.25}
                                 borderRadius={1}
-                                bgcolor="#2E90FA"
-                                color="#fff"
+                                bgcolor="#EAF4FF"
+                                color="#1D6FC2"
                               >
-                                Đã thêm
+                                {t("detail.added", { ns: "bookings" })}
                               </Typography>
                             )}
                           </Box>
@@ -110,11 +114,11 @@ export default function BookingServiceTab() {
                     </ListItem>
                   );
                 })
-            : ""}
+            : <Box py={5} textAlign="center"><Typography fontWeight={600}>{t("detail.noMatchingServices", { ns: "bookings" })}</Typography><Typography variant="body2" color="text.secondary">{t("detail.servicesEmptyHint", { ns: "bookings" })}</Typography></Box>}
         </List>
 
         {(metaServices?.totalPages || 1) > 1 && (
-          <Box display="flex" justifyContent="center">
+          <Box display="flex" justifyContent="center" pt={1.5}>
             <Pager
               totalPages={metaServices?.totalPages || 1}
               page={metaServices?.page || 1}
@@ -125,9 +129,9 @@ export default function BookingServiceTab() {
       </Grid>
 
       {/* BOOKING SERVICES */}
-      <Grid size={6}>
-        <Typography fontWeight={600} mb={1}>
-          Dịch vụ của booking
+      <Grid size={{ xs: 12, md: 5 }}>
+        <Typography fontSize={15} fontWeight={650} mb={1}>
+          {t("detail.bookingServices", { ns: "bookings" })}
         </Typography>
 
         {loadingInvoiceDetail ? (
@@ -135,14 +139,14 @@ export default function BookingServiceTab() {
             <CircularProgress size={28} />
           </Box>
         ) : (invoiceDetail?.invoiceItems?.length || 1) > 1 ? (
-          <List>
+          <List disablePadding>
             {invoiceDetail?.invoiceItems
               .filter((item) => item.extraService)
               .map((item) => (
                 <ListItem
                   key={item.id}
                   divider
-                  secondaryAction={
+                  sx={{ px: 0, py: 1.25 }} secondaryAction={
                     <Box display="flex" alignItems="center" gap={1}>
                       <IconButton
                         size="small"
@@ -178,20 +182,20 @@ export default function BookingServiceTab() {
                         disabled={!canEdit}
                         onClick={() => removeService(item.id)}
                       >
-                        Xóa
+                        {t("actions.delete", { ns: "common" })}
                       </Button>
                     </Box>
                   }
                 >
                   <ListItemText
                     primary={item.extraService?.name}
-                    secondary={`Số lượng: ${item.quantity}`}
+                    secondary={t("detail.quantity", { ns: "bookings", count: item.quantity })}
                   />
                 </ListItem>
               ))}
           </List>
         ) : (
-          <Typography color="text.secondary">Chưa có dịch vụ nào</Typography>
+          <Box sx={{ mt: 1, py: 4, px: 2, textAlign: "center", bgcolor: "#F9FAFB", border: "1px dashed #D0D5DD", borderRadius: "10px" }}><Typography fontWeight={600}>{t("detail.noServices", { ns: "bookings" })}</Typography><Typography variant="body2" color="text.secondary" mt={0.5}>{t("detail.noServicesHint", { ns: "bookings" })}</Typography></Box>
         )}
       </Grid>
     </Grid>
