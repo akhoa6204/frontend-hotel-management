@@ -6,6 +6,7 @@ import {
   TextField,
 } from "@mui/material";
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   name: string;
@@ -16,6 +17,8 @@ interface Props {
   placeholder?: string;
   size?: "medium" | "small";
   disabled?: boolean;
+  error?: boolean;
+  helperText?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -28,8 +31,12 @@ const EntityPickerField: React.FC<Props> = ({
   placeholder,
   size = "medium",
   disabled,
+  error,
+  helperText,
   children,
 }) => {
+  const { t } = useTranslation("common");
+
   return (
     <TextField
       name={name}
@@ -40,6 +47,8 @@ const EntityPickerField: React.FC<Props> = ({
       size={size}
       SelectProps={{ displayEmpty: true }}
       disabled={disabled}
+      error={error}
+      helperText={helperText}
     >
       {placeholder && (
         <MenuItem value="" disabled>
@@ -61,7 +70,7 @@ const EntityPickerField: React.FC<Props> = ({
             }}
             sx={{ fontSize: 14 }}
           >
-            Tìm hiểu thêm...
+            {t("actions.showMore")}
           </ListItemButton>
         </Box>
       )}

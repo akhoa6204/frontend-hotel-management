@@ -16,17 +16,22 @@ import {
   Stack,
   CircularProgress,
 } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
-interface Props {
+interface EntityRow {
+  id: string | number;
+}
+
+interface Props<T extends EntityRow> {
   loading: boolean;
-  data: any[];
+  data: T[];
   onClose: () => void;
   open: boolean;
   selectedId: string | number | null;
   title: string;
   columns: { label: string; name: string }[];
 
-  onSelect?: (row: any) => void; // thêm dòng này
+  onSelect?: (row: T) => void;
 
   q?: string;
   onSearch?: (value: string) => void;
@@ -36,12 +41,12 @@ interface Props {
   onPageChange: (page: number) => void;
 }
 
-const EntityPickerDialog = ({
+const EntityPickerDialog = <T extends EntityRow,>({
   data,
   onClose,
   open,
   selectedId,
-  title = "Xem thêm Phòng",
+  title,
   columns = [],
   q,
   onSearch,
@@ -50,21 +55,25 @@ const EntityPickerDialog = ({
   onPageChange,
   onSelect,
   loading = false,
-}: Props) => {
-  const getValueByPath = (obj: any, path: string) => {
-    return path.split(".").reduce((acc, key) => acc?.[key], obj);
+}: Props<T>) => {
+  const { t } = useTranslation("common");
+  const getValueByPath = (obj: unknown, path: string): unknown => {
+    return path.split(".").reduce<unknown>((value, key) => {
+      if (typeof value !== "object" || value === null) return undefined;
+      return (value as Record<string, unknown>)[key];
+    }, obj);
   };
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>
-        <Typography>{title}</Typography>
+        <Typography>{title || t("entityPicker.defaultTitle")}</Typography>
       </DialogTitle>
       <DialogContent>
         <Box mb={2}>
           <TextField
             fullWidth
             size="small"
-            placeholder="Tìm kiếm..."
+            placeholder={t("entityPicker.search")}
             value={q ?? ""}
             onChange={(e) => onSearch?.(e.target.value)}
           />
@@ -88,7 +97,7 @@ const EntityPickerDialog = ({
                     spacing={1}
                   >
                     <CircularProgress size={24} />
-                    <Typography variant="body2">Đang tài dữ liệu...</Typography>
+                    <Typography variant="body2">{t("entityPicker.loading")}</Typography>
                   </Stack>
                 </TableCell>
               </TableRow>
@@ -96,12 +105,12 @@ const EntityPickerDialog = ({
               <TableRow>
                 <TableCell colSpan={columns.length} align="center">
                   <Typography color="text.secondary">
-                    Không có dữ liệu
+                    {t("entityPicker.empty")}
                   </Typography>
                 </TableCell>
               </TableRow>
             ) : (
-              data.map((row: any) => {
+              data.map((row) => {
                 return (
                   <TableRow
                     key={row.id}
@@ -115,7 +124,7 @@ const EntityPickerDialog = ({
 
                       return (
                         <TableCell key={`${row.id}-${col.name}`}>
-                          {value}
+                          {value == null ? "" : String(value)}
                         </TableCell>
                       );
                     })}
@@ -136,7 +145,7 @@ const EntityPickerDialog = ({
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Đóng</Button>
+        <Button onClick={onClose}>{t("actions.close")}</Button>
       </DialogActions>
     </Dialog>
   );
