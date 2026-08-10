@@ -1,83 +1,37 @@
-import { Paper, Typography, Stack } from "@mui/material";
-import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
-import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
-import TrendingDownOutlinedIcon from "@mui/icons-material/TrendingDownOutlined";
-import { formatMoneyShort } from "@utils/format";
+import type { ReactNode } from "react";
+import { Box, Paper, Skeleton, Stack, Typography } from "@mui/material";
 
 interface StatCardProps {
   label: string;
   value: string | number;
-  delta?: number | string | null;
-  deltaText?: string;
-  suffix?: string;
   loading?: boolean;
-  isMoney?: boolean;
+  icon: ReactNode;
 }
 
 export default function StatCard({
   label,
   value,
-  delta,
-  deltaText = "",
-  suffix = "%",
   loading = false,
-  isMoney = false,
+  icon,
 }: StatCardProps) {
-  const num = typeof delta === "string" ? Number(delta) : Number(delta ?? 0);
-  const isUp = num > 0;
-  const isDown = num < 0;
-  const color = isUp ? "#2E90FA" : isDown ? "error.main" : "text.secondary";
-
-  if (loading) return null;
-
-  const shownValue =
-    typeof value === "number" && isMoney ? formatMoneyShort(value) : value;
-
   return (
     <Paper
-      sx={{
-        p: 2,
-        borderRadius: 2.5,
-        borderColor: "#2E90FA",
-      }}
       variant="outlined"
+      sx={{
+        minHeight: 98,
+        p: 2,
+        borderRadius: "11px",
+        borderColor: "#E4E7EC",
+        boxShadow: "none",
+      }}
     >
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-        {label}
-      </Typography>
-
-      <Stack
-        direction="row"
-        spacing={1}
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <Typography variant="h5" fontWeight={700}>
-          {shownValue}
-        </Typography>
-        <AssignmentTurnedInOutlinedIcon sx={{ color: "#42a5f5" }} />
+      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2}>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography sx={{ color: "#667085", fontSize: 12.75, fontWeight: 600 }}>{label}</Typography>
+          {loading ? <Skeleton width={76} height={39} sx={{ mt: 0.2 }} /> : <Typography sx={{ mt: 0.35, color: "#1F2937", fontSize: { xs: 26, md: 28 }, lineHeight: 1.15, fontWeight: 700 }}>{value}</Typography>}
+        </Box>
+        <Box sx={{ width: 34, height: 34, flexShrink: 0, display: "grid", placeItems: "center", borderRadius: "8px", bgcolor: "#F0F6FD", color: "#2E90FA", "& svg": { fontSize: 19 } }}>{icon}</Box>
       </Stack>
-
-      {delta !== undefined && delta !== null ? (
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={0.5}
-          sx={{ mt: 0.5 }}
-        >
-          {isUp && <TrendingUpOutlinedIcon fontSize="small" sx={{ color }} />}
-          {isDown && (
-            <TrendingDownOutlinedIcon fontSize="small" sx={{ color }} />
-          )}
-          <Typography variant="caption" sx={{ color }}>
-            {isUp ? `+${num}${suffix}` : `${num}${suffix}`} {deltaText}
-          </Typography>
-        </Stack>
-      ) : (
-        <Typography variant="caption" sx={{ color }}>
-          Chưa có dữ liệu tháng trước
-        </Typography>
-      )}
     </Paper>
   );
 }

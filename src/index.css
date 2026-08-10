@@ -3,3 +3,32 @@
 * {
   scroll-behavior: smooth;
 }
+
+/* Scoped utility for scrollable surfaces inside Diamond Sea Admin. */
+.admin-scrollbar,
+body.diamond-sea-admin :where(.MuiDialogContent-root, .MuiTableContainer-root, .MuiDrawer-paper) {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(152, 162, 179, 0.35) transparent;
+}
+
+.admin-scrollbar::-webkit-scrollbar,
+body.diamond-sea-admin :where(.MuiDialogContent-root, .MuiTableContainer-root, .MuiDrawer-paper)::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.admin-scrollbar::-webkit-scrollbar-track,
+body.diamond-sea-admin :where(.MuiDialogContent-root, .MuiTableContainer-root, .MuiDrawer-paper)::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-scrollbar::-webkit-scrollbar-thumb,
+body.diamond-sea-admin :where(.MuiDialogContent-root, .MuiTableContainer-root, .MuiDrawer-paper)::-webkit-scrollbar-thumb {
+  background: rgba(152, 162, 179, 0.35);
+  border-radius: 999px;
+}
+
+.admin-scrollbar:hover::-webkit-scrollbar-thumb,
+body.diamond-sea-admin :where(.MuiDialogContent-root, .MuiTableContainer-root, .MuiDrawer-paper):hover::-webkit-scrollbar-thumb {
+  background: rgba(152, 162, 179, 0.55);
+}

@@ -10,14 +10,7 @@ import BookingStayOverview from "./components/BookingStayOverview";
 import CancelBookingDialog from "./components/CancelBookingDialog";
 import useBookingDetail from "./useBookingDetail";
 import { getBookingReviewAction } from "@utils/bookingReview";
-
-const statusLabels = {
-  PENDING: "Đang chờ xác nhận",
-  CONFIRMED: "Đã xác nhận",
-  CANCELLED: "Đã hủy",
-  CHECKED_IN: "Đang lưu trú",
-  CHECKED_OUT: "Đã hoàn tất",
-} as const;
+import { useTranslation } from "react-i18next";
 
 const statusColors = {
   PENDING: { color: "#8A6116", background: "#FFF6DD" },
@@ -28,6 +21,7 @@ const statusColors = {
 } as const;
 
 const BookingDetailPage = () => {
+  const { t } = useTranslation("client");
   const {
     booking,
     existingReview,
@@ -53,7 +47,7 @@ const BookingDetailPage = () => {
     return (
       <Stack minHeight={420} alignItems="center" justifyContent="center" spacing={2}>
         <CircularProgress size={28} thickness={3} />
-        <Typography color="text.secondary">Đang tải thông tin kỳ nghỉ…</Typography>
+        <Typography color="text.secondary">{t("bookingDetail.states.loading")}</Typography>
       </Stack>
     );
   }
@@ -63,13 +57,13 @@ const BookingDetailPage = () => {
       <Stack minHeight={420} alignItems="center" justifyContent="center" spacing={2} textAlign="center">
         <ErrorOutlineRounded sx={{ color: "text.secondary", fontSize: 38 }} />
         <Box>
-          <Typography variant="h6" fontWeight={600}>Không thể tải đặt phòng</Typography>
+          <Typography variant="h6" fontWeight={600}>{t("bookingDetail.states.loadErrorTitle")}</Typography>
           <Typography color="text.secondary" mt={0.5}>
-            Đặt phòng không tồn tại hoặc hiện chưa thể truy cập.
+            {t("bookingDetail.states.loadErrorDescription")}
           </Typography>
         </Box>
         <Button onClick={onBack} startIcon={<ArrowBackRounded />} sx={{ textTransform: "none" }}>
-          Trở về đặt phòng của tôi
+          {t("bookingDetail.actions.backToBookings")}
         </Button>
       </Stack>
     );
@@ -88,7 +82,7 @@ const BookingDetailPage = () => {
         startIcon={<ArrowBackRounded />}
         sx={{ color: "text.secondary", textTransform: "none", px: 0, mb: { xs: 2.5, md: 3.5 } }}
       >
-        Đặt phòng của tôi
+        {t("bookingDetail.actions.myBookings")}
       </Button>
 
       <Box component="header" sx={{ mb: { xs: 2.25, md: 3 } }}>
@@ -98,7 +92,7 @@ const BookingDetailPage = () => {
               component="p"
               sx={{ color: "primary.main", fontSize: 12, fontWeight: 700, letterSpacing: "0.16em", mb: 1 }}
             >
-              KỲ NGHỈ CỦA BẠN
+              {t("bookingDetail.hero.eyebrow")}
             </Typography>
             <Typography
               component="h1"
@@ -107,7 +101,7 @@ const BookingDetailPage = () => {
               {booking.room.roomType.name}
             </Typography>
             <Typography color="text.secondary" mt={1} fontSize={14}>
-              Mã đặt phòng: {booking.bookingCode}
+              {t("bookingDetail.hero.bookingCode", { code: booking.bookingCode })}
             </Typography>
           </Box>
           <Box
@@ -115,7 +109,7 @@ const BookingDetailPage = () => {
             sx={{ alignSelf: { xs: "flex-start", sm: "center" }, display: "inline-flex", alignItems: "center", gap: 1, px: 1.5, py: 0.75, borderRadius: 99, color: statusStyle.color, bgcolor: statusStyle.background, fontSize: 13, fontWeight: 650 }}
           >
             <Box aria-hidden sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: "currentColor" }} />
-            {statusLabels[booking.status]}
+            {t(`bookingDetail.status.${booking.status}`)}
           </Box>
         </Stack>
       </Box>
@@ -129,12 +123,12 @@ const BookingDetailPage = () => {
 
       <Box component="section" sx={{ mt: { xs: 4, md: 5.5 }, pt: { xs: 3, md: 3.5 }, borderTop: "1px solid", borderColor: "divider" }}>
         <Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', color: "text.primary", fontSize: 24, mb: 1 }}>
-          Chính sách đặt phòng
+          {t("bookingDetail.policies.title")}
         </Typography>
         <Typography color="text.secondary" sx={{ maxWidth: 760, lineHeight: 1.7 }}>
           {booking.refundable
-            ? "Đặt phòng này được ghi nhận là có thể hoàn tiền. Điều kiện và số tiền hoàn thực tế được áp dụng theo xác nhận của khách sạn."
-            : "Đặt phòng này được ghi nhận là không hoàn tiền. Vui lòng liên hệ khách sạn nếu bạn cần hỗ trợ."}
+            ? t("bookingDetail.policies.refundable")
+            : t("bookingDetail.policies.nonRefundable")}
         </Typography>
       </Box>
 
@@ -148,8 +142,8 @@ const BookingDetailPage = () => {
           sx={{ mt: { xs: 3, md: 3.25 }, pt: 2.25, borderTop: "1px solid", borderColor: "divider", "& .MuiButton-root": { minHeight: 42, textTransform: "none", px: 2.25, width: { xs: 1, sm: "auto" } } }}
         >
           <Box>
-            <Typography fontWeight={650} color="text.primary">Quản lý đặt phòng</Typography>
-            <Typography variant="body2" color="text.secondary" mt={0.2}>Các thao tác hiện có cho đặt phòng này.</Typography>
+            <Typography fontWeight={650} color="text.primary">{t("bookingDetail.management.title")}</Typography>
+            <Typography variant="body2" color="text.secondary" mt={0.2}>{t("bookingDetail.management.description")}</Typography>
           </Box>
           <Stack
             direction={{ xs: "column", sm: "row" }}
@@ -158,7 +152,7 @@ const BookingDetailPage = () => {
           >
             {booking.status === "CONFIRMED" && (
               <Button color="error" variant="outlined" onClick={openCancelDialog}>
-                Hủy đặt phòng
+                {t("bookingDetail.actions.cancelBooking")}
               </Button>
             )}
             {canRebook && (
@@ -168,7 +162,7 @@ const BookingDetailPage = () => {
                 onClick={onReBook}
                 sx={{ order: { xs: reviewAction.type === "write" ? 2 : 1, sm: 1 } }}
               >
-                Đặt lại phòng
+                {t("bookingDetail.actions.bookAgain")}
               </Button>
             )}
             {reviewAction.type === "write" && (
@@ -178,7 +172,7 @@ const BookingDetailPage = () => {
                 onClick={onReview}
                 sx={{ order: { xs: 1, sm: 2 } }}
               >
-                Viết đánh giá
+                {t("bookingDetail.actions.writeReview")}
               </Button>
             )}
             {reviewAction.type === "view" && (
@@ -188,7 +182,7 @@ const BookingDetailPage = () => {
                 onClick={() => onViewReview(reviewAction.reviewId)}
                 sx={{ order: { xs: 1, sm: 2 } }}
               >
-                Xem đánh giá
+                {t("bookingDetail.actions.viewReview")}
               </Button>
             )}
           </Stack>

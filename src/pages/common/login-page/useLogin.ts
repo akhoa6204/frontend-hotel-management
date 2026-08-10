@@ -9,17 +9,13 @@ import { useMutation } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { LoginRequest } from "@constant/request/LoginRequest";
 import type { AuthenticationResponse } from "@constant/response/AuthenticationResponse";
+import { useTranslation } from "react-i18next";
 
 const initialForm: LoginRequest = { email: "", password: "" };
 
 const isEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e || "");
-const validate = (f: LoginRequest): Errors<LoginRequest> => {
-  const err: Errors<LoginRequest> = {};
-  if (!isEmail(f.email)) err.email = "Email không hợp lệ";
-  if (!f.password) err.password = "Mật khẩu không hợp lệ";
-  return err;
-};
 const useLogin = () => {
+  const { t } = useTranslation("client");
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { alert, closeSnackbar, showError } = useSnackbar();
@@ -54,11 +50,18 @@ const useLogin = () => {
       navigate("/", { replace: true });
     },
     onError: (error: AxiosError<{ message?: string }>) => {
-      const msg = error.response?.data?.message || "Không thể đăng nhập. Vui lòng kiểm tra thông tin và thử lại.";
+      const msg = error.response?.data?.message || t("login.errors.loginFailed");
       showError(msg);
     },
   });
   const location = useLocation();
+
+  const validate = (formData: LoginRequest): Errors<LoginRequest> => {
+    const validationErrors: Errors<LoginRequest> = {};
+    if (!isEmail(formData.email)) validationErrors.email = t("login.validation.invalidEmail");
+    if (!formData.password) validationErrors.password = t("login.validation.invalidPassword");
+    return validationErrors;
+  };
 
   const { form, errors, onChange, onSubmit } = useForm<LoginRequest>(
     initialForm,

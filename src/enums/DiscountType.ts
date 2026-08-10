@@ -1,1 +1,1 @@
-export type DiscountType = "PERCENTAGE" | "FIXED";
+export type DiscountType = "PERCENTAGE" | "FIXED_AMOUNT";

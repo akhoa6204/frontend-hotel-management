@@ -1,187 +1,122 @@
+import { useState } from "react";
 import {
+  Box,
   Card,
   CardContent,
   CardMedia,
+  Chip,
+  CircularProgress,
+  IconButton,
+  Menu,
+  MenuItem,
   Stack,
   Typography,
-  Chip,
-  Button,
-  Select,
-  MenuItem,
 } from "@mui/material";
-import {
-  Edit,
-  Delete,
-  PeopleAlt,
-  KeyboardArrowDown,
-} from "@mui/icons-material";
-import { RoomStatus } from "@constant/types";
-import { RoomResponse } from "@constant/response/RoomResponse";
-import { fmtVND } from "@utils/format";
+import { Check, DeleteOutline, EditOutlined, MoreVert, PeopleAltOutlined } from "@mui/icons-material";
+import type { RoomStatus } from "@enums/RoomStatus";
+import type { RoomResponse } from "@constant/response/RoomResponse";
+import { ImageHotel } from "@assets/images";
+import { useTranslation } from "react-i18next";
 
-export const ROOM_STATUS_LABEL: Record<RoomStatus, string> = {
-  VACANT_CLEAN: "Trống - Sạch",
-  VACANT_DIRTY: "Trống - Cần dọn",
-  OCCUPIED_CLEAN: "Đang ở - Sạch",
-  OCCUPIED_DIRTY: "Đang ở - Cần dọn",
-  OUT_OF_SERVICE: "Bảo trì",
+const STATUS_VIEW: Record<RoomStatus, { background: string; color: string; dot: string }> = {
+  VACANT_CLEAN: { background: "#EAF6F0", color: "#246548", dot: "#2E7D5B" },
+  VACANT_DIRTY: { background: "#FFF5E5", color: "#9A6518", dot: "#C98520" },
+  OCCUPIED_CLEAN: { background: "#EAF4FF", color: "#1D6FC2", dot: "#2E90FA" },
+  OCCUPIED_DIRTY: { background: "#FFF5E5", color: "#9A6518", dot: "#C98520" },
+  OUT_OF_SERVICE: { background: "#FDECEC", color: "#A43B3B", dot: "#C94A4A" },
 };
 
-const STATUS_VIEW: Record<
-  NonNullable<RoomStatus>,
-  { label: string; color: "success" | "warning" | "error" | "default" }
-> = {
-  VACANT_CLEAN: { label: "Trống - Sạch", color: "success" },
-  VACANT_DIRTY: { label: "Trống - Cần dọn", color: "warning" },
-  OCCUPIED_CLEAN: { label: "Đang ở - Sạch", color: "success" },
-  OCCUPIED_DIRTY: { label: "Đang ở - Cần dọn", color: "warning" },
-  OUT_OF_SERVICE: { label: "Bảo trì", color: "error" },
-};
-
-type Props = {
+interface Props {
   room: RoomResponse;
   onEdit?: (room: RoomResponse) => void;
-  onDelete?: (id: number) => void;
-  onEditStatus?: (id: number, status: NonNullable<RoomStatus>) => void;
-};
+  onDelete?: (id: number) => void | Promise<void>;
+  onEditStatus?: (id: number, status: RoomStatus) => void | Promise<void>;
+}
 
-const RoomCard: React.FC<Props> = ({
-  room,
-  onEdit,
-  onDelete,
-  onEditStatus,
-}) => {
-  const image = room.roomType?.roomTypeImages?.[0]?.url;
+const RoomCard = ({ room, onEdit, onDelete, onEditStatus }: Props) => {
+  const { t, i18n } = useTranslation(["rooms", "common"]);
+  const [statusAnchor, setStatusAnchor] = useState<HTMLElement | null>(null);
+  const [actionsAnchor, setActionsAnchor] = useState<HTMLElement | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const image = room.roomType?.roomTypeImages?.[0]?.url || ImageHotel;
+  const currentStatus = room.status || "VACANT_CLEAN";
+  const status = STATUS_VIEW[currentStatus];
+  const statusOptions: RoomStatus[] = currentStatus === "OUT_OF_SERVICE"
+    ? ["VACANT_CLEAN"]
+    : [currentStatus, "OUT_OF_SERVICE"];
+  const formattedPrice = Number(room.roomType?.basePrice || 0).toLocaleString(
+    i18n.resolvedLanguage === "en" ? "en-US" : "vi-VN",
+  );
 
-  const currentStatus = (room.status ||
-    "VACANT_CLEAN") as NonNullable<RoomStatus>;
+  const changeStatus = async (nextStatus: RoomStatus) => {
+    if (nextStatus === currentStatus || updatingStatus) {
+      setStatusAnchor(null);
+      return;
+    }
 
-  const statusOptions: NonNullable<RoomStatus>[] =
-    currentStatus === "OUT_OF_SERVICE"
-      ? ["VACANT_CLEAN"]
-      : [currentStatus, "OUT_OF_SERVICE"];
+    setUpdatingStatus(true);
+    try {
+      await onEditStatus?.(room.id, nextStatus);
+    } finally {
+      setUpdatingStatus(false);
+      setStatusAnchor(null);
+    }
+  };
 
   return (
-    <Card
-      sx={{
-        borderRadius: 3,
-        overflow: "hidden",
-        boxShadow: 2,
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      {/* Ảnh phòng */}
-      <CardMedia
-        component="img"
-        image={image}
-        alt={room.name}
-        sx={{
-          height: 208,
-          width: "100%",
-          objectFit: "cover",
-        }}
-      />
+    <Card variant="outlined" sx={{ height: "100%", overflow: "hidden", borderColor: "#E4E7EC", borderRadius: "11px", bgcolor: "#FFFFFF", boxShadow: "none", transition: "border-color 120ms ease", "&:hover": { borderColor: "#D0D5DD" } }}>
+      <CardMedia component="img" image={image} alt={t("aria.roomImage", { name: room.name })} sx={{ width: "100%", height: { xs: 112, sm: 124 }, objectFit: "cover" }} />
 
-      {/* Nội dung */}
-      <CardContent sx={{ flexGrow: 1 }}>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          mb={1}
-        >
-          <Typography variant="h6" fontWeight={600}>
-            Phòng {room.name}
-          </Typography>
-          <Select
-            size="small"
-            variant="standard"
-            IconComponent={KeyboardArrowDown}
-            disableUnderline
-            value={currentStatus}
-            onChange={(e) =>
-              onEditStatus?.(room.id, e.target.value as NonNullable<RoomStatus>)
-            }
-            sx={{
-              minWidth: 160,
-              "& .MuiSelect-select": {
-                display: "flex",
-                alignItems: "center",
-                paddingRight: "28px !important",
-              },
-              "& .MuiSelect-icon": {
-                right: 4,
-              },
-            }}
-            renderValue={(selected) => {
-              const config = STATUS_VIEW[selected as NonNullable<RoomStatus>];
-              return (
-                <Chip
-                  label={config.label}
-                  color={config.color}
-                  size="small"
-                  variant="filled"
-                  sx={{ fontWeight: 600 }}
-                />
-              );
-            }}
-          >
-            {statusOptions.map((key) => {
-              const config = STATUS_VIEW[key];
-              return (
-                <MenuItem key={key} value={key}>
-                  <Chip
-                    label={config.label}
-                    color={config.color}
-                    size="small"
-                    variant="filled"
-                    sx={{ fontWeight: 600 }}
-                  />
-                </MenuItem>
-              );
-            })}
-          </Select>
+      <CardContent sx={{ p: 1.75, "&:last-child": { pb: 1.75 } }}>
+        <Stack direction="row" alignItems="flex-start" justifyContent="space-between" gap={1}>
+          <Box minWidth={0}>
+            <Typography sx={{ color: "#1F2937", fontSize: 18, lineHeight: 1.3, fontWeight: 700, overflowWrap: "anywhere" }}>{room.name}</Typography>
+            <Typography sx={{ mt: 0.35, color: "#667085", fontSize: 12, lineHeight: 1.4, fontWeight: 650, letterSpacing: "0.035em" }}>{room.roomType?.name}</Typography>
+          </Box>
+          <IconButton aria-label={t("aria.roomActions", { name: room.name })} size="small" onClick={(event) => setActionsAnchor(event.currentTarget)} sx={{ width: 32, height: 32, color: "#667085" }}><MoreVert fontSize="small" /></IconButton>
         </Stack>
 
-        {/* Loại phòng + sức chứa */}
-        <Typography variant="body2" color="text.secondary">
-          {room.roomType?.name}
+        <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1} sx={{ mt: 1.5 }}>
+          <Chip
+            component="button"
+            clickable
+            disabled={updatingStatus}
+            onClick={(event) => setStatusAnchor(event.currentTarget)}
+            label={updatingStatus ? t("states.updating", { ns: "common" }) : t(`status.${currentStatus}`, { ns: "rooms" })}
+            size="small"
+            sx={{ height: 25, maxWidth: "100%", border: 0, borderRadius: 999, bgcolor: status.background, color: status.color, fontSize: 11.5, fontWeight: 650, "& .MuiChip-label": { px: 1.1 } }}
+          />
+          <Stack direction="row" alignItems="center" spacing={0.5} flexShrink={0}>
+            <PeopleAltOutlined sx={{ color: "#98A2B3", fontSize: 17 }} />
+            <Typography sx={{ color: "#667085", fontSize: 12.5 }}>{t("guests", { count: room.roomType?.capacity || 0 })}</Typography>
+          </Stack>
+        </Stack>
+
+        <Typography sx={{ mt: 1.25, pt: 1.25, borderTop: "1px solid #EAECF0", color: "#1F2937", fontSize: 13.5, fontWeight: 650 }}>
+          {formattedPrice} {t("currency")} <Box component="span" sx={{ color: "#667085", fontWeight: 400 }}>{t("perNight")}</Box>
         </Typography>
-
-        <Stack direction="row" alignItems="center" spacing={1} mt={0.5}>
-          <PeopleAlt fontSize="small" color="action" />
-          <Typography variant="body2" color="text.secondary">
-            {room.roomType?.capacity || 0} người
-          </Typography>
-        </Stack>
-
-        {/* Giá */}
-        <Typography mt={1.5} fontWeight={600} color="primary" variant="body1">
-          {fmtVND(room.roomType?.basePrice || 0)} đ/đêm
-        </Typography>
-
-        {/* Hành động */}
-        <Stack direction="row" spacing={1.5} mt={2}>
-          <Button
-            variant="outlined"
-            startIcon={<Edit />}
-            size="small"
-            onClick={() => onEdit?.(room)}
-          >
-            Sửa
-          </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<Delete />}
-            size="small"
-            onClick={() => onDelete?.(room.id)}
-          >
-            Xóa
-          </Button>
-        </Stack>
       </CardContent>
+
+      <Menu anchorEl={statusAnchor} open={Boolean(statusAnchor)} onClose={() => setStatusAnchor(null)} MenuListProps={{ "aria-label": t("aria.updateRoomStatus", { name: room.name }), dense: true }} slotProps={{ paper: { sx: { width: 210, mt: 0.75, p: 0.5, borderRadius: "8px", boxShadow: "0 8px 24px rgba(16, 24, 40, 0.14)" } } }}>
+        <Typography sx={{ px: 1.25, py: 0.75, color: "#667085", fontSize: 11.5, fontWeight: 650 }}>{t("fields.status")}</Typography>
+        {statusOptions.map((option) => {
+          const optionView = STATUS_VIEW[option];
+          const selected = option === currentStatus;
+          return (
+            <MenuItem key={option} selected={selected} disabled={updatingStatus} onClick={() => changeStatus(option)} sx={{ minHeight: 38, px: 1.25, gap: 1, borderRadius: "6px", fontSize: 13 }}>
+              <Box sx={{ width: 8, height: 8, flexShrink: 0, borderRadius: "50%", bgcolor: optionView.dot }} />
+              <Typography sx={{ flex: 1, fontSize: 13, fontWeight: selected ? 650 : 500 }}>{t(`status.${option}`, { ns: "rooms" })}</Typography>
+              {selected && <Check sx={{ color: "primary.main", fontSize: 17 }} />}
+              {updatingStatus && !selected && <CircularProgress size={14} />}
+            </MenuItem>
+          );
+        })}
+      </Menu>
+
+      <Menu anchorEl={actionsAnchor} open={Boolean(actionsAnchor)} onClose={() => setActionsAnchor(null)} MenuListProps={{ "aria-label": t("aria.roomActions", { name: room.name }), dense: true }} slotProps={{ paper: { sx: { width: 180, mt: 0.5, p: 0.5, borderRadius: "8px", boxShadow: "0 8px 24px rgba(16, 24, 40, 0.14)" } } }}>
+        <MenuItem onClick={() => { setActionsAnchor(null); onEdit?.(room); }} sx={{ minHeight: 38, gap: 1, borderRadius: "6px", fontSize: 13 }}><EditOutlined sx={{ fontSize: 18, color: "#667085" }} />{t("actions.edit", { ns: "common" })}</MenuItem>
+        <MenuItem onClick={() => { setActionsAnchor(null); onDelete?.(room.id); }} sx={{ minHeight: 38, gap: 1, borderRadius: "6px", color: "error.main", fontSize: 13 }}><DeleteOutline sx={{ fontSize: 18 }} />{t("actions.delete", { ns: "rooms" })}</MenuItem>
+      </Menu>
     </Card>
   );
 };

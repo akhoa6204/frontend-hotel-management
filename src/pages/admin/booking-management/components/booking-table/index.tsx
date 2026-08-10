@@ -1,7 +1,7 @@
 import Pager from "@components/pager";
 import { useBookingManagementContext } from "@context/booking-management";
-import { BookingResponse } from "@constant/response/BookingResponse";
-import { BookingStatus } from "@enums/BookingStatus";
+import type { BookingResponse } from "@constant/response/BookingResponse";
+import type { BookingStatus } from "@enums/BookingStatus";
 import {
   Table,
   TableBody,
@@ -16,30 +16,34 @@ import {
   Box,
 } from "@mui/material";
 import { diffNights } from "@utils/format";
+import { useTranslation } from "react-i18next";
 
-const StatusChip = (status: BookingStatus) => {
+const StatusChip = ({ status }: { status: BookingStatus }) => {
+  const { t } = useTranslation("bookings");
   const map: Record<
     string,
     {
-      label: string;
-      color: "default" | "primary" | "warning" | "error" | "info" | "success";
+      background: string;
+      color: string;
     }
   > = {
-    PENDING: { label: "Chờ xác nhận", color: "warning" },
-    CONFIRMED: { label: "Đã xác nhận", color: "success" },
-    CANCELLED: { label: "Đã hủy", color: "error" },
-    CHECKED_IN: { label: "Đang ở", color: "primary" },
-    CHECKED_OUT: { label: "Đã trả phòng", color: "default" },
+    PENDING: { background: "#FFF5E5", color: "#9A6518" },
+    CONFIRMED: { background: "#EAF6F0", color: "#246548" },
+    CANCELLED: { background: "#FDECEC", color: "#A43B3B" },
+    CHECKED_IN: { background: "#EAF4FF", color: "#1D6FC2" },
+    CHECKED_OUT: { background: "#F2F4F7", color: "#475467" },
   };
   const s = map[status] || map.PENDING;
   return (
-    <Chip size="small" label={s.label} color={s.color} variant="outlined" />
+    <Chip size="small" label={t(`status.${status}`)} sx={{ height: 26, borderRadius: 999, bgcolor: s.background, color: s.color, fontSize: 12, fontWeight: 600, border: 0 }} />
   );
 };
 export default function BookingTable() {
+  const { t } = useTranslation(["bookings", "common"]);
   const {
     bookings,
     loadingBookingList: isLoading,
+    bookingListError,
     onView,
     pagination,
     handleChangePage,
@@ -58,49 +62,56 @@ export default function BookingTable() {
   return (
     <>
       <TableContainer
+        className="admin-scrollbar"
         component={Paper}
         sx={{
-          borderRadius: 2,
+          borderRadius: "12px",
+          border: "1px solid #E4E7EC",
           overflow: "hidden",
           overflowX: "auto",
         }}
-        elevation={1}
+        elevation={0}
       >
         <Table sx={{ minWidth: 1100 }}>
-          <TableHead sx={{ backgroundColor: "#2E90FA0d" }}>
+          <TableHead sx={{ backgroundColor: "#F9FAFB", "& th": { color: "#475467", fontSize: 12.5, fontWeight: 650, py: 1.4, borderColor: "#E4E7EC" } }}>
             <TableRow>
               <TableCell
                 sx={{
                   position: "sticky",
                   left: 0,
-                  background: "#fff",
+                  background: "#F9FAFB",
                   zIndex: 2,
                   fontWeight: 600,
-                  backgroundColor: "#2E90FA0d",
                 }}
               >
-                Mã
+                {t("columns.code", { ns: "bookings" })}
               </TableCell>
 
-              <TableCell>Khách</TableCell>
-              <TableCell>Điện thoại</TableCell>
-              <TableCell>Phòng</TableCell>
-              <TableCell>Check-in</TableCell>
-              <TableCell>Check-out</TableCell>
-              <TableCell>Đêm</TableCell>
-              <TableCell>Trạng thái</TableCell>
+              <TableCell>{t("columns.guest", { ns: "bookings" })}</TableCell>
+              <TableCell>{t("fields.phone", { ns: "common" })}</TableCell>
+              <TableCell>{t("columns.room", { ns: "bookings" })}</TableCell>
+              <TableCell>{t("columns.checkIn", { ns: "bookings" })}</TableCell>
+              <TableCell>{t("columns.checkOut", { ns: "bookings" })}</TableCell>
+              <TableCell>{t("columns.nights", { ns: "bookings" })}</TableCell>
+              <TableCell>{t("fields.status", { ns: "common" })}</TableCell>
             </TableRow>
           </TableHead>
 
           <TableBody>
             {isLoading ? (
               renderSkeleton()
+            ) : bookingListError ? (
+              <TableRow>
+                <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
+                  <Typography fontWeight={600}>{t("list.loadError", { ns: "bookings" })}</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{t("list.retryHint", { ns: "bookings" })}</Typography>
+                </TableCell>
+              </TableRow>
             ) : Array.isArray(bookings) && bookings.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={11} align="center" sx={{ py: 6 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Không có booking nào
-                  </Typography>
+                <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
+                  <Typography fontWeight={600}>{t("list.empty", { ns: "bookings" })}</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{t("list.emptyHint", { ns: "bookings" })}</Typography>
                 </TableCell>
               </TableRow>
             ) : (
@@ -111,7 +122,7 @@ export default function BookingTable() {
                   <TableRow
                     key={item.id}
                     hover
-                    sx={{ cursor: "pointer" }}
+                    sx={{ cursor: "pointer", height: 56, "& td": { py: 1.25, fontSize: 13.5, borderColor: "#E4E7EC" }, "&:hover": { bgcolor: "#F8FBFF" } }}
                     onClick={() => onView(item.id)}
                   >
                     <TableCell
@@ -123,7 +134,7 @@ export default function BookingTable() {
                         fontWeight: 600,
 
                         ".MuiTableRow-root:hover &": {
-                          backgroundColor: "rgba(0,0,0,0.004)",
+                          backgroundColor: "#F8FBFF",
                         },
                       }}
                     >
@@ -150,7 +161,7 @@ export default function BookingTable() {
 
                     <TableCell>{nights}</TableCell>
 
-                    <TableCell>{StatusChip(item.status)}</TableCell>
+                    <TableCell><StatusChip status={item.status} /></TableCell>
                   </TableRow>
                 );
               })

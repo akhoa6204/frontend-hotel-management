@@ -1,6 +1,7 @@
 import { RoomCard, RoomCardSkeleton } from "@components";
-import { Room, RoomTypeGuest } from "@constant/types";
-import { Box, Button, Grid, Stack, Typography, Skeleton } from "@mui/material";
+import { RoomTypeGuest } from "@constant/types";
+import { Box, Grid, Stack, Skeleton } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   rooms: RoomTypeGuest[];
@@ -9,6 +10,7 @@ interface Props {
 }
 
 const RoomList: React.FC<Props> = ({ rooms, loading, onBooking }) => {
+  const { t } = useTranslation("client");
   const fallbackImg =
     "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1600&auto=format&fit=crop";
   return (
@@ -49,7 +51,7 @@ const RoomList: React.FC<Props> = ({ rooms, loading, onBooking }) => {
                 <RoomCard
                   id={room.id}
                   name={room.name}
-                  type={room.name || "Hạng phòng"}
+                  type={room.name || t("payment.legacy.roomType")}
                   price={Number(room.basePrice)}
                   capacity={room.capacity}
                   image={room.image || fallbackImg}

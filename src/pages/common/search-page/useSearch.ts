@@ -7,9 +7,11 @@ import { formatDateInput } from "@utils/format";
 import type { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
 import type { SearchFilter } from "@constant/internal/SearchFilter";
 import GuestRoomTypeService from "@services/guest/roomType.service";
+import { useTranslation } from "react-i18next";
 
 type FormBooking = SearchBookingFilter & SearchFilter;
 const useSearch = () => {
+  const { t } = useTranslation("client");
   const navigate = useNavigate();
   const { state } = useLocation() as {
     state?: Partial<SearchBookingFilter>;
@@ -84,7 +86,7 @@ const useSearch = () => {
     hasAutoHandledRoomTypeRef.current = true;
 
     if (!findRoom || !findRoom.isAvailable) {
-      showError("Không còn loại phòng này trong khoảng thời gian này.");
+      showError(t("search.errors.roomTypeUnavailable"));
       return;
     }
 
@@ -95,7 +97,7 @@ const useSearch = () => {
         endDate: formSearch.endDate,
       },
     });
-  }, [data, formSearch.endDate, formSearch.startDate, loadingRooms, navigate, rooms, showError, state?.roomTypeId]);
+  }, [data, formSearch.endDate, formSearch.startDate, loadingRooms, navigate, rooms, showError, state?.roomTypeId, t]);
 
   const handleSort = (s: typeof filters.sortOrder) =>
     setFilters((p) => ({ ...p, sortOrder: s, page: 1 }));
@@ -105,7 +107,7 @@ const useSearch = () => {
 
   const onBooking = (id: number) => {
     if (!formSearch.startDate || !formSearch.endDate) {
-      showError("Điền đủ thông tin ngày bắt đầu - ngày kết thúc");
+      showError(t("search.errors.datesRequired"));
       return;
     }
     navigate(`/booking`, {

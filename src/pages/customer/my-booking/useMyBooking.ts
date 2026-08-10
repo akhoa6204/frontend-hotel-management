@@ -8,6 +8,7 @@ import MyReviewService from "@services/me/review.service";
 import type { BookingStatus } from "@enums/BookingStatus";
 import type { BookingResponse } from "@constant/response/BookingResponse";
 import type { BookingCancelRequest } from "@constant/request/BookingCancelRequest";
+import { useTranslation } from "react-i18next";
 
 export type BookingTab = "upcoming" | "done" | "cancelled";
 
@@ -27,6 +28,7 @@ const mapTabToStatus = (tab: BookingTab): BookingStatus | undefined => {
 };
 
 const useMyBooking = () => {
+  const { t } = useTranslation("client");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -94,19 +96,19 @@ const useMyBooking = () => {
     mutationFn: async (payload: BookingCancelRequest) =>
       MyBookingService.cancel(payload),
     onSuccess: async () => {
-      showSuccess("Hủy đặt phòng thành công");
+      showSuccess(t("myBookings.messages.cancelSuccess"));
       closeCancelDialog();
       await queryClient.invalidateQueries({ queryKey: ["my-bookings"] });
     },
     onError: () => {
-      showError("Không thể hủy đặt phòng lúc này. Vui lòng thử lại.");
+      showError(t("myBookings.messages.cancelError"));
     },
   });
 
   const confirmCancel = () => {
     if (!bookingToCancel) return;
     if (!cancelReason.trim()) {
-      showError("Vui lòng nhập lý do hủy phòng.");
+      showError(t("myBookings.cancelDialog.reasonRequired"));
       return;
     }
 

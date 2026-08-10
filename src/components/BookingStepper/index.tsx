@@ -1,16 +1,27 @@
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import { Box, Stack, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 interface BookingStepperProps {
   activeStep: number;
 }
 
-const steps = ["Bạn chọn", "Đặt phòng", "Thanh toán"];
+const BookingStepper = ({ activeStep = 1 }: BookingStepperProps) => {
+  const { t } = useTranslation("client");
+  const steps = [
+    t("shared.bookingStepper.selection"),
+    t("shared.bookingStepper.booking"),
+    t("shared.bookingStepper.payment"),
+  ];
 
-const BookingStepper = ({ activeStep = 1 }: BookingStepperProps) => (
-  <Box component="nav" aria-label="Tiến trình đặt phòng" sx={{ py: { xs: 3, md: 3.5 } }}>
-    <Stack direction="row" alignItems="flex-start" sx={{ width: 1 }}>
-      {steps.map((label, index) => {
+  return (
+    <Box
+      component="nav"
+      aria-label={t("shared.bookingStepper.aria")}
+      sx={{ py: { xs: 3, md: 3.5 } }}
+    >
+      <Stack direction="row" alignItems="flex-start" sx={{ width: 1 }}>
+        {steps.map((label, index) => {
         const stepNumber = index + 1;
         const completed = stepNumber < activeStep;
         const active = stepNumber === activeStep;
@@ -49,9 +60,10 @@ const BookingStepper = ({ activeStep = 1 }: BookingStepperProps) => (
             )}
           </Stack>
         );
-      })}
-    </Stack>
-  </Box>
-);
+        })}
+      </Stack>
+    </Box>
+  );
+};
 
 export default BookingStepper;

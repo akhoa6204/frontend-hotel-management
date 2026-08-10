@@ -13,6 +13,7 @@ import PeopleAltRoundedIcon from "@mui/icons-material/PeopleAltRounded";
 import ApartmentRoundedIcon from "@mui/icons-material/ApartmentRounded";
 import { useNavigate } from "react-router-dom";
 import { fmtVND } from "@utils/format";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   id: number;
@@ -37,6 +38,7 @@ const RoomCard = ({
   isAvailable,
   onBooking,
 }: Props) => {
+  const { t } = useTranslation("client");
   const navigate = useNavigate();
   const onNavigate = () => {
     navigate(`/room-detail/${id}`);
@@ -75,7 +77,7 @@ const RoomCard = ({
               {isAvailable !== undefined && (
                 <Chip
                   size="small"
-                  label={isAvailable ? "Còn phòng" : "Hết phòng"}
+                  label={t(isAvailable ? "shared.roomCard.available" : "shared.roomCard.soldOut")}
                   color={isAvailable ? "success" : "error"}
                   variant="outlined"
                 />
@@ -85,7 +87,7 @@ const RoomCard = ({
             <Stack direction="row" spacing={1}>
               <PeopleAltRoundedIcon fontSize="small" color="action" />
               <Typography variant="body2" color="text.secondary">
-                {capacity} người
+                {t("shared.roomCard.capacity", { count: capacity })}
               </Typography>
 
               <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
@@ -105,7 +107,7 @@ const RoomCard = ({
               onBooking?.();
             }}
           >
-            {isAvailable === false ? "Hết phòng" : "Đặt phòng"}
+            {t(isAvailable === false ? "shared.roomCard.soldOut" : "shared.roomCard.bookRoom")}
           </Button>
         </Stack>
       </CardContent>

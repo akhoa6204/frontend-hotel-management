@@ -1,81 +1,32 @@
 // BookingItemCard.tsx
-import { Box, Stack, Typography, Chip } from "@mui/material";
-import { Booking, BookingStatus } from "@constant/types";
-
-const STATUS_UI: Record<
-  BookingStatus,
-  { label: string; color: string; border: string; bg: string }
-> = {
-  PENDING: {
-    label: "Đang chờ xác nhận",
-    color: "#9E9E9E",
-    border: "#BDBDBD",
-    bg: "#F5F5F5",
-  },
-  CONFIRMED: {
-    label: "Check-in",
-    color: "#2E90FA",
-    border: "#2E90FA",
-    bg: "rgba(36, 171, 112, 0.1)",
-  },
-  CHECKED_IN: {
-    label: "Đã nhận phòng",
-    color: "#ED6C02",
-    border: "#ED6C02",
-    bg: "rgba(237, 108, 2, 0.1)",
-  },
-  CHECKED_OUT: {
-    label: "Đã trả phòng",
-    color: "#2E90FA",
-    border: "#2E90FA",
-    bg: "rgba(46, 125, 50, 0.1)",
-  },
-  CANCELLED: {
-    label: "Đã hủy phòng",
-    color: "#D32F2F",
-    border: "#D32F2F",
-    bg: "rgba(211, 47, 47, 0.1)",
-  },
-};
+import type { BookingResponse } from "@constant/response/BookingResponse";
+import AdminBookingOperation, { type BookingOperationContext } from "@components/admin-booking-operation";
+import { Box, Stack, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 export default function BookingItemCard({
   booking,
   handleOnClick,
+  operationContext,
 }: {
-  booking: Booking;
-  handleOnClick?: () => void;
+  booking: BookingResponse;
+  handleOnClick: () => void;
+  operationContext: BookingOperationContext;
 }) {
-  const ui = STATUS_UI[booking.status];
+  const { t } = useTranslation("receptionist");
 
   return (
-    <Box
-      sx={{
-        border: "1px solid #2E90FA",
-        borderRadius: 2.5,
-        p: 2,
-      }}
-    >
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Box>
-          <Typography fontWeight={600}>{booking.fullName}</Typography>
-          <Typography variant="body2" color="text.secondary">
-            Phòng {booking.room?.name} — {booking.room?.roomType?.name ?? "-"}
+    <Box sx={{ py: 1.4, opacity: booking.status === "CANCELLED" ? 0.72 : 1 }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography noWrap sx={{ color: "#1F2937", fontSize: 13.75, fontWeight: 650 }}>
+            {booking.room?.name ?? "—"} · {booking.room?.roomType?.name ?? "—"}
+          </Typography>
+          <Typography noWrap sx={{ mt: 0.3, color: "#667085", fontSize: 12.5 }}>
+            {booking.guestName || t("activity.missingGuestName")}
           </Typography>
         </Box>
-
-        <Chip
-          label={ui.label}
-          size="small"
-          sx={{
-            fontWeight: 600,
-            color: ui.color,
-            borderColor: ui.border,
-            borderWidth: 1.5,
-            borderStyle: "solid",
-            backgroundColor: ui.bg,
-          }}
-          onClick={handleOnClick}
-        />
+        <AdminBookingOperation booking={booking} context={operationContext} onAction={handleOnClick} />
       </Stack>
     </Box>
   );

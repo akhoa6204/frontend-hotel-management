@@ -1,4 +1,4 @@
-import { UserRole } from "@enums/UserRole";
+import type { UserRole } from "@enums/UserRole";
 
 export type EmployeeUpdateRequest = {
   id: string;
@@ -6,5 +6,5 @@ export type EmployeeUpdateRequest = {
   phone?: string;
   email?: string;
   active?: boolean;
-  role?: Omit<UserRole, "USER">;
+  role?: Exclude<UserRole, "USER">;
 };

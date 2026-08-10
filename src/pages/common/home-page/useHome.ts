@@ -8,8 +8,10 @@ import { sleep } from "@utils/sleep";
 import { formatDateInput } from "@utils/format";
 import type { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
 import GuestRoomTypeService from "@services/guest/roomType.service";
+import { useTranslation } from "react-i18next";
 
 const useHome = () => {
+  const { t } = useTranslation("client");
   const today = new Date();
   const tomorrow = new Date();
   tomorrow.setDate(today.getDate() + 1);
@@ -30,11 +32,11 @@ const useHome = () => {
       (f) => {
         const errors: Partial<Record<keyof SearchBookingFilter, string>> = {};
 
-        if (!f.startDate) errors.startDate = "Vui lòng chọn ngày nhận phòng";
-        if (!f.endDate) errors.endDate = "Vui lòng chọn ngày trả phòng";
+        if (!f.startDate) errors.startDate = t("home.search.validation.checkInRequired");
+        if (!f.endDate) errors.endDate = t("home.search.validation.checkOutRequired");
 
         if (Object.keys(errors).length > 0) {
-          showError("Vui lòng chọn ngày nhận phòng và ngày trả phòng");
+          showError(t("home.search.validation.dateRangeRequired"));
         }
 
         return errors;

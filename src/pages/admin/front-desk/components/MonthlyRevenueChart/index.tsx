@@ -1,5 +1,5 @@
 // components/MonthlyRevenueChart.tsx
-import { MonthlyRevenue } from "@constant/types";
+import type { MonthlyRevenueResponse } from "@constant/response/MonthlyRevenueResponse";
 import { formatMoneyShort } from "@utils/format";
 import {
   BarChart,
@@ -10,9 +10,24 @@ import {
   LabelList,
   YAxis,
 } from "recharts";
+import { useTranslation } from "react-i18next";
 
 // Label tiền nằm dưới chân cột
-function ValueBelow(props: any) {
+interface ValueBelowProps {
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  value?: string | number;
+}
+
+interface RevenueTooltipProps {
+  active?: boolean;
+  payload?: Array<{ dataKey?: string; value?: string | number }>;
+  label?: string | number;
+}
+
+function ValueBelow(props: ValueBelowProps) {
   const { x = 0, y = 0, width = 0, height = 0, value } = props;
   return (
     <text
@@ -25,9 +40,10 @@ function ValueBelow(props: any) {
     </text>
   );
 }
-function OnlyActualTooltip({ active, payload, label }: any) {
+function OnlyActualTooltip({ active, payload, label }: RevenueTooltipProps) {
+  const { t } = useTranslation("receptionist");
   if (!active || !payload?.length) return null;
-  const actualItem = payload.find((p: any) => p.dataKey === "actual");
+  const actualItem = payload.find((item) => item.dataKey === "actual");
   if (!actualItem) return null;
 
   return (
@@ -39,9 +55,9 @@ function OnlyActualTooltip({ active, payload, label }: any) {
         boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
       }}
     >
-      <div style={{ fontWeight: 600, marginBottom: 6 }}>Tháng {label}</div>
+      <div style={{ fontWeight: 600, marginBottom: 6 }}>{t("revenue.month", { month: label })}</div>
       <div style={{ color: "#2E90FA", fontWeight: 600 }}>
-        Doanh thu: {formatMoneyShort(actualItem.value)}
+        {t("revenue.tooltip", { value: formatMoneyShort(Number(actualItem.value)) })}
       </div>
     </div>
   );
@@ -49,7 +65,7 @@ function OnlyActualTooltip({ active, payload, label }: any) {
 export default function MonthlyRevenueChart({
   data,
 }: {
-  data: MonthlyRevenue;
+  data: MonthlyRevenueResponse;
 }) {
   if (!data?.months?.length) return null;
 

@@ -6,6 +6,7 @@ import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlin
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { fmtVND } from "@utils/format";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   room: RoomTypeResponse;
@@ -16,6 +17,7 @@ interface Props {
 const inappropriateImagePattern = /(meme|joke|giphy|tenor|\.gif(?:\?|$))/i;
 
 const SearchRoomResult = ({ room, onViewRoom, onBooking }: Props) => {
+  const { t } = useTranslation("client");
   const [imageFailed, setImageFailed] = useState(false);
   const suitableImage = room.roomTypeImages?.find(
     (image) => image.url && !inappropriateImagePattern.test(`${image.url} ${image.alt ?? ""}`),
@@ -40,7 +42,7 @@ const SearchRoomResult = ({ room, onViewRoom, onBooking }: Props) => {
         component="button"
         type="button"
         onClick={() => onViewRoom(room.id)}
-        aria-label={`Xem chi tiết ${room.name}`}
+        aria-label={t("search.roomCard.viewDetailsFor", { room: room.name })}
         sx={{
           position: "relative",
           alignSelf: { md: "start" },
@@ -78,14 +80,14 @@ const SearchRoomResult = ({ room, onViewRoom, onBooking }: Props) => {
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1fr) 190px" }, gap: { xs: 3, lg: 4 }, p: { xs: 3, sm: 4, md: 4.5 } }}>
         <Stack sx={{ minWidth: 0 }}>
           <Typography sx={{ color: "primary.main", letterSpacing: 1.8, fontSize: 11, fontWeight: 700 }}>
-            PHÒNG DIAMOND SEA
+            {t("search.roomCard.eyebrow")}
           </Typography>
           <Typography component="h2" sx={{ mt: 1, fontFamily: "Georgia, serif", fontSize: { xs: 27, md: 31 }, lineHeight: 1.2, color: "text.primary" }}>
             {room.name}
           </Typography>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1.5, color: "text.secondary" }}>
             <PeopleAltOutlinedIcon fontSize="small" />
-            <Typography variant="body2">Tối đa {room.capacity} khách</Typography>
+            <Typography variant="body2">{t("search.roomCard.capacity", { count: room.capacity })}</Typography>
           </Stack>
 
           {room.description && (
@@ -108,7 +110,7 @@ const SearchRoomResult = ({ room, onViewRoom, onBooking }: Props) => {
 
         <Stack justifyContent="space-between" alignItems={{ lg: "flex-end" }} sx={{ pt: { lg: 2 }, borderLeft: { lg: "1px solid #e2dfd8" }, pl: { lg: 4 } }}>
           <Box sx={{ textAlign: { lg: "right" } }}>
-            <Typography variant="caption" color="text.secondary">Giá mỗi đêm</Typography>
+            <Typography variant="caption" color="text.secondary">{t("search.roomCard.pricePerNight")}</Typography>
             {!!room.discountAmount && (
               <Typography variant="body2" sx={{ mt: .5, color: "text.disabled", textDecoration: "line-through" }}>
                 {fmtVND(room.basePrice)} ₫
@@ -121,10 +123,10 @@ const SearchRoomResult = ({ room, onViewRoom, onBooking }: Props) => {
 
           <Stack spacing={1.25} sx={{ width: 1, mt: { xs: 3, lg: 5 } }}>
             <Button variant="contained" disabled={!canBook} onClick={() => room.roomId && onBooking(room.roomId)} sx={{ minHeight: 46, borderRadius: 1 }}>
-              {room.isAvailable === false ? "Hết phòng" : "Chọn phòng"}
+              {room.isAvailable === false ? t("search.roomCard.soldOut") : t("search.roomCard.selectRoom")}
             </Button>
             <Button variant="text" endIcon={<ArrowForwardRoundedIcon />} onClick={() => onViewRoom(room.id)} sx={{ minHeight: 44 }}>
-              Xem chi tiết
+              {t("search.roomCard.viewDetails")}
             </Button>
           </Stack>
         </Stack>

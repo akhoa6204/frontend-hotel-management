@@ -1,12 +1,12 @@
-import { DialogMode, DialogState } from "@constant/internal/DialogState";
-import { SearchFilter } from "@constant/internal/SearchFilter";
-import { HousekeepingCreationRequest } from "@constant/request/HousekeepingCreationRequest";
-import { HousekeepingUpdateRequest } from "@constant/request/HousekeepingUpdateRequest";
-import { HouseKeepingTaskResponse } from "@constant/response/HousekeepingResponse";
-import { RoomResponse } from "@constant/response/RoomResponse";
-import { UserShortResponse } from "@constant/response/UserShortResponse";
-import { HousekeepingTaskStatus } from "@enums/HousekeepingTaskStatus";
-import { HousekeepingTaskType } from "@enums/HousekeepingTaskType";
+import type { DialogMode, DialogState } from "@constant/internal/DialogState";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
+import type { HousekeepingCreationRequest } from "@constant/request/HousekeepingCreationRequest";
+import type { HousekeepingUpdateRequest } from "@constant/request/HousekeepingUpdateRequest";
+import type { HouseKeepingTaskResponse } from "@constant/response/HousekeepingResponse";
+import type { RoomResponse } from "@constant/response/RoomResponse";
+import type { UserShortResponse } from "@constant/response/UserShortResponse";
+import type { HousekeepingTaskStatus } from "@enums/HousekeepingTaskStatus";
+import type { HousekeepingTaskType } from "@enums/HousekeepingTaskType";
 import useAuth from "@hooks/useAuth";
 import { useEntityPicker } from "@hooks/useEntityPickerDialog";
 import useForm from "@hooks/useForm";
@@ -17,6 +17,7 @@ import StaffRoomService from "@services/staff/room.service";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type Filter = SearchFilter & {
   status: HousekeepingTaskStatus | "ALL";
@@ -27,20 +28,24 @@ export type TaskForm = Partial<HouseKeepingTaskResponse> & {
   status: HousekeepingTaskStatus;
   note?: string;
 };
-const validateForm = (form: TaskForm) => {
+const validateForm = (
+  form: TaskForm,
+  messages: { roomRequired: string; staffRequired: string },
+) => {
   const errors: Partial<Record<keyof TaskForm, string>> = {};
 
   if (!form.roomId) {
-    errors.roomId = "Vui lòng chọn phòng";
+    errors.roomId = messages.roomRequired;
   }
 
   if (!form.staffId) {
-    errors.staffId = "Vui lòng chọn nhân viên";
+    errors.staffId = messages.staffRequired;
   }
 
   return errors;
 };
 const useHouseKeeping = () => {
+  const { t } = useTranslation("housekeeping");
   const queryClient = useQueryClient();
   const { canAccessManager, hasRole } = useAuth();
   const { alert, closeSnackbar, showError, showSuccess } = useSnackbar();
@@ -53,7 +58,12 @@ const useHouseKeeping = () => {
 
   const notHouseKeeping = canAccessManager() || hasRole("RECEPTIONIST");
 
-  const { data: tasksResponse, isLoading } = useQuery({
+  const {
+    data: tasksResponse,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["housekeeping-tasks", notHouseKeeping ? "all" : "me", filters],
     queryFn: async () => {
       const params = {
@@ -79,7 +89,7 @@ const useHouseKeeping = () => {
     mutationFn: async (data: HousekeepingUpdateRequest) =>
       await StaffHousekeepingService.update(data),
     onSuccess: () => {
-      showSuccess("Cập nhật nội dung nhiệm vụ phòng thành công");
+      showSuccess(t("notifications.updateSuccess"));
       queryClient.invalidateQueries({
         queryKey: ["housekeeping-tasks"],
       });
@@ -87,8 +97,8 @@ const useHouseKeeping = () => {
         queryKey: ["housekeeping-tasks", selectedTaskId],
       });
     },
-    onError(error, variables, onMutateResult, context) {
-      const msg = error.message || "Cập nhật nội dung nhiệm vụ phòng thất bại";
+    onError(error) {
+      const msg = error.message || t("notifications.updateError");
       showError(msg);
     },
   });
@@ -109,7 +119,7 @@ const useHouseKeeping = () => {
     limit: number;
   }>({ q: "", page: 1, limit: 4 });
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
-  const { form, onChangeField, onSubmit, resetForm, updateForm } =
+  const { form, errors, onChangeField, onSubmit, resetForm, updateForm } =
     useForm<TaskForm>(
       {
         roomId: undefined,
@@ -119,7 +129,11 @@ const useHouseKeeping = () => {
         updatedAt: undefined,
         note: undefined,
       },
-      validateForm,
+      (values) =>
+        validateForm(values, {
+          roomRequired: t("validation.roomRequired"),
+          staffRequired: t("validation.staffRequired"),
+        }),
       async () => {
         if (dialog.mode === "CREATE") {
           if (!form.roomId || !form.staffId) return;
@@ -146,7 +160,7 @@ const useHouseKeeping = () => {
     mutationFn: async (data: HousekeepingCreationRequest) =>
       await StaffHousekeepingService.create(data),
     onSuccess: () => {
-      showSuccess("Tạo nhiệm vụ phòng thành công");
+      showSuccess(t("notifications.createSuccess"));
       queryClient.invalidateQueries({
         queryKey: [
           "rooms-list",
@@ -171,11 +185,12 @@ const useHouseKeeping = () => {
         queryKey: ["housekeeping-tasks", filters],
       });
     },
-    onError: (error: any) => {
-      const msg =
-        error?.response?.data?.message || "Tạo nhiệm vụ phòng thất bại";
-
-      showError(msg);
+    onError: (error) => {
+      showError(
+        error instanceof Error
+          ? error.message
+          : t("notifications.createError"),
+      );
     },
   });
   const { data: task, isLoading: loadingTask } = useQuery({
@@ -201,7 +216,6 @@ const useHouseKeeping = () => {
 
   const {
     selectedId: selectedIdRoom,
-    selectedRow: selectedRowRoom,
     setSelectedId: setSelectedIdRoom,
     open: openEntityPickerRoomDialog,
     openPicker: openPickerRoom,
@@ -213,7 +227,6 @@ const useHouseKeeping = () => {
 
   const {
     selectedId: selectedIdStaff,
-    selectedRow: selectedRowStaff,
     setSelectedId: setSelectedIdStaff,
     open: openEntityPickerStaffDialog,
     openPicker: openPickerStaff,
@@ -239,11 +252,11 @@ const useHouseKeeping = () => {
     setFiltersStaff({ limit: 4, q: "", page: 1 });
     onClosePickerStaff();
   };
-  const onChange = (field: keyof TaskForm, value: any) => {
-    if (field === "roomId") {
+  const onChange = <K extends keyof TaskForm>(field: K, value: TaskForm[K]) => {
+    if (field === "roomId" && typeof value === "number") {
       setSelectedIdRoom(value);
     }
-    if (field === "staffId") {
+    if (field === "staffId" && typeof value === "string") {
       setSelectedIdStaff(value);
     }
     onChangeField(field, value);
@@ -264,8 +277,6 @@ const useHouseKeeping = () => {
     setFiltersStaff({ q: "", page: 1, limit: 4 });
   };
   const canEditForm = dialog.mode !== "VIEW";
-  console.log(dialog);
-
   const { data: roomsResponse, isLoading: loadingRooms } = useQuery({
     queryKey: [
       "rooms-list",
@@ -286,7 +297,12 @@ const useHouseKeeping = () => {
   const onPageChangeRoom = (page: number) =>
     setFiltersRoom((pre) => ({ ...pre, page }));
 
-  const { data: staffsResponse, isLoading: loadingStaffs } = useQuery({
+  const {
+    data: staffsResponse,
+    isLoading: loadingStaffs,
+    isError: staffOptionsError,
+    refetch: refetchStaffOptions,
+  } = useQuery({
     queryKey: [
       "staffs-list",
       filtersStaff.q,
@@ -314,6 +330,11 @@ const useHouseKeeping = () => {
   return {
     tasks,
     meta,
+    isLoading,
+    isError,
+    refetch,
+    isUpdatingTask: mUpdateTask.isPending,
+    isCreatingTask: mCreateTask.isPending,
     notHouseKeeping,
     filters,
     onChangeFilter,
@@ -327,6 +348,7 @@ const useHouseKeeping = () => {
     mode: dialog.mode,
     onOpen,
     form,
+    errors,
     onChange,
     onSubmit,
     onClose,
@@ -360,6 +382,8 @@ const useHouseKeeping = () => {
     onPageChangeStaff,
     selectStaff,
     loadingStaffs,
+    staffOptionsError,
+    refetchStaffOptions,
   };
 };
 export default useHouseKeeping;

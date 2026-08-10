@@ -1,8 +1,9 @@
-import { Box, Paper, Stack, Typography, Divider } from "@mui/material";
+import { Box, Paper, Stack, Typography } from "@mui/material";
 import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 import BlockRoundedIcon from "@mui/icons-material/BlockRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import { diffNights, formatDate } from "@utils/format";
+import { useTranslation } from "react-i18next";
 
 type BookingDetailCardProps = {
   checkIn: string;
@@ -17,8 +18,9 @@ const BookingDetailCard: React.FC<BookingDetailCardProps> = ({
   checkOut,
   guests,
   timeRange = "14:00 - 22:00",
-  nonRefundText = "Đặt phòng này không được hoàn tiền",
+  nonRefundText,
 }) => {
+  const { t } = useTranslation("client");
   const nights = diffNights(checkIn, checkOut);
   return (
     <Paper
@@ -32,7 +34,7 @@ const BookingDetailCard: React.FC<BookingDetailCardProps> = ({
     >
       {/* Title */}
       <Typography variant="h6" fontWeight={600} mb={2}>
-        Chi tiết đặt phòng
+        {t("payment.legacy.bookingDetails")}
       </Typography>
 
       {/* Box ngày nhận / trả phòng */}
@@ -57,7 +59,7 @@ const BookingDetailCard: React.FC<BookingDetailCardProps> = ({
               mb={0.5}
               fontWeight={500}
             >
-              Nhận phòng
+              {t("payment.summary.checkIn")}
             </Typography>
             <Typography fontWeight={700}>{formatDate(checkIn)}</Typography>
             <Typography variant="body2" color="text.secondary">
@@ -68,7 +70,7 @@ const BookingDetailCard: React.FC<BookingDetailCardProps> = ({
           {/* Số đêm + mũi tên */}
           <Stack alignItems="center" spacing={0.5}>
             <Typography variant="body2" color="text.secondary">
-              {nights} đêm
+              {t("payment.summary.nights", { count: nights })}
             </Typography>
             <ArrowForwardIosRoundedIcon fontSize="small" />
           </Stack>
@@ -81,7 +83,7 @@ const BookingDetailCard: React.FC<BookingDetailCardProps> = ({
               mb={0.5}
               fontWeight={500}
             >
-              Trả phòng
+              {t("payment.summary.checkOut")}
             </Typography>
             <Typography fontWeight={700}>{formatDate(checkOut)}</Typography>
             <Typography variant="body2" color="text.secondary">
@@ -94,14 +96,14 @@ const BookingDetailCard: React.FC<BookingDetailCardProps> = ({
       {/* Dòng số khách */}
       <Stack direction="row" spacing={1} alignItems="center" mb={0.5}>
         <PersonOutlineRoundedIcon fontSize="small" />
-        <Typography variant="body2">{guests} khách</Typography>
+        <Typography variant="body2">{t("payment.legacy.guests", { count: guests })}</Typography>
       </Stack>
 
       {/* Dòng không hoàn tiền */}
       <Stack direction="row" spacing={1} alignItems="center">
         <BlockRoundedIcon fontSize="small" sx={{ color: "text.secondary" }} />
         <Typography variant="body2" color="text.secondary">
-          {nonRefundText}
+          {nonRefundText ?? t("payment.legacy.nonRefundable")}
         </Typography>
       </Stack>
     </Paper>

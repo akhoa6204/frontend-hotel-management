@@ -4,33 +4,35 @@ import GlobalSnackbar from "@components/GlobalSnackbar";
 import { Alert, Box, Button, Link as MuiLink, Stack, TextField, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import useLogin from "./useLogin";
+import { useTranslation } from "react-i18next";
 
 const LoginPage = () => {
+  const { t } = useTranslation("client");
   const { form, onChange, onSubmit, alert, closeSnackbar, errors, isPending, registrationCompleted, passwordReset } = useLogin();
 
   return (
     <>
       <AuthLayout
-        eyebrow="TÀI KHOẢN KHÁCH HÀNG"
-        title="Chào mừng bạn trở lại."
-        description="Đăng nhập để xem và quản lý những kỳ nghỉ đã đặt tại Diamond Sea."
+        eyebrow={t("login.eyebrow")}
+        title={t("login.title")}
+        description={t("login.description")}
       >
         {registrationCompleted && (
           <Alert severity="success" sx={{ mb: 3, borderRadius: 1.25 }}>
-            Tài khoản đã được tạo. Bạn có thể đăng nhập để tiếp tục.
+            {t("login.messages.registrationCompleted")}
           </Alert>
         )}
         {passwordReset && (
           <Alert severity="success" sx={{ mb: 3, borderRadius: 1.25 }}>
-            Mật khẩu đã được cập nhật. Bạn có thể đăng nhập bằng mật khẩu mới.
+            {t("login.messages.passwordReset")}
           </Alert>
         )}
 
         <Box component="form" onSubmit={onSubmit} noValidate>
           <Stack spacing={2.25}>
             <TextField
-              label="Email"
-              placeholder="example@email.com"
+              label={t("login.fields.email")}
+              placeholder={t("login.fields.emailPlaceholder")}
               name="email"
               type="email"
               autoComplete="email"
@@ -43,7 +45,7 @@ const LoginPage = () => {
               helperText={errors.email}
             />
             <AuthPasswordField
-              label="Mật khẩu"
+              label={t("login.fields.password")}
               name="password"
               value={form.password}
               onChange={onChange}
@@ -53,19 +55,19 @@ const LoginPage = () => {
             />
 
             <MuiLink component={Link} to="/forgot-password" underline="hover" sx={{ alignSelf: "flex-end", fontSize: 14, fontWeight: 650 }}>
-              Quên mật khẩu?
+              {t("login.actions.forgotPassword")}
             </MuiLink>
 
             <Button type="submit" variant="contained" fullWidth disabled={isPending} sx={{ minHeight: 48, borderRadius: 1.25 }}>
-              {isPending ? "Đang đăng nhập..." : "Đăng nhập"}
+              {isPending ? t("login.actions.signingIn") : t("login.actions.signIn")}
             </Button>
           </Stack>
         </Box>
 
         <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ mt: 3 }}>
-          Chưa có tài khoản?{" "}
+          {t("login.signUpPrompt")}{" "}
           <MuiLink component={Link} to="/register" underline="hover" sx={{ fontWeight: 700 }}>
-            Đăng ký
+            {t("login.actions.signUp")}
           </MuiLink>
         </Typography>
       </AuthLayout>

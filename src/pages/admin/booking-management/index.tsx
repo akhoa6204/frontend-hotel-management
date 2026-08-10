@@ -1,9 +1,5 @@
-import { Box, InputAdornment, Stack, TextField } from "@mui/material";
-import { Search } from "@mui/icons-material";
-import Title from "@components/Title";
 import BookingCreateDialog from "./components/booking-create-dialog";
-import { EntityPickerDialog, Loading, Pager } from "@components";
-import useBookingManagement from "./useBookingManagement";
+import Loading from "@components/Loading";
 import GlobalSnackbar from "@components/GlobalSnackbar";
 import BookingTable from "./components/booking-table";
 import BookingViewDialog from "./components/booking-view-dialog";
@@ -11,8 +7,11 @@ import CancelBookingDialog from "./components/CancelBookingDialog";
 import PaymentQrDialog from "./components/PaymentQrDialog";
 import Header from "./components/Header";
 import { useBookingManagementContext } from "@context/booking-management";
+import AvailableRoomDialog from "./components/available-room-dialog";
+import { useTranslation } from "react-i18next";
 
 export default function BookingManagement() {
+  const { t } = useTranslation("bookings");
   const {
     showLoadingOverlay,
     alert,
@@ -41,7 +40,7 @@ export default function BookingManagement() {
 
       <BookingCreateDialog />
       {showLoadingOverlay ? (
-        <Loading content="Đang xử lý thanh toán, vui lòng chờ..." />
+        <Loading content={t("processingPayment")} />
       ) : null}
 
       <GlobalSnackbar alert={alert} closeSnackbar={closeSnackbar} />
@@ -51,17 +50,11 @@ export default function BookingManagement() {
       <PaymentQrDialog />
 
       {dialog.open && (dialog.mode === "CREATE" || dialog.mode === "VIEW") && (
-        <EntityPickerDialog
+        <AvailableRoomDialog
           open={openEntityPickerDialog}
           data={availableRooms}
           selectedId={selectedId}
           onClose={closePickerHandler}
-          title="Danh sách phòng trống"
-          columns={[
-            { label: "Tên phòng", name: "name" },
-            { label: "Loại phòng", name: "roomType.name" },
-            { label: "Sức chứa", name: "roomType.capacity" },
-          ]}
           onSelect={(row) => {
             select(row);
             if (dialog.mode === "CREATE") {

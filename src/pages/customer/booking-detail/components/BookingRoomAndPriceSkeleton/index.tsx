@@ -1,4 +1,4 @@
-import { Box, Divider, Skeleton, Stack, Typography } from "@mui/material";
+import { Box, Divider, Skeleton, Stack } from "@mui/material";
 
 const BookingRoomAndPriceSkeleton = () => {
   return (

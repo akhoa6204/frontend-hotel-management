@@ -1,84 +1,133 @@
-import { ReviewResponse } from "@constant/response/ReviewResponse";
+import { MoreVert, StarRounded } from "@mui/icons-material";
 import {
-  Paper,
-  Typography,
   Box,
   Chip,
-  Rating,
-  Button,
+  IconButton,
+  Menu,
+  MenuItem,
   Stack,
+  Typography,
 } from "@mui/material";
+import { useState } from "react";
 import dayjs from "dayjs";
+import type { ReviewResponse } from "@constant/response/ReviewResponse";
+import { useTranslation } from "react-i18next";
 
-type Props = {
+interface Props {
   review: ReviewResponse;
-  onToggleStatus: (id: number, active: boolean) => void;
-};
+  isLast: boolean;
+  disabled?: boolean;
+  onToggleStatus: (review: ReviewResponse) => void;
+}
 
-const ReviewCard: React.FC<Props> = ({ review, onToggleStatus }) => {
+const ReviewCard = ({ review, isLast, disabled = false, onToggleStatus }: Props) => {
+  const { t, i18n } = useTranslation("reviews");
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const isPublished = Boolean(review.active);
+  const roomName = review.booking.room?.name;
+  const roomType = review.booking.room?.roomType?.name;
+  const metadata = [
+    roomName ? t("room", { name: roomName }) : undefined,
+    roomType,
+    dayjs(review.createdAt).format(
+      i18n.resolvedLanguage === "en" ? "MM/DD/YYYY" : "DD/MM/YYYY",
+    ),
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  const handleAction = () => {
+    setAnchorEl(null);
+    onToggleStatus(review);
+  };
 
   return (
-    <Paper
-      variant="outlined"
+    <Box
+      component="article"
       sx={{
-        p: 2,
-        borderRadius: 2.5,
-        borderColor: "#E0E0E0",
-        mb: 1.5,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "flex-start",
+        px: { xs: 2, sm: 2.25 },
+        py: 2,
+        borderBottom: isLast ? 0 : "1px solid #EAECF0",
       }}
     >
-      <Box>
-        <Stack direction="row" alignItems="center" spacing={1}>
-          <Typography fontWeight={600}>{review.booking.guestName}</Typography>
+      <Stack direction="row" alignItems="flex-start" justifyContent="space-between" gap={1.5}>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography sx={{ color: "#1F2937", fontSize: 13.5, fontWeight: 650, lineHeight: 1.45 }}>
+            {review.booking.guestName}
+          </Typography>
+          <Typography sx={{ mt: 0.25, color: "#667085", fontSize: 12.25, lineHeight: 1.45 }}>
+            {metadata}
+          </Typography>
+        </Box>
+
+        <Stack direction="row" alignItems="center" spacing={{ xs: 0.5, sm: 1 }} sx={{ flexShrink: 0 }}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={0.35}
+            aria-label={t("ratingAriaLabel", { value: Number(review.overall).toFixed(1) })}
+          >
+            <StarRounded aria-hidden sx={{ color: "#C98520", fontSize: 17 }} />
+            <Typography sx={{ color: "#344054", fontSize: 13, fontWeight: 650, fontVariantNumeric: "tabular-nums" }}>
+              {Number(review.overall).toFixed(1)}
+            </Typography>
+          </Stack>
           <Chip
+            label={isPublished ? t("visible") : t("hiddenStatus")}
             size="small"
-            label={isPublished ? "Hiển thị" : "Đã ẩn"}
-            color={isPublished ? "primary" : "error"}
-            variant="outlined"
+            sx={{
+              height: 25,
+              border: 0,
+              bgcolor: isPublished ? "#EAF6F0" : "#F2F4F7",
+              color: isPublished ? "#246548" : "#475467",
+              fontSize: 11.75,
+              fontWeight: 600,
+              "& .MuiChip-label": { px: 1.1 },
+            }}
           />
+          <IconButton
+            size="small"
+            disabled={disabled}
+            aria-label={t("actions.openMenu", { name: review.booking.guestName })}
+            aria-controls={anchorEl ? `review-actions-${review.id}` : undefined}
+            aria-haspopup="menu"
+            aria-expanded={anchorEl ? "true" : undefined}
+            onClick={(event) => setAnchorEl(event.currentTarget)}
+            sx={{ color: "#667085" }}
+          >
+            <MoreVert fontSize="small" />
+          </IconButton>
         </Stack>
+      </Stack>
 
-        <Typography variant="body2" color="text.secondary" mt={0.5}>
-          Phòng {review.booking.room?.name} •{" "}
-          {dayjs(review.createdAt).format("DD/MM/YYYY")}
-        </Typography>
+      <Typography
+        sx={{
+          mt: 1.15,
+          color: "#344054",
+          fontSize: 13.5,
+          lineHeight: 1.55,
+          whiteSpace: "pre-wrap",
+          overflowWrap: "anywhere",
+        }}
+      >
+        {review.comment}
+      </Typography>
 
-        <Typography variant="body2" mt={1}>
-          {review.comment}
-        </Typography>
-
-        <Button
-          size="small"
-          variant="outlined"
-          sx={{
-            mt: 1,
-            textTransform: "none",
-            borderColor: isPublished ? "#d32f2f" : "#2E90FA",
-            color: isPublished ? "#d32f2f" : "#2E90FA",
-            borderRadius: 2,
-            py: 0.5,
-            "&:hover": {
-              backgroundColor: isPublished ? "rgba(211,47,47,0.08)" : "#b9e4c7",
-              borderColor: isPublished ? "#d32f2f" : "#2E90FA",
-            },
-          }}
-          onClick={() => onToggleStatus(review.id, !isPublished)}
+      <Menu
+        id={`review-actions-${review.id}`}
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={() => setAnchorEl(null)}
+        slotProps={{ paper: { className: "admin-scrollbar", sx: { width: 190, border: "1px solid #E4E7EC", borderRadius: "8px", boxShadow: "0 8px 24px rgba(16,24,40,0.10)" } } }}
+      >
+        <MenuItem
+          onClick={handleAction}
+          sx={{ minHeight: 38, color: isPublished ? "#9A6518" : "#1D6FC2", fontSize: 13.5 }}
         >
-          {isPublished ? "Ẩn đánh giá" : "Hiển thị đánh giá"}
-        </Button>
-      </Box>
-
-      <Rating
-        value={review.overall}
-        precision={0.1}
-        readOnly
-        sx={{ color: "#FFD700" }}
-      />
-    </Paper>
+          {isPublished ? t("actions.hide") : t("actions.show")}
+        </MenuItem>
+      </Menu>
+    </Box>
   );
 };
 

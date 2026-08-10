@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useNavigate } from "react-router-dom";
 import StaffStatService from "@services/staff/stat.service";
-import { SearchFilter } from "@constant/internal/SearchFilter";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
 
 const PAGE_SIZE = 5;
 const REVENUE_MONTHS = 6;
@@ -20,9 +20,6 @@ const MONTHLY_BOOKING_STATS_QK = [
   "dashboard",
   "monthly-booking-stats",
 ] as const;
-const TOP_CUSTOMERS_QK = (month?: string) =>
-  ["dashboard", "top-customers", month ?? "current"] as const;
-
 const useDashboard = () => {
   const qc = useQueryClient();
   const navigate = useNavigate();

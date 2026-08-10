@@ -2,6 +2,7 @@ import type { ReviewOverviewResponse } from "@constant/response/ReviewOverviewRe
 import type { ReviewResponse } from "@constant/response/ReviewResponse";
 import { Avatar, Box, Rating, Stack, Typography } from "@mui/material";
 import { diffNights, formatDate } from "@utils/format";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   stats?: ReviewOverviewResponse;
@@ -10,7 +11,10 @@ interface Props {
 
 const getInitial = (name: string) => name.trim().charAt(0).toLocaleUpperCase("vi-VN") || "K";
 
-const ReviewSection = ({ stats, reviews }: Props) => (
+const ReviewSection = ({ stats, reviews }: Props) => {
+  const { t } = useTranslation("client");
+
+  return (
   <Box sx={{ py: { xs: 5.5, md: 7 }, borderTop: "1px solid #dcd9d1", borderBottom: "1px solid #dcd9d1" }}>
     <Box
       sx={{
@@ -23,13 +27,13 @@ const ReviewSection = ({ stats, reviews }: Props) => (
     >
       <Box>
         <Typography sx={{ color: "primary.main", letterSpacing: 2.2, fontSize: 12, fontWeight: 700 }}>
-          TRẢI NGHIỆM CỦA KHÁCH
+          {t("roomDetail.reviews.eyebrow")}
         </Typography>
         <Typography
           component="h2"
           sx={{ mt: 1.25, color: "text.primary", fontFamily: "Georgia, serif", fontSize: { xs: 32, sm: 38, md: 44 }, lineHeight: 1.16 }}
         >
-          Những kỳ nghỉ được ghi nhớ.
+          {t("roomDetail.reviews.title")}
         </Typography>
       </Box>
 
@@ -39,9 +43,9 @@ const ReviewSection = ({ stats, reviews }: Props) => (
             {stats.avgOverall.toFixed(1)}
           </Typography>
           <Box>
-            <Rating value={stats.avgOverall} precision={0.1} readOnly size="small" aria-label={`${stats.avgOverall.toFixed(1)} trên 5 điểm`} sx={{ color: "rating.main", display: "flex" }} />
+            <Rating value={stats.avgOverall} precision={0.1} readOnly size="small" aria-label={t("roomDetail.reviews.ratingLabel", { rating: stats.avgOverall.toFixed(1) })} sx={{ color: "rating.main", display: "flex" }} />
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
-              {stats.totalReviews} đánh giá
+              {t("roomDetail.reviews.count", { count: stats.totalReviews })}
             </Typography>
           </Box>
         </Stack>
@@ -65,7 +69,7 @@ const ReviewSection = ({ stats, reviews }: Props) => (
               borderRadius: 1.5,
             }}
           >
-            <Rating value={review.overall} precision={1} readOnly size="small" aria-label={`${review.overall} trên 5 điểm`} sx={{ color: "rating.main" }} />
+            <Rating value={review.overall} precision={1} readOnly size="small" aria-label={t("roomDetail.reviews.ratingLabel", { rating: review.overall })} sx={{ color: "rating.main" }} />
             <Typography
               sx={{
                 color: "#263F49",
@@ -79,7 +83,7 @@ const ReviewSection = ({ stats, reviews }: Props) => (
                 overflowWrap: "anywhere",
               }}
             >
-              “{review.comment || "Khách không để lại nhận xét."}”
+              “{review.comment || t("roomDetail.reviews.noComment")}”
             </Typography>
 
             <Stack direction="row" spacing={1.25} alignItems="center" sx={{ pt: 0.25 }}>
@@ -92,7 +96,7 @@ const ReviewSection = ({ stats, reviews }: Props) => (
               <Box sx={{ minWidth: 0 }}>
                 <Typography fontWeight={650} color="text.primary" noWrap>{guestName}</Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {formatDate(review.createdAt)} · {review.booking.room.roomType.name} · {nights} đêm
+                  {formatDate(review.createdAt)} · {review.booking.room.roomType.name} · {t("roomDetail.reviews.nights", { count: nights })}
                 </Typography>
               </Box>
             </Stack>
@@ -101,6 +105,7 @@ const ReviewSection = ({ stats, reviews }: Props) => (
       })}
     </Box>
   </Box>
-);
+  );
+};
 
 export default ReviewSection;

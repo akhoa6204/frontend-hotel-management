@@ -1,59 +1,156 @@
 import EntityPickerField from "@components/entity-picker-field";
 import { Typography, Grid, Box, MenuItem } from "@mui/material";
-import EntityPickerDialog from "@components/entity-picker-dialog";
 import { useBookingManagementContext } from "@context/booking-management";
+import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
+
+const DetailItem = ({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) => (
+  <Box>
+    <Typography sx={{ color: "#667085", fontSize: 12.5, mb: 0.5 }}>
+      {label}
+    </Typography>
+    <Box sx={{ color: "#1F2937", fontSize: 14, fontWeight: 600 }}>
+      {children}
+    </Box>
+  </Box>
+);
 
 export default function BookingInfoTab() {
+  const { t } = useTranslation(["bookings", "common"]);
   const {
     bookingDetail,
     openPickerHandler,
     availableRooms,
     handleChangeRoom,
     metaAvailabelRooms,
-    getLabeBookinglStatus,
   } = useBookingManagementContext();
-  if (!bookingDetail) return;
+  if (!bookingDetail) return null;
+  const nights = Math.max(
+    1,
+    dayjs(bookingDetail.checkOutDate).diff(
+      dayjs(bookingDetail.checkInDate),
+      "day",
+    ),
+  );
   return (
-    <>
-      <Box minHeight={400}>
-        <Grid container spacing={2}>
-          <Grid size={6}>
-            <Typography variant="body2">Khách</Typography>
-            <Typography fontWeight={600}>{bookingDetail.guestName}</Typography>
+    <Box>
+      <Grid container spacing={{ xs: 3, md: 4 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Typography
+            sx={{
+              fontSize: 12,
+              fontWeight: 700,
+              color: "#475467",
+              letterSpacing: "0.05em",
+              pb: 1.25,
+              mb: 2,
+              borderBottom: "1px solid #E4E7EC",
+            }}
+          >
+            {t("detail.guestInformation", { ns: "bookings" })}
+          </Typography>
+          <Grid container spacing={2.5}>
+            <Grid size={6}>
+              <DetailItem label={t("detail.guest", { ns: "bookings" })}>{bookingDetail.guestName}</DetailItem>
+            </Grid>
+            <Grid size={6}>
+              <DetailItem label={t("detail.phone", { ns: "bookings" })}>
+                {bookingDetail.guestPhone}
+              </DetailItem>
+            </Grid>
+            <Grid size={12}>
+              <DetailItem label={t("detail.email", { ns: "bookings" })}>
+                {bookingDetail.guestEmail || t("states.noInformation", { ns: "common" })}
+              </DetailItem>
+            </Grid>
+            <Grid size={12}>
+              <DetailItem label={t("detail.bookedFor", { ns: "bookings" })}>
+                {t(bookingDetail.bookingForSomeoneElse ? "detail.yes" : "detail.no", { ns: "bookings" })}
+              </DetailItem>
+            </Grid>
           </Grid>
-
-          <Grid size={6}>
-            <Typography variant="body2">Điện thoại</Typography>
-            <Typography fontWeight={600}>{bookingDetail.guestPhone}</Typography>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Typography
+            sx={{
+              fontSize: 12,
+              fontWeight: 700,
+              color: "#475467",
+              letterSpacing: "0.05em",
+              pb: 1.25,
+              mb: 2,
+              borderBottom: "1px solid #E4E7EC",
+            }}
+          >
+            {t("detail.stayInformation", { ns: "bookings" })}
+          </Typography>
+          <Grid container spacing={2.5}>
+            <Grid size={6}>
+              <DetailItem label={t("detail.checkIn", { ns: "bookings" })}>
+                {dayjs(bookingDetail.checkInDate).format("DD/MM/YYYY")}
+              </DetailItem>
+            </Grid>
+            <Grid size={6}>
+              <DetailItem label={t("detail.checkOut", { ns: "bookings" })}>
+                {dayjs(bookingDetail.checkOutDate).format("DD/MM/YYYY")}
+              </DetailItem>
+            </Grid>
+            <Grid size={6}>
+              <DetailItem label={t("detail.nights", { ns: "bookings" })}>{nights}</DetailItem>
+            </Grid>
+            <Grid size={6}>
+              <DetailItem label={t("detail.expectedArrivalTime", { ns: "bookings" })}>
+                {bookingDetail.estimatedArrivalTime || t("states.noInformation", { ns: "common" })}
+              </DetailItem>
+            </Grid>
+            <Grid size={12}>
+              <DetailItem label={t("detail.status", { ns: "bookings" })}>
+                {t(`status.${bookingDetail.status}`, { ns: "bookings" })}
+              </DetailItem>
+            </Grid>
           </Grid>
-          <Grid size={6}>
-            <Typography variant="body2">Email</Typography>
-            <Typography fontWeight={600}>
-              {bookingDetail.guestEmail
-                ? bookingDetail.guestEmail
-                : "Không có thông tin"}
+        </Grid>
+        <Grid size={12}>
+          <Typography
+            sx={{
+              fontSize: 12,
+              fontWeight: 700,
+              color: "#475467",
+              letterSpacing: "0.05em",
+              pb: 1.25,
+              mb: 2,
+              borderBottom: "1px solid #E4E7EC",
+            }}
+          >
+            {t("detail.roomAssignment", { ns: "bookings" })}
+          </Typography>
+          <Box sx={{ maxWidth: 440 }}>
+            <Typography sx={{ color: "#667085", fontSize: 12.5, mb: 0.75 }}>
+              {t("detail.assignedRoom", { ns: "bookings" })}
             </Typography>
-          </Grid>
-
-          <Grid size={6}>
-            <Typography variant="body2">Phòng</Typography>
             {bookingDetail.status === "CANCELLED" ||
             bookingDetail.status === "CHECKED_OUT" ? (
-              <Typography fontWeight={600}>
+              <Typography fontSize={14} fontWeight={600}>
                 {bookingDetail.room.name} - {bookingDetail.room.roomType.name}
               </Typography>
             ) : (
               <EntityPickerField
                 name="roomId"
                 value={bookingDetail.room.id}
-                onChange={(field, value) => {
+                onChange={(_, value) => {
                   if (value && value !== bookingDetail.room.id) {
                     handleChangeRoom(Number(value));
                   }
                 }}
                 onOpenPicker={openPickerHandler}
                 isMoreOptions={(metaAvailabelRooms?.totalPages || 1) > 1}
-                placeholder="Chọn phòng trống"
+                placeholder={t("createDialog.chooseAvailableRoom", { ns: "bookings" })}
                 size="small"
               >
                 {availableRooms.map((room) => (
@@ -63,46 +160,9 @@ export default function BookingInfoTab() {
                 ))}
               </EntityPickerField>
             )}
-          </Grid>
-
-          <Grid size={6}>
-            <Typography variant="body2">Trạng thái</Typography>
-            <Typography fontWeight={600}>
-              {getLabeBookinglStatus[bookingDetail.status]}
-            </Typography>
-          </Grid>
-
-          <Grid size={6}>
-            <Typography variant="body2">Check-in</Typography>
-            <Typography fontWeight={600}>
-              {new Date(bookingDetail.checkInDate).toLocaleDateString()}
-            </Typography>
-          </Grid>
-
-          <Grid size={6}>
-            <Typography variant="body2">Check-out</Typography>
-            <Typography fontWeight={600}>
-              {new Date(bookingDetail.checkOutDate).toLocaleDateString()}
-            </Typography>
-          </Grid>
-
-          <Grid size={6}>
-            <Typography variant="body2">Giờ đến dự kiến</Typography>
-            <Typography fontWeight={600}>
-              {bookingDetail.estimatedArrivalTime
-                ? bookingDetail.estimatedArrivalTime
-                : "Không có thông tin"}
-            </Typography>
-          </Grid>
-
-          <Grid size={6}>
-            <Typography variant="body2">Đặt hộ / Người ở thực tế</Typography>
-            <Typography fontWeight={600}>
-              {bookingDetail.bookingForSomeoneElse ? "Có" : "Không"}
-            </Typography>
-          </Grid>
+          </Box>
         </Grid>
-      </Box>
-    </>
+      </Grid>
+    </Box>
   );
 }

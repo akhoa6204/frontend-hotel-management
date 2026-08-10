@@ -8,6 +8,7 @@ import GuestPaymentService from "@services/guest/payment.service";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const DEPOSIT_AMOUNT = 150_000;
 
@@ -17,6 +18,7 @@ interface PaymentNotice {
 }
 
 const usePayment = () => {
+  const { t } = useTranslation("client");
   const navigate = useNavigate();
   const { user } = useAuth();
   const { state } = useLocation() as { state?: { booking?: BookingResponse } };
@@ -42,7 +44,7 @@ const usePayment = () => {
     mutationFn: ({ paymentId }: { paymentId: number }) => GuestPaymentService.createCheckoutLink(paymentId),
     onSuccess: (data) => {
       if (!data?.qrUrl) {
-        showError("Không lấy được mã QR thanh toán");
+        showError(t("payment.errors.missingQr"));
         return;
       }
       setQrState((previous) => ({
@@ -53,7 +55,7 @@ const usePayment = () => {
         onlinePaymentId: data.paymentId,
       }));
     },
-    onError: () => showError("Không thể khởi tạo mã QR thanh toán. Vui lòng thử lại."),
+    onError: () => showError(t("payment.errors.createQr")),
   });
 
   const mCreatePayment = useMutation({
@@ -64,7 +66,7 @@ const usePayment = () => {
       mCreatePaymentOnline.mutate({ paymentId });
     },
     onError: (error: AxiosError<{ message?: string }>) => {
-      showError(error.response?.data?.message || "Không thể khởi tạo thanh toán. Vui lòng thử lại.");
+      showError(error.response?.data?.message || t("payment.errors.createPayment"));
     },
   });
 
@@ -101,14 +103,14 @@ const usePayment = () => {
 
         setQrState({ paymentQrDialogOpen: false, paid: true, open: false });
         setShowNotice({ open: true, type: "success" });
-        showSuccess("Thanh toán thành công");
+        showSuccess(t("payment.notice.successTitle"));
       } catch {
         // A temporary polling failure should not interrupt the active QR payment.
       }
     }, 15_000);
 
     return () => window.clearInterval(intervalId);
-  }, [qrState.onlinePaymentId, qrState.paid, qrState.paymentQrDialogOpen, showSuccess]);
+  }, [qrState.onlinePaymentId, qrState.paid, qrState.paymentQrDialogOpen, showSuccess, t]);
 
   const backToHome = () => {
     if (!booking) {

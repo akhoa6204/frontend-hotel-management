@@ -1,12 +1,12 @@
-import { StatsOverviewResponse } from "@constant/response/StatsOverviewResponse";
+import type { StatsOverviewResponse } from "@constant/response/StatsOverviewResponse";
 import httpClient from "..";
-import { MonthlyRevenueResponse } from "@constant/response/MonthlyRevenueResponse";
-import { MonthlyBookingStatsResponse } from "@constant/response/MonthlyBookingStatsResponse";
-import { RevenueOccupancyStatsResponse } from "@constant/response/RevenueOccupancyStatsResponse";
-import { ReviewStatsResponse } from "@constant/response/ReviewStatsResponse";
-import { ApiResponse } from "@constant/response/ApiResponse";
-import { BookingResponse } from "@constant/response/BookingResponse";
-import { SearchFilter } from "@constant/internal/SearchFilter";
+import type { MonthlyRevenueResponse } from "@constant/response/MonthlyRevenueResponse";
+import type { MonthlyBookingStatsResponse } from "@constant/response/MonthlyBookingStatsResponse";
+import type { RevenueOccupancyStatsResponse } from "@constant/response/RevenueOccupancyStatsResponse";
+import type { ReviewStatsResponse } from "@constant/response/ReviewStatsResponse";
+import type { ApiResponse } from "@constant/response/ApiResponse";
+import type { BookingResponse } from "@constant/response/BookingResponse";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
 
 const BASE_URL = "/staff/stats";
 

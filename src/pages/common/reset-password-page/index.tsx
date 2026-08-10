@@ -9,6 +9,7 @@ import AuthService from "@services/auth/auth.service";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface ResetPasswordForm {
   password: string;
@@ -16,6 +17,7 @@ interface ResetPasswordForm {
 }
 
 const ResetPasswordPage = () => {
+  const { t } = useTranslation("client");
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -43,7 +45,7 @@ const ResetPasswordPage = () => {
     },
     onSuccess: () => navigate("/login", { replace: true, state: { passwordReset: true } }),
     onError: (error: AxiosError<{ message?: string }>) => {
-      showError(error.response?.data?.message || "Không thể đặt lại mật khẩu. Liên kết có thể đã hết hạn.");
+      showError(error.response?.data?.message || t("resetPassword.errors.resetFailed"));
     },
   });
 
@@ -51,10 +53,10 @@ const ResetPasswordPage = () => {
     { password: "", confirmPassword: "" },
     (values) => {
       const validationErrors: Partial<Record<keyof ResetPasswordForm, string>> = {};
-      if (!values.password.trim()) validationErrors.password = "Mật khẩu không được để trống";
-      else if (values.password.length < 6) validationErrors.password = "Mật khẩu tối thiểu 6 ký tự";
-      if (!values.confirmPassword.trim()) validationErrors.confirmPassword = "Vui lòng nhập lại mật khẩu";
-      else if (values.confirmPassword !== values.password) validationErrors.confirmPassword = "Mật khẩu nhập lại không khớp";
+      if (!values.password.trim()) validationErrors.password = t("resetPassword.validation.passwordRequired");
+      else if (values.password.length < 6) validationErrors.password = t("resetPassword.validation.passwordLength");
+      if (!values.confirmPassword.trim()) validationErrors.confirmPassword = t("resetPassword.validation.confirmPasswordRequired");
+      else if (values.confirmPassword !== values.password) validationErrors.confirmPassword = t("resetPassword.validation.passwordMismatch");
       return validationErrors;
     },
     (values) => mResetPassword.mutate(values.password),
@@ -63,17 +65,17 @@ const ResetPasswordPage = () => {
   return (
     <>
       <AuthLayout
-        eyebrow="BẢO MẬT TÀI KHOẢN"
-        title="Đặt lại mật khẩu."
-        description="Chọn mật khẩu mới cho tài khoản Diamond Sea của bạn."
+        eyebrow={t("resetPassword.eyebrow")}
+        title={t("resetPassword.title")}
+        description={t("resetPassword.description")}
       >
         <Alert severity="info" sx={{ mb: 3, borderRadius: 1.25 }}>
-          Mật khẩu mới cần có ít nhất 6 ký tự.
+          {t("resetPassword.passwordRequirement")}
         </Alert>
         <Box component="form" onSubmit={onSubmit} noValidate>
           <Stack spacing={2.25}>
             <AuthPasswordField
-              label="Mật khẩu mới"
+              label={t("resetPassword.fields.password")}
               name="password"
               value={form.password}
               onChange={onChange}
@@ -82,7 +84,7 @@ const ResetPasswordPage = () => {
               disabled={mResetPassword.isPending || !token}
             />
             <AuthPasswordField
-              label="Nhập lại mật khẩu mới"
+              label={t("resetPassword.fields.confirmPassword")}
               name="confirmPassword"
               value={form.confirmPassword}
               onChange={onChange}
@@ -91,12 +93,12 @@ const ResetPasswordPage = () => {
               disabled={mResetPassword.isPending || !token}
             />
             <Button type="submit" variant="contained" fullWidth disabled={mResetPassword.isPending || !token} sx={{ minHeight: 48, borderRadius: 1.25 }}>
-              {mResetPassword.isPending ? "Đang cập nhật..." : "Đặt lại mật khẩu"}
+              {mResetPassword.isPending ? t("resetPassword.actions.updating") : t("resetPassword.actions.reset")}
             </Button>
           </Stack>
         </Box>
         <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ mt: 3 }}>
-          <MuiLink component={Link} to="/login" underline="hover" sx={{ fontWeight: 700 }}>Quay lại đăng nhập</MuiLink>
+          <MuiLink component={Link} to="/login" underline="hover" sx={{ fontWeight: 700 }}>{t("resetPassword.actions.backToLogin")}</MuiLink>
         </Typography>
       </AuthLayout>
       <GlobalSnackbar alert={alert} closeSnackbar={closeSnackbar} />

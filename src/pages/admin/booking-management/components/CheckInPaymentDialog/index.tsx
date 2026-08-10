@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   open: boolean;
@@ -35,6 +36,7 @@ const CheckInPaymentDialog: React.FC<Props> = ({
   onConfirm,
   loading,
 }) => {
+  const { t } = useTranslation(["bookings", "common"]);
   const nights = useMemo(() => {
     const a = dayjs(booking.checkIn);
     const b = dayjs(booking.checkOut);
@@ -51,28 +53,28 @@ const CheckInPaymentDialog: React.FC<Props> = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Xác nhận nhận phòng</DialogTitle>
+      <DialogTitle>{t("checkInDialog.title", { ns: "bookings" })}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 0.5 }}>
           <Paper variant="outlined" sx={{ py: 2, px: 1.5, borderRadius: 2 }}>
             <Typography fontWeight={600} pb={1.5}>
-              Thông tin đặt phòng
+              {t("checkInDialog.bookingInformation", { ns: "bookings" })}
             </Typography>
             <Grid container spacing={2}>
               <Grid size={6}>
-                <Typography>Khách hàng: {booking.fullName}</Typography>
-                <Typography>Email: {booking.email || "-"}</Typography>
-                <Typography>Số điện thoại: {booking.phone || "-"}</Typography>
+                <Typography>{t("checkInDialog.customer", { ns: "bookings" })}: {booking.fullName}</Typography>
+                <Typography>{t("detail.email", { ns: "bookings" })}: {booking.email || "-"}</Typography>
+                <Typography>{t("detail.phone", { ns: "bookings" })}: {booking.phone || "-"}</Typography>
               </Grid>
               <Grid size={6}>
                 <Typography>
-                  Phòng: {booking.room?.name} - {booking.room.roomType?.name}
+                  {t("columns.room", { ns: "bookings" })}: {booking.room?.name} - {booking.room.roomType?.name}
                 </Typography>
                 <Typography>
-                  Check-in: {dayjs(booking.checkIn).format("DD/M/YYYY")}
+                  {t("detail.checkIn", { ns: "bookings" })}: {dayjs(booking.checkIn).format("DD/M/YYYY")}
                 </Typography>
                 <Typography>
-                  Check-out: {dayjs(booking.checkOut).format("DD/M/YYYY")}
+                  {t("detail.checkOut", { ns: "bookings" })}: {dayjs(booking.checkOut).format("DD/M/YYYY")}
                 </Typography>
               </Grid>
             </Grid>
@@ -80,11 +82,11 @@ const CheckInPaymentDialog: React.FC<Props> = ({
 
           <Paper variant="outlined" sx={{ py: 2, px: 1.5, borderRadius: 2 }}>
             <Typography fontWeight={600} pb={1.5}>
-              Thông tin thanh toán
+              {t("checkInDialog.paymentInformation", { ns: "bookings" })}
             </Typography>
             <Grid container spacing={2}>
               <Grid size={6}>
-                <InputLabel shrink>Phương thức thanh toán</InputLabel>
+                <InputLabel shrink>{t("detail.paymentMethod", { ns: "bookings" })}</InputLabel>
                 <Select
                   value={paymentMethod}
                   fullWidth
@@ -93,60 +95,60 @@ const CheckInPaymentDialog: React.FC<Props> = ({
                     onPaymentMethodChange(e.target.value as PaymentMethod)
                   }
                 >
-                  <MenuItem value="CASH">Tiền mặt</MenuItem>
-                  <MenuItem value="CARD">Thanh toán online</MenuItem>
+                  <MenuItem value="CASH">{t("paymentMethods.CASH", { ns: "bookings" })}</MenuItem>
+                  <MenuItem value="CARD">{t("paymentMethods.ONLINE", { ns: "bookings" })}</MenuItem>
                 </Select>
               </Grid>
 
               <Grid size={6} container>
                 <Grid size={6}>
-                  <Typography>Đơn giá:</Typography>
+                  <Typography>{t("createDialog.unitPrice", { ns: "bookings" })}</Typography>
                 </Grid>
                 <Grid size={6} textAlign="right">
-                  <Typography>{unitPrice.toLocaleString()} VND/đêm</Typography>
+                  <Typography>{t("currency.perNight", { ns: "bookings", value: unitPrice.toLocaleString() })}</Typography>
                 </Grid>
 
                 <Grid size={6}>
-                  <Typography>Số đêm:</Typography>
+                  <Typography>{t("detail.nights", { ns: "bookings" })}:</Typography>
                 </Grid>
                 <Grid size={6} textAlign="right">
                   <Typography>{nights}</Typography>
                 </Grid>
 
                 <Grid size={6}>
-                  <Typography>Tạm tính:</Typography>
+                  <Typography>{t("detail.subtotal", { ns: "bookings" })}:</Typography>
                 </Grid>
                 <Grid size={6} textAlign="right">
-                  <Typography>{totalBefore.toLocaleString()} VND</Typography>
+                  <Typography>{t("currency.amount", { ns: "bookings", value: totalBefore.toLocaleString() })}</Typography>
                 </Grid>
 
                 <Grid size={6}>
-                  <Typography>Giảm giá:</Typography>
+                  <Typography>{t("detail.discount", { ns: "bookings" })}:</Typography>
                 </Grid>
                 <Grid size={6} textAlign="right">
-                  <Typography>−{discount.toLocaleString()} VND</Typography>
+                  <Typography>−{t("currency.amount", { ns: "bookings", value: discount.toLocaleString() })}</Typography>
                 </Grid>
 
                 <Grid size={6}>
-                  <Typography>Tổng cộng:</Typography>
+                  <Typography>{t("detail.total", { ns: "bookings" })}:</Typography>
                 </Grid>
                 <Grid size={6} textAlign="right">
-                  <Typography>{totalAfter.toLocaleString()} VND</Typography>
+                  <Typography>{t("currency.amount", { ns: "bookings", value: totalAfter.toLocaleString() })}</Typography>
                 </Grid>
 
                 <Grid size={6}>
-                  <Typography>Đã thanh toán:</Typography>
+                  <Typography>{t("detail.paid", { ns: "bookings" })}:</Typography>
                 </Grid>
                 <Grid size={6} textAlign="right">
-                  <Typography>{deposit.toLocaleString()} VND</Typography>
+                  <Typography>{t("currency.amount", { ns: "bookings", value: deposit.toLocaleString() })}</Typography>
                 </Grid>
 
                 <Grid size={6}>
-                  <Typography fontWeight={700}>Thanh toán Còn lại:</Typography>
+                  <Typography fontWeight={700}>{t("detail.remaining", { ns: "bookings" })}:</Typography>
                 </Grid>
                 <Grid size={6} textAlign="right">
                   <Typography fontWeight={700}>
-                    {remaining.toLocaleString()} VND
+                    {t("currency.amount", { ns: "bookings", value: remaining.toLocaleString() })}
                   </Typography>
                 </Grid>
               </Grid>
@@ -157,10 +159,10 @@ const CheckInPaymentDialog: React.FC<Props> = ({
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button variant="outlined" color="inherit" onClick={onClose}>
-          Hủy
+          {t("actions.cancel", { ns: "common" })}
         </Button>
         <Button variant="contained" onClick={onConfirm} disabled={loading}>
-          Xác nhận thanh toán
+          {t("checkInDialog.confirmPayment", { ns: "bookings" })}
         </Button>
       </DialogActions>
     </Dialog>

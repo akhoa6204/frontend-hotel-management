@@ -1,11 +1,13 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 
 import useForm from "@hooks/useForm";
 import useSnackbar from "@hooks/useSnackbar";
-import { PromotionResponse } from "@constant/response/PromotionResponse";
-import { SearchFilter } from "@constant/internal/SearchFilter";
-import { DialogState } from "@constant/internal/DialogState";
+import type { PromotionResponse } from "@constant/response/PromotionResponse";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
+import type { DialogState } from "@constant/internal/DialogState";
 import StaffPromotionService from "@services/staff/promotion.service";
 import StaffRoomTypeService from "@services/staff/roomType.service";
 
@@ -13,6 +15,12 @@ const initialFilters: SearchFilter = {
   q: "",
   page: 1,
   limit: 10,
+};
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (typeof error !== "object" || error === null) return fallback;
+  const candidate = error as { response?: { data?: { message?: string } } };
+  return candidate.response?.data?.message || fallback;
 };
 export type PromotionForm = Omit<
   PromotionResponse,
@@ -34,23 +42,30 @@ const initialForm: PromotionForm = {
   quotaTotal: 100,
   stackable: false,
 };
-export const getPromotionLabels = (promotion: PromotionResponse) => {
+export const getPromotionLabels = (
+  promotion: PromotionResponse,
+  t: TFunction,
+) => {
   const scopeLabel =
     promotion.scope === "ROOM"
-      ? "Loại phòng"
+      ? t("scopes.ROOM", { ns: "promotions" })
       : promotion.scope === "SERVICE"
-        ? "Dịch vụ"
-        : "Toàn bộ";
+        ? t("scopes.SERVICE", { ns: "promotions" })
+        : t("scopes.INVOICE", { ns: "promotions" });
 
   const discountTypeTransform =
-    promotion.discountType === "FIXED" ? "Giá cố định" : "Phần trăm";
+    promotion.discountType === "FIXED_AMOUNT"
+      ? t("discountTypes.FIXED_AMOUNT", { ns: "promotions" })
+      : t("discountTypes.PERCENTAGE", { ns: "promotions" });
 
   const usedLabel =
     promotion.quotaTotal == null
       ? (promotion.quotaUsed ?? 0)
       : `${promotion.quotaUsed ?? 0}/${promotion.quotaTotal}`;
 
-  const autoApplyLabel = promotion.autoApplied ? "Tự động" : "Mã code";
+  const autoApplyLabel = promotion.autoApplied
+    ? t("types.AUTO", { ns: "promotions" })
+    : t("types.CODE", { ns: "promotions" });
 
   return {
     scopeLabel,
@@ -61,6 +76,7 @@ export const getPromotionLabels = (promotion: PromotionResponse) => {
 };
 
 const usePromotionManagement = () => {
+  const { t } = useTranslation(["promotions", "common"]);
   const qc = useQueryClient();
 
   const { alert, showError, showSuccess, closeSnackbar } = useSnackbar();
@@ -84,7 +100,7 @@ const usePromotionManagement = () => {
     });
   const handleChangePage = (page: number) => onChangeFilter("page", page);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["promotions", filters],
     queryFn: () => StaffPromotionService.getList(filters),
   });
@@ -152,12 +168,13 @@ const usePromotionManagement = () => {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["promotions"] });
-      showSuccess("Tạo mã giảm giá thành công");
+      showSuccess(t("messages.createSuccess", { ns: "promotions" }));
       onClose();
     },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message || "Có lỗi xảy ra";
-      showError(msg);
+    onError: (error) => {
+      showError(
+        getErrorMessage(error, t("messages.genericError", { ns: "promotions" })),
+      );
     },
   });
 
@@ -183,11 +200,12 @@ const usePromotionManagement = () => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["promotions"] });
       onClose();
-      showSuccess("Cập nhật mã giảm giá thành công");
+      showSuccess(t("messages.updateSuccess", { ns: "promotions" }));
     },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message || "Có lỗi xảy ra";
-      showError(msg);
+    onError: (error) => {
+      showError(
+        getErrorMessage(error, t("messages.genericError", { ns: "promotions" })),
+      );
     },
   });
 
@@ -195,28 +213,33 @@ const usePromotionManagement = () => {
     mutationFn: (id: number) => StaffPromotionService.delete(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["promotions"] });
-      showSuccess("Xóa mã giảm giá thành công");
+      showSuccess(t("messages.deleteSuccess", { ns: "promotions" }));
     },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message || "Có lỗi xảy ra";
-      showError(msg);
+    onError: (error) => {
+      showError(
+        getErrorMessage(error, t("messages.genericError", { ns: "promotions" })),
+      );
     },
   });
 
   const onSubmit = () => {
-    if (!form.startDate || !form.endDate) return;
+    if (!form.startDate || !form.endDate) {
+      showError(t("validation.dateRangeRequired", { ns: "promotions" }));
+      return;
+    }
     if (dialogState.mode === "EDIT" && editingId) updateMutation.mutate();
     else createMutation.mutate();
   };
 
-  const handleDeletePromotion = (id: number) => {
-    if (window.confirm("Xóa khuyến mãi này?")) deleteMutation.mutate(id);
-  };
+  const handleDeletePromotion = async (id: number) =>
+    await deleteMutation.mutateAsync(id);
 
   return {
     rows,
     meta,
     isLoading,
+    isError,
+    refetch,
     filters,
     handleSearch,
     handleChangePage,
@@ -237,6 +260,8 @@ const usePromotionManagement = () => {
 
     promotion,
     isLoadingPromotion,
+    isSaving: createMutation.isPending || updateMutation.isPending,
+    isDeleting: deleteMutation.isPending,
   };
 };
 

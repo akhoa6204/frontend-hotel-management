@@ -7,6 +7,7 @@ import BrokenImageOutlinedIcon from "@mui/icons-material/BrokenImageOutlined";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import CollectionsOutlinedIcon from "@mui/icons-material/CollectionsOutlined";
 import { Box, Button, Dialog, IconButton, Stack, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   images: RoomTypeImageResponse[];
@@ -16,6 +17,7 @@ interface Props {
 const inappropriateImagePattern = /(meme|joke|giphy|tenor|\.gif(?:\?|$))/i;
 
 const ImageGallery = ({ images, roomName }: Props) => {
+  const { t } = useTranslation("client");
   const galleryImages = useMemo(() => {
     const uniqueImages = new Map<string, RoomTypeImageResponse>();
 
@@ -28,8 +30,8 @@ const ImageGallery = ({ images, roomName }: Props) => {
     const normalizedImages = Array.from(uniqueImages.values());
     return normalizedImages.length
       ? normalizedImages
-      : [{ url: BgRoom, alt: "Không gian khách sạn Diamond Sea" }];
-  }, [images]);
+      : [{ url: BgRoom, alt: t("roomDetail.gallery.fallbackAlt") }];
+  }, [images, t]);
 
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
   const [failedImages, setFailedImages] = useState<Set<string>>(() => new Set());
@@ -97,7 +99,7 @@ const ImageGallery = ({ images, roomName }: Props) => {
       component="button"
       type="button"
       onClick={() => setActiveImageIndex(index)}
-      aria-label={`Xem ảnh ${index + 1} của ${roomName}`}
+      aria-label={t("roomDetail.gallery.viewImageOfRoom", { index: index + 1, room: roomName })}
       sx={{
         position: "relative",
         display: "block",
@@ -115,13 +117,13 @@ const ImageGallery = ({ images, roomName }: Props) => {
       {failedImages.has(image.url) ? (
         <Stack alignItems="center" justifyContent="center" spacing={1} sx={{ height: 1, color: "text.secondary" }}>
           <BrokenImageOutlinedIcon />
-          <Typography variant="caption">Không thể tải ảnh</Typography>
+          <Typography variant="caption">{t("roomDetail.gallery.loadError")}</Typography>
         </Stack>
       ) : (
         <Box
           component="img"
           src={image.url}
-          alt={image.alt || `${roomName} - ảnh ${index + 1}`}
+          alt={image.alt || t("roomDetail.gallery.imageAlt", { room: roomName, index: index + 1 })}
           onError={() => markImageAsFailed(image.url)}
           sx={{ width: 1, height: 1, display: "block", objectFit: "cover", transition: "transform .4s ease" }}
         />
@@ -134,7 +136,7 @@ const ImageGallery = ({ images, roomName }: Props) => {
           startIcon={<CollectionsOutlinedIcon />}
           sx={{ position: "absolute", right: 18, bottom: 18, bgcolor: "rgba(255,255,255,.94)", color: "#183746", borderRadius: 1 }}
         >
-          Xem tất cả ảnh
+          {t("roomDetail.gallery.viewAll")}
         </Button>
       )}
     </Box>
@@ -160,7 +162,7 @@ const ImageGallery = ({ images, roomName }: Props) => {
         onClose={closeGallery}
         fullWidth
         maxWidth="lg"
-        aria-label={`Thư viện ảnh ${roomName}`}
+        aria-label={t("roomDetail.gallery.dialogLabel", { room: roomName })}
         PaperProps={{
           sx: {
             width: { xs: "100%", md: "calc(100% - 64px)" },
@@ -175,7 +177,7 @@ const ImageGallery = ({ images, roomName }: Props) => {
       >
         <IconButton
           onClick={closeGallery}
-          aria-label="Đóng thư viện ảnh"
+          aria-label={t("roomDetail.gallery.close")}
           sx={{ position: "absolute", top: { xs: 12, md: 18 }, right: { xs: 12, md: 18 }, zIndex: 2, color: "#fff", bgcolor: "rgba(0,0,0,.5)", "&:hover": { bgcolor: "rgba(0,0,0,.7)" } }}
         >
           <CloseRoundedIcon />
@@ -187,13 +189,13 @@ const ImageGallery = ({ images, roomName }: Props) => {
               {failedImages.has(activeImage.url) ? (
                 <Stack alignItems="center" spacing={1.5} sx={{ color: "rgba(255,255,255,.72)" }}>
                   <BrokenImageOutlinedIcon sx={{ fontSize: 42 }} />
-                  <Typography>Không thể tải ảnh này</Typography>
+                  <Typography>{t("roomDetail.gallery.activeImageLoadError")}</Typography>
                 </Stack>
               ) : (
                 <Box
                   component="img"
                   src={activeImage.url}
-                  alt={activeImage.alt || `${roomName} - ảnh ${activeImageIndex + 1}`}
+                  alt={activeImage.alt || t("roomDetail.gallery.imageAlt", { room: roomName, index: activeImageIndex + 1 })}
                   onError={() => markImageAsFailed(activeImage.url)}
                   sx={{ display: "block", width: "auto", height: "auto", maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
                 />
@@ -201,10 +203,10 @@ const ImageGallery = ({ images, roomName }: Props) => {
 
               {galleryImages.length > 1 && (
                 <>
-                  <IconButton onClick={showPreviousImage} aria-label="Ảnh trước" sx={{ position: "absolute", left: { xs: 8, sm: 18 }, top: "50%", color: "#fff", bgcolor: "rgba(0,0,0,.42)", "&:hover": { bgcolor: "rgba(0,0,0,.68)" } }}>
+                  <IconButton onClick={showPreviousImage} aria-label={t("roomDetail.gallery.previous")} sx={{ position: "absolute", left: { xs: 8, sm: 18 }, top: "50%", color: "#fff", bgcolor: "rgba(0,0,0,.42)", "&:hover": { bgcolor: "rgba(0,0,0,.68)" } }}>
                     <ArrowBackIosNewRoundedIcon />
                   </IconButton>
-                  <IconButton onClick={showNextImage} aria-label="Ảnh tiếp theo" sx={{ position: "absolute", right: { xs: 8, sm: 18 }, top: "50%", color: "#fff", bgcolor: "rgba(0,0,0,.42)", "&:hover": { bgcolor: "rgba(0,0,0,.68)" } }}>
+                  <IconButton onClick={showNextImage} aria-label={t("roomDetail.gallery.next")} sx={{ position: "absolute", right: { xs: 8, sm: 18 }, top: "50%", color: "#fff", bgcolor: "rgba(0,0,0,.42)", "&:hover": { bgcolor: "rgba(0,0,0,.68)" } }}>
                     <ArrowForwardIosRoundedIcon />
                   </IconButton>
                 </>
@@ -228,7 +230,7 @@ const ImageGallery = ({ images, roomName }: Props) => {
                       }}
                       key={image.url}
                       onClick={() => setActiveImageIndex(index)}
-                      aria-label={`Xem ảnh ${index + 1}`}
+                      aria-label={t("roomDetail.gallery.viewImage", { index: index + 1 })}
                       aria-current={active ? "true" : undefined}
                       sx={{ flex: "0 0 auto", width: { xs: 72, sm: 92 }, height: { xs: 52, sm: 66 }, p: 0, border: active ? "2px solid #fff" : "2px solid transparent", borderRadius: .75, overflow: "hidden", bgcolor: "#20343d", opacity: active ? 1 : .62, cursor: "pointer", transition: "opacity .2s ease, border-color .2s ease", "&:hover": { opacity: 1 }, "&:focus-visible": { outline: "3px solid #61aee8", outlineOffset: 2 } }}
                     >

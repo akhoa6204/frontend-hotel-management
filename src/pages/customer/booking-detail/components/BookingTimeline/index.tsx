@@ -5,11 +5,10 @@ import {
   LoginRounded,
   LogoutRounded,
   CheckCircleOutline,
-  Cancel,
-  CancelOutlined,
   Close,
 } from "@mui/icons-material";
 import { Box, Button, Divider, Stack, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   booking: BookingResponse;
@@ -18,6 +17,7 @@ type Props = {
 };
 
 const BookingTimeline = ({ booking, onRebook, onReview }: Props) => {
+  const { t } = useTranslation("client");
   const canRebook =
     booking.status === "CHECKED_OUT" || booking.status === "CANCELLED";
 
@@ -25,24 +25,24 @@ const BookingTimeline = ({ booking, onRebook, onReview }: Props) => {
     booking.status !== "CANCELLED"
       ? [
           {
-            label: "Phòng đã đặt",
+            label: t("bookingDetail.timeline.booked"),
             icon: <HotelRounded />,
             active: true,
           },
           {
-            label: "Đã check-in",
+            label: t("bookingDetail.timeline.checkedIn"),
             icon: <LoginRounded />,
             active:
               booking.status === "CHECKED_IN" ||
               booking.status === "CHECKED_OUT",
           },
           {
-            label: "Đã check-out",
+            label: t("bookingDetail.timeline.checkedOut"),
             icon: <LogoutRounded />,
             active: booking.status === "CHECKED_OUT",
           },
           {
-            label: "Đánh giá",
+            label: t("bookingDetail.timeline.review"),
             icon: <StarBorderRounded />,
 
             active: booking.status === "CHECKED_OUT" && booking.hasReview,
@@ -50,12 +50,12 @@ const BookingTimeline = ({ booking, onRebook, onReview }: Props) => {
         ]
       : [
           {
-            label: "Phòng đã đặt",
+            label: t("bookingDetail.timeline.booked"),
             icon: <HotelRounded />,
             active: false,
           },
           {
-            label: "Hủy đặt phòng",
+            label: t("bookingDetail.timeline.cancelled"),
             icon: <Close />,
 
             active: false,
@@ -143,7 +143,7 @@ const BookingTimeline = ({ booking, onRebook, onReview }: Props) => {
             onClick={onReview}
             sx={{ textTransform: "none", py: 0.5, px: 2, borderRadius: 1 }}
           >
-            Đánh giá
+            {t("bookingDetail.actions.writeReview")}
           </Button>
         ) : (
           ""
@@ -155,7 +155,7 @@ const BookingTimeline = ({ booking, onRebook, onReview }: Props) => {
             onClick={onRebook}
             sx={{ textTransform: "none", py: 0.5, px: 2, borderRadius: 1 }}
           >
-            Đặt lại
+            {t("bookingDetail.actions.bookAgain")}
           </Button>
         )}
       </Stack>

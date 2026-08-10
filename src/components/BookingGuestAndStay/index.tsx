@@ -1,9 +1,10 @@
 import { Box, Divider, Stack, Typography } from "@mui/material";
 import EastIcon from "@mui/icons-material/East";
 import { diffNights, formatDate } from "@utils/format";
-import { BookingResponse } from "@constant/response/BookingResponse";
+import type { BookingResponse } from "@constant/response/BookingResponse";
+import { useTranslation } from "react-i18next";
 
-export const formatTime = (iso?: string) => {
+const formatTime = (iso?: string) => {
   if (!iso) return "";
   const d = new Date(iso);
   return d.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
@@ -15,6 +16,7 @@ type Props = {
 };
 
 const BookingGuestAndStay = ({ title, booking }: Props) => {
+  const { t } = useTranslation("client");
   const nights = diffNights(booking.checkInDate, booking.checkOutDate);
 
   return (
@@ -37,10 +39,10 @@ const BookingGuestAndStay = ({ title, booking }: Props) => {
           </Typography>
           <Stack spacing={0.5}>
             <Typography variant="body2">
-              📞 {booking.guestPhone || "Chưa có số điện thoại"}
+              📞 {booking.guestPhone || t("shared.booking.noPhone")}
             </Typography>
             <Typography variant="body2">
-              ✉️ {booking.guestEmail || "Chưa có email"}
+              ✉️ {booking.guestEmail || t("shared.booking.noEmail")}
             </Typography>
           </Stack>
         </Box>
@@ -58,7 +60,7 @@ const BookingGuestAndStay = ({ title, booking }: Props) => {
           <Stack direction="row" justifyContent="space-between" mb={1}>
             <Box>
               <Typography variant="body2" color="text.secondary">
-                Nhận phòng
+                {t("shared.booking.checkIn")}
               </Typography>
               <Typography fontWeight={600}>
                 {formatDate(booking.checkInDate)}
@@ -69,13 +71,13 @@ const BookingGuestAndStay = ({ title, booking }: Props) => {
             </Box>
 
             <Stack alignItems="center" justifyContent="center" spacing={0.5}>
-              <Typography variant="body2">{nights} đêm</Typography>
+              <Typography variant="body2">{t("shared.booking.nights", { count: nights })}</Typography>
               <EastIcon sx={{ fontSize: 24, color: "text.primary" }} />
             </Stack>
 
             <Box>
               <Typography variant="body2" color="text.secondary">
-                Trả phòng
+                {t("shared.booking.checkOut")}
               </Typography>
               <Typography fontWeight={600}>
                 {formatDate(booking.checkOutDate)}

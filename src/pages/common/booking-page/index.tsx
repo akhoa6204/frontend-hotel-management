@@ -6,8 +6,10 @@ import ReservationSummary from "./components/ReservationSummary";
 import ReservationSummarySkeleton from "./components/ReservationSummarySkeleton";
 import RulesCard from "./components/RulesCard";
 import useBooking from "./useBooking";
+import { useTranslation } from "react-i18next";
 
 const BookingPage = () => {
+  const { t } = useTranslation("client");
   const {
     room,
     bookingForm,
@@ -27,13 +29,13 @@ const BookingPage = () => {
       <Box>
         <Container maxWidth="lg" sx={{ pt: { xs: 4, md: 5 }, pb: { xs: 8, md: 12 } }}>
           <Typography sx={{ color: "primary.main", letterSpacing: 2, fontSize: 11, fontWeight: 750 }}>
-            HOÀN TẤT ĐẶT PHÒNG
+            {t("booking.hero.eyebrow")}
           </Typography>
           <Typography component="h1" sx={{ mt: 1.25, fontFamily: "Georgia, serif", fontSize: { xs: 34, sm: 40, md: 46 }, lineHeight: 1.15, color: "text.primary" }}>
-            Xác nhận kỳ nghỉ của bạn.
+            {t("booking.hero.title")}
           </Typography>
           <Typography color="text.secondary" sx={{ mt: 1.5, maxWidth: 620, lineHeight: 1.75 }}>
-            Kiểm tra thông tin phòng và điền thông tin liên hệ để tiếp tục đến bước thanh toán.
+            {t("booking.hero.description")}
           </Typography>
 
           <Box component="form" onSubmit={onSubmit} noValidate sx={{ mt: { xs: 4, md: 5.5 } }}>
@@ -65,7 +67,7 @@ const BookingPage = () => {
         </Container>
       </Box>
 
-      {loadingCreateBooking && <Loading content="Đang tạo đặt phòng..." />}
+      {loadingCreateBooking && <Loading content={t("booking.states.creatingBooking")} />}
       <GlobalSnackbar alert={alert} closeSnackbar={closeSnackbar} />
     </Box>
   );

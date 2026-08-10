@@ -1,4 +1,4 @@
-import { BookingResponse } from "./BookingResponse";
+import type { BookingResponse } from "./BookingResponse";
 
 export interface ReviewResponse {
   id: number;

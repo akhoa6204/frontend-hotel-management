@@ -1,101 +1,50 @@
-// components/dashboard/MonthlyBookingStatsCard.tsx
-import { MonthlyBookingStats } from "@constant/types";
-import {
-  Paper,
-  CardContent,
-  Typography,
-  Box,
-  CircularProgress,
-} from "@mui/material";
+import type { MonthlyBookingStatsResponse } from "@constant/response/MonthlyBookingStatsResponse";
+import { Box, CircularProgress, Divider, Paper, Stack, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
-type Props = {
-  data?: MonthlyBookingStats;
+interface Props {
+  data?: MonthlyBookingStatsResponse;
   loading?: boolean;
-};
+}
 
-const StatRow = ({
-  label,
-  value,
-  color,
-}: {
+interface StatRowProps {
   label: string;
   value: string | number;
   color?: string;
-}) => (
-  <Box
-    display="flex"
-    justifyContent="space-between"
-    alignItems="center"
-    border="1px solid #2E90FA"
-    borderRadius={2.5}
-    px={2}
-    py={2}
-  >
-    <Typography
-      variant="body2"
-      color="text.primary"
-      fontWeight={600}
-      fontSize={16}
-    >
-      {label}
-    </Typography>
-    <Typography
-      variant="subtitle1"
-      fontWeight={600}
-      color={color || "text.primary"}
-    >
-      {value}
-    </Typography>
-  </Box>
+}
+
+const StatRow = ({ label, value, color = "text.primary" }: StatRowProps) => (
+  <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2} sx={{ py: 1.45 }}>
+    <Typography sx={{ color: "text.secondary", fontSize: 13.5 }}>{label}</Typography>
+    <Typography sx={{ color, fontSize: 14, fontWeight: 700 }}>{value}</Typography>
+  </Stack>
 );
 
-const MonthlyBookingStatsCard = ({ data, loading }: Props) => {
-  if (loading)
-    return (
-      <Paper
-        variant="outlined"
-        sx={{ p: 3, display: "flex", justifyContent: "center" }}
-      >
-        <CircularProgress size={28} />
-      </Paper>
-    );
-
-  if (!data)
-    return (
-      <Paper variant="outlined" sx={{ p: 3 }}>
-        <Typography variant="body2" color="text.secondary">
-          Không có dữ liệu
-        </Typography>
-      </Paper>
-    );
+const MonthlyBookingStatsCard = ({ data, loading = false }: Props) => {
+  const { t } = useTranslation("dashboard");
 
   return (
-    <Paper variant="outlined" sx={{ p: 2, borderRadius: 2.5, height: "100%" }}>
-      <Box>
-        <Typography variant="body2" fontWeight={600} mb={2} fontSize={20}>
-          Thống kê booking
+    <Paper variant="outlined" sx={{ height: "100%", p: 2, borderRadius: "11px", borderColor: "#E4E7EC", boxShadow: "none" }}>
+      <Typography component="h3" sx={{ color: "text.primary", fontSize: 17, fontWeight: 650 }}>
+        {t("bookingStats.title")}
+      </Typography>
+
+      {loading ? (
+        <Box sx={{ minHeight: 190, display: "grid", placeItems: "center" }}>
+          <CircularProgress size={24} />
+        </Box>
+      ) : !data ? (
+        <Typography sx={{ py: 3, color: "text.secondary", fontSize: 13.5 }}>
+          {t("bookingStats.noData")}
         </Typography>
-        <Box mb={2}>
-          <StatRow label="Tổng booking" value={data.total ?? 0} />
-        </Box>
-        <Box mb={2}>
-          <StatRow
-            label="Booking thành công"
-            value={data.success ?? 0}
-            color="primary"
-          />
-        </Box>
-        <Box mb={2}>
-          <StatRow
-            label="Booking bị hủy"
-            value={data.cancelled ?? 0}
-            color="error.main"
-          />{" "}
-        </Box>
-        <Box>
-          <StatRow label="Tỷ lệ hủy" value={`${data.cancelRate ?? 0}%`} />
-        </Box>
-      </Box>
+      ) : (
+        <Stack sx={{ mt: 1.1 }} divider={<Divider sx={{ borderColor: "#EAECF0" }} />}>
+          <StatRow label={t("bookingStats.total")} value={data.total ?? 0} />
+          <StatRow label={t("bookingStats.successful")} value={data.success ?? 0} color="success.main" />
+          <StatRow label={t("bookingStats.cancelled")} value={data.cancelled ?? 0} color="error.main" />
+          <StatRow label={t("bookingStats.cancellationRate")} value={`${data.cancelRate ?? 0}%`} />
+        </Stack>
+      )}
     </Paper>
   );
 };

@@ -13,16 +13,17 @@ import {
   Stack,
   InputAdornment,
   IconButton,
-  Paper,
   InputLabel,
   CircularProgress,
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import dayjs from "dayjs";
-import { EntityPickerField } from "@components";
+import EntityPickerField from "@components/entity-picker-field";
 import { useBookingManagementContext } from "@context/booking-management";
+import { useTranslation } from "react-i18next";
 
 export default function BookingCreateDialog() {
+  const { t } = useTranslation(["bookings", "common"]);
   const {
     dialog,
     closeDialog,
@@ -46,22 +47,25 @@ export default function BookingCreateDialog() {
         onClose={closeDialog}
         maxWidth="md"
         fullWidth
+        PaperProps={{ sx: { width: "min(920px, calc(100vw - 48px))", maxHeight: "88dvh", borderRadius: "12px", m: { xs: 1.5, sm: 3 }, overflow: "hidden" } }}
       >
-        <DialogTitle fontWeight={700}>Tạo đặt phòng</DialogTitle>
-        <Box component={"form"} onSubmit={handleCreateBooking}>
-          <DialogContent>
-            <Stack spacing={2} sx={{ mt: 0.5 }}>
-              <Paper
-                variant="outlined"
-                sx={{ py: 2, px: 1.5, borderRadius: 2 }}
-              >
-                <Typography fontWeight={600} pb={1.5}>
-                  Thông tin khách hàng
+        <DialogTitle sx={{ position: "sticky", top: 0, zIndex: 2, bgcolor: "#FFFFFF", px: { xs: 2, sm: 3 }, py: 2, borderBottom: "1px solid #E4E7EC" }}>
+          <Stack direction="row" alignItems="flex-start" justifyContent="space-between" gap={2}>
+            <Box><Typography variant="h6" fontWeight={700}>{t("createDialog.title", { ns: "bookings" })}</Typography><Typography variant="body2" color="text.secondary">{t("createDialog.subtitle", { ns: "bookings" })}</Typography></Box>
+            <IconButton aria-label={t("actions.close", { ns: "common" })} size="small" onClick={closeDialog}><Close /></IconButton>
+          </Stack>
+        </DialogTitle>
+        <Box component="form" onSubmit={handleCreateBooking} sx={{ display: "flex", flex: 1, minHeight: 0, flexDirection: "column" }}>
+          <DialogContent className="admin-scrollbar" sx={{ flex: 1, minHeight: 0, overflowY: "auto", px: { xs: 2, sm: 3 }, py: 2.5 }}>
+            <Stack spacing={2.5}>
+              <Box>
+                <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#475467", pb: 1.25, mb: 2, borderBottom: "1px solid #E4E7EC" }}>
+                  {t("createDialog.customerInformation", { ns: "bookings" })}
                 </Typography>
 
                 <Grid container spacing={2}>
-                  <Grid size={6}>
-                    <InputLabel shrink>Tên khách hàng</InputLabel>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <InputLabel shrink>{t("createDialog.customerName", { ns: "bookings" })}</InputLabel>
                     <TextField
                       type="text"
                       fullWidth
@@ -72,8 +76,8 @@ export default function BookingCreateDialog() {
                       onChange={(e) => onChange("guestName", e.target.value)}
                     />
                   </Grid>
-                  <Grid size={6}>
-                    <InputLabel shrink>Số điện thoại</InputLabel>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <InputLabel shrink>{t("createDialog.phone", { ns: "bookings" })}</InputLabel>
                     <TextField
                       type="tel"
                       fullWidth
@@ -85,18 +89,15 @@ export default function BookingCreateDialog() {
                     />
                   </Grid>
                 </Grid>
-              </Paper>
+              </Box>
 
-              <Paper
-                variant="outlined"
-                sx={{ py: 2, px: 1.5, borderRadius: 2 }}
-              >
-                <Typography fontWeight={600} pb={1.5}>
-                  Thông tin đặt phòng
+              <Box>
+                <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#475467", pb: 1.25, mb: 2, borderBottom: "1px solid #E4E7EC" }}>
+                  {t("createDialog.stayInformation", { ns: "bookings" })}
                 </Typography>
                 <Grid container spacing={2} mb={2}>
-                  <Grid size={4}>
-                    <InputLabel shrink>Ngày đến</InputLabel>
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <InputLabel shrink>{t("createDialog.checkInDate", { ns: "bookings" })}</InputLabel>
                     <TextField
                       type="date"
                       fullWidth
@@ -107,8 +108,8 @@ export default function BookingCreateDialog() {
                       onChange={(e) => onChange("checkInDate", e.target.value)}
                     />
                   </Grid>
-                  <Grid size={4}>
-                    <InputLabel shrink>Ngày đi</InputLabel>
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <InputLabel shrink>{t("createDialog.checkOutDate", { ns: "bookings" })}</InputLabel>
                     <TextField
                       type="date"
                       fullWidth
@@ -119,8 +120,8 @@ export default function BookingCreateDialog() {
                       onChange={(e) => onChange("checkOutDate", e.target.value)}
                     />
                   </Grid>
-                  <Grid size={4}>
-                    <InputLabel shrink>Phương thức thanh toán</InputLabel>
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <InputLabel shrink>{t("createDialog.paymentMethod", { ns: "bookings" })}</InputLabel>
                     <Select
                       fullWidth
                       size="small"
@@ -129,23 +130,23 @@ export default function BookingCreateDialog() {
                         onChange("paymentMethod", e.target.value)
                       }
                     >
-                      <MenuItem value="CASH">Tiền mặt</MenuItem>
+                      <MenuItem value="CASH">{t("paymentMethods.CASH", { ns: "bookings" })}</MenuItem>
                       <MenuItem value="BANK_TRANSFER">
-                        Thanh toán online
+                        {t("paymentMethods.BANK_TRANSFER", { ns: "bookings" })}
                       </MenuItem>
                     </Select>
                   </Grid>
-                  <Grid size={12}>
-                    <InputLabel shrink>Loại phòng</InputLabel>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <InputLabel shrink>{t("createDialog.roomType", { ns: "bookings" })}</InputLabel>
                     <Select
                       fullWidth
                       size="small"
                       value={values.roomTypeId}
                       displayEmpty
                       renderValue={(v) => {
-                        if (!v || v === undefined) return "Toàn bộ loại phòng";
-                        const t = roomTypes.find((rt) => rt.id === v);
-                        return t?.name ?? "";
+                        if (!v || v === undefined) return t("createDialog.allRoomTypes", { ns: "bookings" });
+                        const roomType = roomTypes.find((rt) => rt.id === v);
+                        return roomType?.name ?? "";
                       }}
                       onChange={(e) => {
                         const value = e.target.value as string | number;
@@ -155,7 +156,7 @@ export default function BookingCreateDialog() {
                         );
                       }}
                     >
-                      <MenuItem value="">Toàn bộ loại phòng</MenuItem>
+                      <MenuItem value="">{t("createDialog.allRoomTypes", { ns: "bookings" })}</MenuItem>
                       {roomTypes.map((type) => (
                         <MenuItem key={type.id} value={type.id!}>
                           {type.name}
@@ -163,35 +164,28 @@ export default function BookingCreateDialog() {
                       ))}
                     </Select>
                   </Grid>
-                </Grid>
-
-                {loadingRooms ? (
-                  <Stack
-                    alignItems={"center"}
-                    justifyContent={"center"}
-                    spacing={1}
-                    mt={5}
-                  >
-                    <CircularProgress />
-                    <Typography variant="body2">
-                      Đang tài danh sách phòng...
-                    </Typography>
-                  </Stack>
-                ) : rooms.length ? (
-                  <Grid container spacing={1}>
-                    <Grid size={5}>
-                      <InputLabel shrink>Chọn phòng</InputLabel>
+                  {loadingRooms ? (
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <InputLabel shrink>{t("createDialog.room", { ns: "bookings" })}</InputLabel>
+                      <Stack direction="row" alignItems="center" spacing={1} sx={{ height: 40, px: 1.5, border: "1px solid #D0D5DD", borderRadius: "8px", color: "text.secondary" }}>
+                        <CircularProgress size={18} />
+                        <Typography variant="body2">{t("roomPicker.loading", { ns: "bookings" })}</Typography>
+                      </Stack>
+                    </Grid>
+                  ) : rooms.length ? (
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <InputLabel shrink>{t("createDialog.room", { ns: "bookings" })}</InputLabel>
                       <EntityPickerField
                         name="roomId"
                         value={values.roomId}
-                        onChange={(field, value) => {
+                        onChange={(_, value) => {
                           onChange("roomId", value);
                         }}
                         onOpenPicker={onOpenPicker}
                         isMoreOptions={
                           (metaAvailabelRooms?.totalPages || 1) > 1
                         }
-                        placeholder="Chọn phòng trống"
+                        placeholder={t("createDialog.chooseAvailableRoom", { ns: "bookings" })}
                         size="small"
                       >
                         {rooms.map((room) => (
@@ -201,12 +195,24 @@ export default function BookingCreateDialog() {
                         ))}
                       </EntityPickerField>
                     </Grid>
-                    <Grid size={5}>
-                      <InputLabel shrink>Mã khuyến mãi</InputLabel>
+                  ) : (
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <InputLabel shrink>{t("createDialog.room", { ns: "bookings" })}</InputLabel>
+                      <Box sx={{ minHeight: 40, display: "flex", alignItems: "center", px: 1.5, border: "1px solid #E4E7EC", borderRadius: "8px", bgcolor: "#F9FAFB" }}>
+                        <Typography variant="body2" color="text.secondary">{t("createDialog.noAvailableRooms", { ns: "bookings" })}</Typography>
+                      </Box>
+                    </Grid>
+                  )}
+                </Grid>
+
+                {rooms.length > 0 && !loadingRooms && (
+                  <Grid container spacing={2}>
+                    <Grid size={{ xs: 12, sm: 10 }}>
+                      <InputLabel shrink>{t("createDialog.promotionCode", { ns: "bookings" })}</InputLabel>
                       <TextField
                         fullWidth
                         size="small"
-                        placeholder="Nhập mã khuyến mãi"
+                        placeholder={t("createDialog.promotionPlaceholder", { ns: "bookings" })}
                         value={values.promotionCode}
                         onChange={(e) =>
                           onChange("promotionCode", e.target.value)
@@ -224,91 +230,89 @@ export default function BookingCreateDialog() {
                         }}
                       />
                     </Grid>
-                    <Grid size={2} display={"flex"} alignItems={"flex-end"}>
+                    <Grid size={{ xs: 12, sm: 2 }} display="flex" alignItems="flex-end">
                       <Button
                         variant="outlined"
                         fullWidth
                         onClick={onApplyPromo}
                         disabled={!values.roomId}
+                        sx={{ minWidth: { sm: 92 }, height: 40, borderRadius: "8px" }}
                       >
-                        Áp dụng
+                        {t("createDialog.applyPromotion", { ns: "bookings" })}
                       </Button>
                     </Grid>
                   </Grid>
-                ) : (
-                  <Typography textAlign={"center"} variant="body2">
-                    Không có phòng trống thời điểm này
-                  </Typography>
                 )}
-              </Paper>
+              </Box>
 
               {pricing && (
-                <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
+                <Box sx={{ bgcolor: "#F9FAFB", border: "1px solid #E4E7EC", borderRadius: "10px", p: 2 }}>
+                  <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#475467", mb: 1.5 }}>{t("createDialog.priceSummary", { ns: "bookings" })}</Typography>
                   <Grid container spacing={0.5}>
-                    <Grid size={6}></Grid>
-                    <Grid size={6} container>
+                    <Grid size={{ xs: 0, sm: 6 }}></Grid>
+                    <Grid size={{ xs: 12, sm: 6 }} container>
                       <Grid size={6}>
-                        <Typography>Đơn giá:</Typography>
+                        <Typography>{t("createDialog.unitPrice", { ns: "bookings" })}</Typography>
                       </Grid>
                       <Grid size={6} textAlign="right">
                         <Typography>
-                          {pricing.basePrice?.toLocaleString()} VND/đêm
+                          {t("currency.perNight", { ns: "bookings", value: pricing.basePrice?.toLocaleString() })}
                         </Typography>
                       </Grid>
 
                       <Grid size={6}>
-                        <Typography>Số đêm:</Typography>
+                        <Typography>{t("detail.nights", { ns: "bookings" })}:</Typography>
                       </Grid>
                       <Grid size={6} textAlign="right">
                         <Typography>{nights}</Typography>
                       </Grid>
 
                       <Grid size={6}>
-                        <Typography>Tạm tính:</Typography>
+                        <Typography>{t("detail.subtotal", { ns: "bookings" })}:</Typography>
                       </Grid>
                       <Grid size={6} textAlign="right">
                         <Typography>
-                          {pricing.subtotal?.toLocaleString()} VND
+                          {t("currency.amount", { ns: "bookings", value: pricing.subtotal?.toLocaleString() })}
                         </Typography>
                       </Grid>
 
                       <Grid size={6}>
-                        <Typography>Giảm giá:</Typography>
+                        <Typography>{t("detail.discount", { ns: "bookings" })}:</Typography>
                       </Grid>
                       <Grid size={6} textAlign="right">
                         <Typography>
-                          −{pricing.totalDiscount?.toLocaleString()} VND
+                          −{t("currency.amount", { ns: "bookings", value: pricing.totalDiscount?.toLocaleString() })}
                         </Typography>
                       </Grid>
 
                       <Grid size={6}>
-                        <Typography fontWeight={700}>Tổng cộng:</Typography>
+                        <Typography fontWeight={700}>{t("detail.total", { ns: "bookings" })}:</Typography>
                       </Grid>
                       <Grid size={6} textAlign="right">
                         <Typography fontWeight={700}>
                           {(
                             pricing.subtotal - pricing.totalDiscount
                           )?.toLocaleString()}{" "}
-                          VND
+                          {t("currency.code", { ns: "bookings" })}
                         </Typography>
                       </Grid>
                     </Grid>
                   </Grid>
-                </Paper>
+                </Box>
               )}
             </Stack>
           </DialogContent>
 
-          <DialogActions sx={{ px: 3, pb: 2 }}>
+          <DialogActions sx={{ position: "sticky", bottom: 0, zIndex: 2, bgcolor: "#FFFFFF", px: { xs: 2, sm: 3 }, py: 1.5, borderTop: "1px solid #E4E7EC" }}>
             <Button variant="outlined" color="inherit" onClick={closeDialog}>
-              Hủy
+              {t("actions.cancel", { ns: "common" })}
             </Button>
             <Button
               variant="contained"
               disabled={!values.roomId || submitting}
               type="submit"
             >
-              Tạo đặt phòng
+              {t("createDialog.create", { ns: "bookings" })}
             </Button>
           </DialogActions>
         </Box>

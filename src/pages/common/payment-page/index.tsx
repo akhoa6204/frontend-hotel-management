@@ -1,11 +1,13 @@
 import { GlobalSnackbar, Loading } from "@components";
 import { Box, Button, Container, Dialog, DialogActions, DialogContent, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import PaymentDetails from "./components/PaymentDetails";
 import PaymentQrDialog from "./components/PaymentQrDialog";
 import PaymentReservationSummary from "./components/PaymentReservationSummary";
 import usePayment from "./usePayment";
 
 const PaymentPage = () => {
+  const { t } = useTranslation("client");
   const {
     booking,
     depositAmount,
@@ -23,7 +25,7 @@ const PaymentPage = () => {
   } = usePayment();
 
   if (!booking) {
-    return <Loading content="Đang tải thông tin thanh toán..." />;
+    return <Loading content={t("payment.loading.paymentInfo")} />;
   }
 
   return (
@@ -32,16 +34,16 @@ const PaymentPage = () => {
         <Container maxWidth="lg">
           <Box sx={{ maxWidth: 760 }}>
             <Typography sx={{ color: "primary.main", letterSpacing: 2, fontSize: 11, fontWeight: 750 }}>
-              THANH TOÁN ĐẶT PHÒNG
+              {t("payment.hero.eyebrow")}
             </Typography>
             <Typography
               component="h1"
               sx={{ mt: 1.25, fontFamily: "Georgia, serif", fontSize: { xs: 38, sm: 48, md: 56 }, lineHeight: 1.08, fontWeight: 400 }}
             >
-              Hoàn tất khoản cọc cho kỳ nghỉ của bạn.
+              {t("payment.hero.title")}
             </Typography>
             <Typography color="text.secondary" sx={{ mt: 2, maxWidth: 660, fontSize: { xs: 15, sm: 17 }, lineHeight: 1.7 }}>
-              Kiểm tra lại thông tin kỳ nghỉ và thanh toán khoản cọc để giữ phòng. Trạng thái sẽ được cập nhật sau khi hệ thống xác nhận giao dịch.
+              {t("payment.hero.description")}
             </Typography>
           </Box>
 
@@ -70,23 +72,23 @@ const PaymentPage = () => {
         </Container>
       </Box>
 
-      {loadingPayment && <Loading content="Đang khởi tạo thanh toán..." />}
+      {loadingPayment && <Loading content={t("payment.loading.initializing")} />}
       <GlobalSnackbar alert={alert} closeSnackbar={closeSnackbar} />
 
       <Dialog open={showNotice.open} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: 2, p: 1 } }}>
         <DialogContent>
           <Typography component="h2" sx={{ fontFamily: "Georgia, serif", fontSize: 28, color: "text.primary", textAlign: "center" }}>
-            {showNotice.type === "success" ? "Thanh toán thành công" : "Thanh toán chưa hoàn tất"}
+            {t(showNotice.type === "success" ? "payment.notice.successTitle" : "payment.notice.pendingTitle")}
           </Typography>
           <Typography color="text.secondary" sx={{ mt: 1.5, lineHeight: 1.7, textAlign: "center" }}>
             {showNotice.type === "success"
-              ? "Hệ thống đã xác nhận giao dịch và cập nhật trạng thái thanh toán cho đặt phòng của bạn."
-              : "Giao dịch chưa được xác nhận. Vui lòng thử lại hoặc quay về để tiếp tục sau."}
+              ? t("payment.notice.successDescription")
+              : t("payment.notice.pendingDescription")}
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2.5 }}>
           <Button variant="contained" fullWidth onClick={backToHome} sx={{ minHeight: 48, borderRadius: 1.25 }}>
-            {showNotice.type === "success" ? "Xem đặt phòng" : "Quay lại"}
+            {t(showNotice.type === "success" ? "payment.actions.viewBooking" : "payment.actions.back")}
           </Button>
         </DialogActions>
       </Dialog>

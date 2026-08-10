@@ -1,12 +1,13 @@
 import { Box, Chip, Stack, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 type BookingStepperProps = {
   activeStep: number;
 };
 
-const steps = ["Bạn chọn", "Đặt phòng", "Thanh toán"];
-
 const BookingStepper = ({ activeStep = 1 }: BookingStepperProps) => {
+  const { t } = useTranslation("client");
+  const steps = [t("payment.legacy.steps.selection"), t("payment.legacy.steps.booking"), t("payment.legacy.steps.payment")];
   return (
     <Box py={4.5}>
       <Stack direction="row" alignItems="center" sx={{ width: "100%" }}>

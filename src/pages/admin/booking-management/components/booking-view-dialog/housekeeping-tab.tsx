@@ -1,10 +1,7 @@
-import { HouseKeepingTask, TaskStatus, TaskType } from "@constant/types";
-import { useState } from "react";
 import {
   Box,
   Typography,
   Stack,
-  Paper,
   CircularProgress,
   Grid,
   TextField,
@@ -16,11 +13,13 @@ import {
 import { formatDate } from "@utils/format";
 import Pager from "@components/pager";
 import { Add } from "@mui/icons-material";
-import { HouseKeepingTaskResponse } from "@constant/response/HousekeepingResponse";
+import type { HouseKeepingTaskResponse } from "@constant/response/HousekeepingResponse";
 import { useBookingManagementContext } from "@context/booking-management";
-import { HousekeepingTaskStatus } from "@enums/HousekeepingTaskStatus";
+import type { HousekeepingTaskStatus } from "@enums/HousekeepingTaskStatus";
+import { useTranslation } from "react-i18next";
 
 export default function HousekeepingTab() {
+  const { t } = useTranslation(["bookings", "common"]);
   const {
     canEdit,
     handleCreateTask,
@@ -36,8 +35,8 @@ export default function HousekeepingTab() {
     bookingDetail,
   } = useBookingManagementContext();
   return (
-    <Grid container spacing={3}>
-      <Grid size={{ xs: 12, md: 4 }}>
+    <Grid container spacing={{ xs: 3, md: 2.5 }}>
+      <Grid size={{ xs: 12, md: 5 }} sx={{ borderRight: { md: "1px solid #E4E7EC" }, pr: { md: 2.5 } }}>
         <Stack
           direction={"row"}
           justifyContent={"space-between"}
@@ -45,13 +44,14 @@ export default function HousekeepingTab() {
           spacing={2}
           flexWrap={"wrap"}
         >
-          <Typography fontWeight={600} mb={1}>
-            Danh sách công việc
+          <Typography fontSize={15} fontWeight={650}>
+            {t("detail.housekeepingWork", { ns: "bookings" })}
           </Typography>
           {canEdit && (
             <Button
-              variant="contained"
-              sx={{ py: 0.25, px: 2, borderRadius: 1.5 }}
+              variant="outlined"
+              size="small"
+              sx={{ minHeight: 34, py: 0.25, px: 1.25, borderRadius: "8px" }}
               onClick={() => {
                 if (!bookingDetail?.id || !bookingDetail?.room?.id) return;
 
@@ -63,7 +63,7 @@ export default function HousekeepingTab() {
               }}
             >
               <Add sx={{ fontSize: 20, marginRight: 0.5 }} />
-              Thêm mới
+              {t("detail.addTask", { ns: "bookings" })}
             </Button>
           )}
         </Stack>
@@ -75,7 +75,7 @@ export default function HousekeepingTab() {
             sx={{ height: 200 }}
           >
             <CircularProgress size={24} />
-            <Typography variant="body2">Đang tải dữ liệu...</Typography>
+            <Typography variant="body2">{t("detail.loadingHousekeeping", { ns: "bookings" })}</Typography>
           </Stack>
         ) : Array.isArray(housekeepingList) && housekeepingList.length === 0 ? (
           <Stack
@@ -85,30 +85,33 @@ export default function HousekeepingTab() {
             sx={{ height: 200 }}
           >
             <Typography variant="body2" color="text.secondary">
-              Không có công việc buồng phòng
+              {t("detail.noHousekeepingTasks", { ns: "bookings" })}
             </Typography>
           </Stack>
         ) : (
-          <List sx={{ height: 360 }}>
+          <List className="admin-scrollbar" disablePadding sx={{ minHeight: 280, maxHeight: 360, overflowY: "auto", mt: 1 }}>
             {Array.isArray(housekeepingList)
-              ? housekeepingList.map((t: HouseKeepingTaskResponse) => (
+              ? housekeepingList.map((task: HouseKeepingTaskResponse) => (
                   <ListItemButton
-                    key={t.id}
-                    onClick={() => onSelectTask?.(t.id)}
-                    selected={t.id === selectedTaskId}
+                    key={task.id}
+                    onClick={() => onSelectTask?.(task.id)}
+                    selected={task.id === selectedTaskId}
                     sx={{
                       flexDirection: "column",
                       alignItems: "flex-start",
-                      px: 2,
-                      py: 1.5,
-                      borderBottom: "1px solid #eee",
+                      px: 1.25,
+                      py: 1.25,
+                      borderLeft: "3px solid transparent",
+                      borderBottom: "1px solid #E4E7EC",
+                      "&.Mui-selected": { bgcolor: "#EAF4FF", borderLeftColor: "#2E90FA" },
+                      "&.Mui-selected:hover": { bgcolor: "#EAF4FF" },
                     }}
                   >
                     <Typography fontWeight={500}>
-                      {t.type === "CLEANING" ? "Dọn phòng" : "Kiểm tra phòng"}
+                      {t(`housekeepingTypes.${task.type}`, { ns: "bookings" })}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {formatDate(t.completedAt || t.startedAt, {
+                      {formatDate(task.completedAt || task.startedAt, {
                         withTime: true,
                       })}
                     </Typography>
@@ -128,7 +131,7 @@ export default function HousekeepingTab() {
         )}
       </Grid>
 
-      <Grid size={{ xs: 12, md: 8 }}>
+      <Grid size={{ xs: 12, md: 7 }}>
         {loadingHousekeepingDetail ? (
           <Stack
             alignItems="center"
@@ -137,28 +140,26 @@ export default function HousekeepingTab() {
             sx={{ mt: 6 }}
           >
             <CircularProgress size={24} />
-            <Typography variant="body2">Đang tải dữ liệu...</Typography>
+            <Typography variant="body2">{t("detail.loadingHousekeeping", { ns: "bookings" })}</Typography>
           </Stack>
         ) : (
           housekeepingDetail &&
           selectedTaskId && (
-            <Stack spacing={3}>
-              <Typography fontWeight={600}>Danh sách công việc</Typography>
-              <Grid container spacing={3}>
+            <Stack spacing={2.5}>
+              <Box><Typography fontSize={15} fontWeight={650}>{t("detail.housekeepingTaskDetail", { ns: "bookings" })}</Typography><Typography variant="body2" color="text.secondary">{t("detail.housekeepingTaskDetailHint", { ns: "bookings" })}</Typography></Box>
+              <Grid container spacing={2.5}>
                 <Grid size={{ xs: 12, md: 6 }}>
                   <Typography variant="subtitle2" gutterBottom>
-                    Loại công việc
+                    {t("detail.taskType", { ns: "bookings" })}
                   </Typography>
                   <Typography>
-                    {housekeepingDetail.type === "CLEANING"
-                      ? "Dọn phòng"
-                      : "Kiểm tra phòng"}
+                    {t(`housekeepingTypes.${housekeepingDetail.type}`, { ns: "bookings" })}
                   </Typography>
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }}>
                   <Typography variant="subtitle2" gutterBottom>
-                    Trạng thái
+                    {t("detail.status", { ns: "bookings" })}
                   </Typography>
                   <TextField
                     select
@@ -173,24 +174,24 @@ export default function HousekeepingTab() {
                     }
                     sx={{ minWidth: 180 }}
                   >
-                    <MenuItem value="PENDING">Chờ thực hiện</MenuItem>
-                    <MenuItem value="IN_PROGRESS">Đang kiểm tra</MenuItem>
-                    <MenuItem value="COMPLETED">Hoàn thành</MenuItem>
+                    <MenuItem value="PENDING">{t("housekeepingStatus.PENDING", { ns: "bookings" })}</MenuItem>
+                    <MenuItem value="IN_PROGRESS">{t("housekeepingStatus.IN_PROGRESS", { ns: "bookings" })}</MenuItem>
+                    <MenuItem value="COMPLETED">{t("housekeepingStatus.COMPLETED", { ns: "bookings" })}</MenuItem>
                   </TextField>
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }}>
                   <Typography variant="subtitle2" gutterBottom>
-                    Nhân viên phụ trách
+                    {t("detail.assignee", { ns: "bookings" })}
                   </Typography>
                   <Typography>
-                    {housekeepingDetail.staff?.fullName ?? "Chưa phân công"}
+                    {housekeepingDetail.staff?.fullName ?? t("detail.unassigned", { ns: "bookings" })}
                   </Typography>
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }}>
                   <Typography variant="subtitle2" gutterBottom>
-                    Ngày làm việc
+                    {t("detail.workDate", { ns: "bookings" })}
                   </Typography>
                   <Typography>
                     {formatDate(
@@ -204,15 +205,15 @@ export default function HousekeepingTab() {
 
               <Box>
                 <Typography variant="subtitle2" gutterBottom>
-                  Ghi chú buồng phòng
+                  {t("detail.housekeepingNotes", { ns: "bookings" })}
                 </Typography>
-                <Paper variant="outlined" sx={{ p: 2 }}>
+                <Box sx={{ mt: 0.75 }}>
                   <TextField
                     fullWidth
                     multiline
-                    minRows={3}
+                    minRows={2}
                     disabled={!canEdit}
-                    placeholder="Nhập ghi chú buồng phòng..."
+                    placeholder={t("detail.housekeepingNotesPlaceholder", { ns: "bookings" })}
                     value={housekeepingDetail.note || ""}
                     onChange={(e) =>
                       handleUpdateTask({
@@ -221,10 +222,10 @@ export default function HousekeepingTab() {
                       })
                     }
                   />
-                </Paper>
+                </Box>
               </Box>
             </Stack>
-          )
+          ) || <Box sx={{ minHeight: 280, display: "grid", placeItems: "center", textAlign: "center" }}><Box><Typography fontWeight={600}>{t("detail.chooseTask", { ns: "bookings" })}</Typography><Typography variant="body2" color="text.secondary">{t("detail.chooseTaskHint", { ns: "bookings" })}</Typography></Box></Box>
         )}
       </Grid>
     </Grid>

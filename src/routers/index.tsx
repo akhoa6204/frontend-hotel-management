@@ -25,12 +25,14 @@ import {
   ResetPasswordPage,
   NotFoundPage,
   EmployeeManagement,
+  AdminProfilePage,
   FrontDeskPage,
   HouseKeepingPage,
   ShiftManagementPage,
   ServiceManagementPage,
   SearchPage,
   PaymentPage,
+  AdminNotFoundPage,
 } from "@pages";
 import { Navigate, createBrowserRouter } from "react-router-dom";
 import { CustomerRoute, AdminRoute, StaffRoute } from "./ProtectedRoute";
@@ -142,6 +144,10 @@ const paths = [
             element: <AdminLayout />,
             children: [
               {
+                path: "profile",
+                element: <AdminProfilePage />,
+              },
+              {
                 element: <StaffRoute roles={["RECEPTIONIST"]} />,
                 children: [
                   {
@@ -202,13 +208,22 @@ const paths = [
                   },
                 ],
               },
+              {
+                path: "*",
+                element: <AdminNotFoundPage />,
+              },
             ],
           },
         ],
       },
       {
-        path: "*",
-        element: <NotFoundPage />,
+        element: <DefaultLayout />,
+        children: [
+          {
+            path: "*",
+            element: <NotFoundPage />,
+          },
+        ],
       },
     ],
   },

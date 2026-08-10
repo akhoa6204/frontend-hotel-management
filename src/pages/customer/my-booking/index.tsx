@@ -7,8 +7,10 @@ import BookingCardSkeleton from "./components/BookingCardSkeleton";
 import NoBooking from "./components/NoBooking";
 import useMyBooking, { type BookingTab } from "./useMyBooking";
 import { diffNights } from "@utils/format";
+import { useTranslation } from "react-i18next";
 
 const MyBookingPage = () => {
+  const { t } = useTranslation("client");
   const {
     tab,
     changeTab,
@@ -40,20 +42,20 @@ const MyBookingPage = () => {
     <Box sx={{ width: 1, pb: { xs: 4, md: 7 } }}>
       <Box component="header" sx={{ mb: { xs: 3, md: 4 } }}>
         <Typography sx={{ color: "primary.main", fontSize: 12, fontWeight: 700, letterSpacing: ".16em", mb: 1 }}>
-          KỲ NGHỈ CỦA BẠN
+          {t("myBookings.hero.eyebrow")}
         </Typography>
         <Typography component="h1" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 32, md: 42 }, lineHeight: 1.15 }}>
-          Đặt phòng của tôi
+          {t("myBookings.hero.title")}
         </Typography>
         <Typography color="text.secondary" sx={{ mt: 1.25, maxWidth: 650, lineHeight: 1.7 }}>
-          Theo dõi những kỳ nghỉ sắp tới và lịch sử lưu trú tại Diamond Sea.
+          {t("myBookings.hero.description")}
         </Typography>
       </Box>
 
       <Tabs
         value={tab}
         onChange={(_, value: BookingTab) => changeTab(value)}
-        aria-label="Danh mục đặt phòng"
+        aria-label={t("myBookings.aria.bookingCategories")}
         variant="scrollable"
         scrollButtons={false}
         sx={{
@@ -74,24 +76,24 @@ const MyBookingPage = () => {
           },
         }}
       >
-        <Tab value="upcoming" label="Sắp tới" />
-        <Tab value="done" label="Hoàn tất" />
-        <Tab value="cancelled" label="Đã hủy" />
+        <Tab value="upcoming" label={t("myBookings.tabs.upcoming")} />
+        <Tab value="done" label={t("myBookings.tabs.done")} />
+        <Tab value="cancelled" label={t("myBookings.tabs.cancelled")} />
       </Tabs>
 
       {loading ? (
-        <Stack spacing={{ xs: 2.5, md: 3 }} aria-label="Đang tải danh sách đặt phòng">
+        <Stack spacing={{ xs: 2.5, md: 3 }} aria-label={t("myBookings.aria.loadingBookings")}>
           {Array.from({ length: 3 }).map((_, index) => <BookingCardSkeleton key={index} />)}
         </Stack>
       ) : error ? (
         <Box sx={{ py: { xs: 6, md: 8 }, borderTop: "1px solid", borderColor: "divider" }}>
           <Typography component="h2" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 24 }}>
-            Không thể tải đặt phòng
+            {t("myBookings.states.loadErrorTitle")}
           </Typography>
           <Typography color="text.secondary" sx={{ mt: 1, mb: 2.5 }}>
-            Thông tin kỳ nghỉ hiện chưa thể truy cập. Vui lòng thử lại.
+            {t("myBookings.states.loadErrorDescription")}
           </Typography>
-          <Button variant="outlined" onClick={() => retry()}>Thử lại</Button>
+          <Button variant="outlined" onClick={() => retry()}>{t("myBookings.actions.retry")}</Button>
         </Box>
       ) : bookings.length === 0 ? (
         <NoBooking step={tab} />
