@@ -13,8 +13,10 @@ import ImageGallerySkeleton from "./components/ImageGallerySkeleton";
 import RoomDescriptionSkeleton from "./components/RoomDescriptionSkeleton";
 import ReviewSectionSkeleton from "./components/ReviewSectionSkeleton";
 import RelatedRooms from "./components/related-rooms";
+import { useTranslation } from "react-i18next";
 
 const RoomDetail = () => {
+  const { t } = useTranslation("client");
   const {
     room,
     reviews,
@@ -39,11 +41,11 @@ const RoomDetail = () => {
   return (
     <Box component="main" sx={{ bgcolor: "background.default" }}>
     <Container maxWidth="lg" sx={{ pt: { xs: 3, md: 5 }, pb: { xs: 8, md: 12 } }}>
-      <Breadcrumbs aria-label="Điều hướng" sx={{ mb: 2.5, color: "text.secondary", fontSize: 14 }}><MuiLink component={Link} to="/" underline="hover">Trang chủ</MuiLink><MuiLink component={Link} to="/#rooms" underline="hover">Phòng nghỉ</MuiLink><Typography variant="body2" color="text.primary">{room?.name || "Chi tiết phòng"}</Typography></Breadcrumbs>
+      <Breadcrumbs aria-label={t("roomDetail.breadcrumbs.label")} sx={{ mb: 2.5, color: "text.secondary", fontSize: 14 }}><MuiLink component={Link} to="/" underline="hover">{t("roomDetail.breadcrumbs.home")}</MuiLink><MuiLink component={Link} to="/#rooms" underline="hover">{t("roomDetail.breadcrumbs.rooms")}</MuiLink><Typography variant="body2" color="text.primary">{room?.name || t("roomDetail.breadcrumbs.details")}</Typography></Breadcrumbs>
       {loadingRoomBlock ? (
         <ImageGallerySkeleton />
       ) : (
-        <ImageGallery images={room?.roomTypeImages ?? []} roomName={room?.name ?? "Phòng Diamond Sea"} />
+        <ImageGallery images={room?.roomTypeImages ?? []} roomName={room?.name ?? t("roomDetail.fallbackRoomName")} />
       )}
 
       <Box>
@@ -65,11 +67,11 @@ const RoomDetail = () => {
       </Box>
 
       {/* ===== REVIEW ===== */}
-      <Box component="section" aria-label="Đánh giá của khách">
+      <Box component="section" aria-label={t("roomDetail.reviews.sectionLabel")}>
         {loadingReviewBlock ? (
           <ReviewSectionSkeleton />
         ) : reviews.length === 0 ? (
-          <Box sx={{ py: 4.5, borderTop: "1px solid", borderColor: "divider" }}><Typography component="h2" variant="h2" sx={{ fontSize: { xs: 28, md: 32 } }}>Đánh giá của khách</Typography><Typography color="text.secondary" sx={{ mt: 1 }}>Chưa có đánh giá cho hạng phòng này.</Typography></Box>
+          <Box sx={{ py: 4.5, borderTop: "1px solid", borderColor: "divider" }}><Typography component="h2" variant="h2" sx={{ fontSize: { xs: 28, md: 32 } }}>{t("roomDetail.reviews.sectionLabel")}</Typography><Typography color="text.secondary" sx={{ mt: 1 }}>{t("roomDetail.reviews.empty")}</Typography></Box>
         ) : (
           <>
             <ReviewSection stats={reviewStats} reviews={reviews} />

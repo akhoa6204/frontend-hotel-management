@@ -1,5 +1,6 @@
 import { Stack, IconButton, Button } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   page: number;
@@ -47,11 +48,13 @@ export default function Pager({
   siblingCount = 1,
   boundaryCount = 1,
 }: Props) {
+  const { t } = useTranslation("common");
   const items = usePageItems(page, totalPages, siblingCount, boundaryCount);
 
   return (
     <Stack direction="row" alignItems="center" spacing={1}>
       <IconButton
+        aria-label={t("pagination.previousPage")}
         size="small"
         disabled={page <= 1}
         onClick={() => onChange(page - 1)}
@@ -74,6 +77,8 @@ export default function Pager({
             key={it}
             size="small"
             onClick={() => onChange(it as number)}
+            aria-label={t("pagination.goToPage", { page: it })}
+            aria-current={it === page ? "page" : undefined}
             variant="text"
             sx={{
               minWidth: 36,
@@ -92,6 +97,7 @@ export default function Pager({
       )}
 
       <IconButton
+        aria-label={t("pagination.nextPage")}
         size="small"
         disabled={page >= totalPages}
         onClick={() => onChange(page + 1)}
