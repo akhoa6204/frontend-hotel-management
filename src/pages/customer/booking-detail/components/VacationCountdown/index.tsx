@@ -1,7 +1,7 @@
 import { CheckInImg } from "@assets/images";
 import { Box, Button, Divider, Paper, Stack, Typography } from "@mui/material";
-import { diffNights } from "@utils/format";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 
 const VacationCountdown = ({
   checkIn,
@@ -10,6 +10,7 @@ const VacationCountdown = ({
   checkIn: string;
   onCancel?: () => void;
 }) => {
+  const { t } = useTranslation("client");
   const countdown = dayjs(checkIn)
     .startOf("day")
     .diff(dayjs().startOf("day"), "day");
@@ -26,28 +27,18 @@ const VacationCountdown = ({
             variant="body2"
             sx={{ fontWeight: 600, fontSize: 24, textAlign: " center", mb: 2 }}
           >
-            Còn{" "}
-            <Typography
-              color="primary"
-              component="span"
-              sx={{
-                fontWeight: 600,
-                fontSize: 24,
-              }}
-            >
-              {countdown}
-            </Typography>{" "}
-            ngày nữa cho kỳ nghỉ sắp tới của bạn!
+            {t("bookingDetail.countdown.upcoming", { count: countdown })}
           </Typography>
         ) : (
           <Typography variant="body2" sx={{ fontWeight: 600, fontSize: 24 }}>
-            Chúc bạn có kỳ nghỉ tuyệt vời!
+            {t("bookingDetail.countdown.today")}
           </Typography>
         )}
 
         <Box
           component="img"
           src={CheckInImg}
+          alt={t("bookingDetail.countdown.imageAlt")}
           sx={{ width: 100, mt: 3, objectFit: "cover" }}
         />
       </Stack>
@@ -62,7 +53,7 @@ const VacationCountdown = ({
             onCancel?.();
           }}
         >
-          Hủy phòng
+          {t("bookingDetail.actions.cancelBooking")}
         </Button>
       </Box>
     </Paper>

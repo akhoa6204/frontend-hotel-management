@@ -6,6 +6,7 @@ import type { BookingResponse } from "@constant/response/BookingResponse";
 import { Box, Stack, Typography } from "@mui/material";
 import { formatTime } from "@utils/format";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Props { booking: BookingResponse }
 
@@ -20,16 +21,17 @@ const Detail = ({ icon, label, value }: { icon: ReactNode; label: string; value:
 );
 
 const BookingInformation = ({ booking }: Props) => {
+  const { t } = useTranslation("client");
   const arrivalTime = formatTime(booking.estimatedArrivalTime);
   return (
     <Box component="section" sx={{ minWidth: 0, height: 1 }}>
-      <Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', color: "text.primary", fontSize: 27, mb: 1 }}>Thông tin lưu trú</Typography>
-      <Typography color="text.secondary" sx={{ mb: 3 }}>Thông tin liên hệ được cung cấp cho đặt phòng này.</Typography>
+      <Typography component="h2" sx={{ fontFamily: 'Georgia, "Times New Roman", serif', color: "text.primary", fontSize: 27, mb: 1 }}>{t("bookingDetail.information.title")}</Typography>
+      <Typography color="text.secondary" sx={{ mb: 3 }}>{t("bookingDetail.information.description")}</Typography>
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: { xs: 2.5, sm: 3.5 }, py: 3, borderTop: "1px solid", borderBottom: "1px solid", borderColor: "divider" }}>
-        <Detail icon={<PersonOutlineRounded fontSize="small" />} label="Khách lưu trú" value={booking.guestName} />
-        <Detail icon={<PhoneOutlined fontSize="small" />} label="Số điện thoại" value={booking.guestPhone} />
-        <Detail icon={<EmailOutlined fontSize="small" />} label="Email" value={booking.guestEmail} />
-        {arrivalTime && <Detail icon={<AccessTimeRounded fontSize="small" />} label="Giờ đến dự kiến" value={arrivalTime} />}
+        <Detail icon={<PersonOutlineRounded fontSize="small" />} label={t("bookingDetail.information.guest")} value={booking.guestName} />
+        <Detail icon={<PhoneOutlined fontSize="small" />} label={t("bookingDetail.information.phone")} value={booking.guestPhone} />
+        <Detail icon={<EmailOutlined fontSize="small" />} label={t("bookingDetail.information.email")} value={booking.guestEmail} />
+        {arrivalTime && <Detail icon={<AccessTimeRounded fontSize="small" />} label={t("bookingDetail.information.arrivalTime")} value={arrivalTime} />}
       </Box>
     </Box>
   );

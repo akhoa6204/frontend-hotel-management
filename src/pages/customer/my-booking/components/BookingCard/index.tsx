@@ -7,6 +7,7 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import { diffNights, fmtVND } from "@utils/format";
 import { getBookingReviewAction } from "@utils/bookingReview";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface BookingCardProps {
   booking: BookingResponse;
@@ -18,14 +19,6 @@ interface BookingCardProps {
   reviewId?: number;
 }
 
-const statusLabels = {
-  PENDING: "Đang chờ xác nhận",
-  CONFIRMED: "Đã xác nhận",
-  CANCELLED: "Đã hủy",
-  CHECKED_IN: "Đang lưu trú",
-  CHECKED_OUT: "Đã hoàn tất",
-} as const;
-
 const statusColors = {
   PENDING: { color: "#8A6116", background: "#FFF6DD" },
   CONFIRMED: { color: "#176B59", background: "#EAF7F2" },
@@ -35,10 +28,10 @@ const statusColors = {
 } as const;
 
 const unsuitableImagePattern = /(meme|joke|giphy|tenor|\.gif(?:\?|$))/i;
-const displayDate = (value: string) =>
-  new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
-
 const BookingCard = ({ booking, onCancel, onClick, onReview, onViewReview, onReBook, reviewId }: BookingCardProps) => {
+  const { t, i18n } = useTranslation("client");
+  const displayDate = (value: string) =>
+    new Intl.DateTimeFormat(i18n.resolvedLanguage === "en" ? "en-US" : "vi-VN", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
   const [imageFailed, setImageFailed] = useState(false);
   const suitableImage = booking.room.roomType.roomTypeImages?.find((image) => image.url && !unsuitableImagePattern.test(image.url));
   const image = imageFailed || !suitableImage ? BgRoom : suitableImage.url;
@@ -70,7 +63,7 @@ const BookingCard = ({ booking, onCancel, onClick, onReview, onViewReview, onReB
         component="img"
         src={image}
         onError={() => setImageFailed(true)}
-        alt={`Phòng ${booking.room.roomType.name} tại Diamond Sea`}
+        alt={t("myBookings.card.roomImageAlt", { room: booking.room.roomType.name })}
         loading="lazy"
         sx={{ width: 1, height: { xs: 190, sm: 228, md: 252 }, objectFit: "cover", display: "block" }}
       />
@@ -83,46 +76,46 @@ const BookingCard = ({ booking, onCancel, onClick, onReview, onViewReview, onReB
                 {booking.room.roomType.name}
               </Typography>
               <Typography color="text.secondary" variant="body2" sx={{ mt: 0.5, overflowWrap: "anywhere" }}>
-                Phòng {booking.room.name} · Mã đặt phòng {booking.bookingCode}
+                {t("myBookings.card.roomAndCode", { room: booking.room.name, code: booking.bookingCode })}
               </Typography>
             </Box>
             <Box role="status" sx={{ alignSelf: { xs: "flex-start", sm: "auto" }, display: "inline-flex", alignItems: "center", gap: 0.8, px: 1.25, py: 0.6, borderRadius: 99, bgcolor: statusStyle.background, color: statusStyle.color, fontSize: 12.5, fontWeight: 650, whiteSpace: "nowrap" }}>
               <Box aria-hidden sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "currentColor" }} />
-              {statusLabels[booking.status]}
+              {t(`myBookings.status.${booking.status}`)}
             </Box>
           </Stack>
 
           <Stack direction="row" alignItems="center" spacing={{ xs: 1.25, sm: 2 }} sx={{ mt: 2.25 }}>
-            <Box><Typography fontSize={11.5} color="text.secondary" sx={{ letterSpacing: ".08em" }}>NHẬN PHÒNG</Typography><Typography fontWeight={600} color="#263F49" mt={0.35}>{displayDate(booking.checkInDate)}</Typography></Box>
+            <Box><Typography fontSize={11.5} color="text.secondary" sx={{ letterSpacing: ".08em" }}>{t("myBookings.card.checkIn")}</Typography><Typography fontWeight={600} color="#263F49" mt={0.35}>{displayDate(booking.checkInDate)}</Typography></Box>
             <ArrowForwardRounded aria-hidden sx={{ color: "primary.main", fontSize: 20, flexShrink: 0 }} />
-            <Box><Typography fontSize={11.5} color="text.secondary" sx={{ letterSpacing: ".08em" }}>TRẢ PHÒNG</Typography><Typography fontWeight={600} color="#263F49" mt={0.35}>{displayDate(booking.checkOutDate)}</Typography></Box>
+            <Box><Typography fontSize={11.5} color="text.secondary" sx={{ letterSpacing: ".08em" }}>{t("myBookings.card.checkOut")}</Typography><Typography fontWeight={600} color="#263F49" mt={0.35}>{displayDate(booking.checkOutDate)}</Typography></Box>
           </Stack>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            {nights} đêm · Sức chứa tối đa {booking.room.roomType.capacity} khách
+            {t("myBookings.card.staySummary", { nights, guests: booking.room.roomType.capacity })}
           </Typography>
         </Box>
 
         <Stack direction={{ xs: "column", sm: "row" }} alignItems={{ sm: "flex-end" }} justifyContent="space-between" gap={2} sx={{ pt: 1.75, borderTop: "1px solid rgba(23, 60, 75, 0.09)" }}>
           <Box>
-            <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: ".06em", textTransform: "uppercase" }}>Tổng giá trị</Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: ".06em", textTransform: "uppercase" }}>{t("myBookings.card.total")}</Typography>
             <Typography sx={{ color: "text.primary", fontSize: 19, fontWeight: 700, mt: 0.25 }}>{fmtVND(total)} VND</Typography>
-            {discount > 0 && <Typography variant="caption" color="success.main">Ưu đãi −{fmtVND(discount)} VND</Typography>}
-            {remaining > 0 && <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.25 }}>Còn lại {fmtVND(remaining)} VND</Typography>}
+            {discount > 0 && <Typography variant="caption" color="success.main">{t("myBookings.card.discount", { amount: fmtVND(discount) })}</Typography>}
+            {remaining > 0 && <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.25 }}>{t("myBookings.card.remaining", { amount: fmtVND(remaining) })}</Typography>}
           </Box>
 
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ width: { xs: 1, sm: "auto" }, "& .MuiButton-root": { minHeight: 40, px: 1.75, width: { xs: 1, sm: "auto" }, whiteSpace: "nowrap" } }}>
-            <Button variant="outlined" onClick={onClick}>Xem chi tiết</Button>
+            <Button variant="outlined" onClick={onClick}>{t("myBookings.actions.viewDetails")}</Button>
             {booking.status === "CONFIRMED" && onCancel && (
-              <Button color="error" variant="outlined" onClick={onCancel}>Hủy đặt phòng</Button>
+              <Button color="error" variant="outlined" onClick={onCancel}>{t("myBookings.actions.cancelBooking")}</Button>
             )}
             {booking.status === "CHECKED_OUT" && (
               <>
-                <Button variant="text" startIcon={<ReplayRounded />} onClick={onReBook}>Đặt lại</Button>
-                {reviewAction.type === "write" && <Button variant="contained" startIcon={<StarOutlineRounded />} onClick={onReview}>Viết đánh giá</Button>}
-                {reviewAction.type === "view" && <Button variant="outlined" startIcon={<StarOutlineRounded />} onClick={onViewReview}>Xem đánh giá</Button>}
+                <Button variant="text" startIcon={<ReplayRounded />} onClick={onReBook}>{t("myBookings.actions.bookAgain")}</Button>
+                {reviewAction.type === "write" && <Button variant="contained" startIcon={<StarOutlineRounded />} onClick={onReview}>{t("myBookings.actions.writeReview")}</Button>}
+                {reviewAction.type === "view" && <Button variant="outlined" startIcon={<StarOutlineRounded />} onClick={onViewReview}>{t("myBookings.actions.viewReview")}</Button>}
               </>
             )}
-            {booking.status === "CANCELLED" && <Button variant="outlined" startIcon={<ReplayRounded />} onClick={onReBook}>Đặt lại</Button>}
+            {booking.status === "CANCELLED" && <Button variant="outlined" startIcon={<ReplayRounded />} onClick={onReBook}>{t("myBookings.actions.bookAgain")}</Button>}
           </Stack>
         </Stack>
       </Stack>

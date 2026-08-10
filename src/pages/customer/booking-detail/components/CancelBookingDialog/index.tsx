@@ -13,6 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   open: boolean;
@@ -31,6 +32,7 @@ const CancelBookingDialog = ({
   onChangeReason,
   loading,
 }: Props) => {
+  const { t } = useTranslation("client");
   const [reasonError, setReasonError] = useState(false);
 
   useEffect(() => {
@@ -85,13 +87,13 @@ const CancelBookingDialog = ({
           lineHeight: 1.25,
         }}
       >
-        Xác nhận hủy đặt phòng
+        {t("bookingDetail.cancelDialog.title")}
       </DialogTitle>
 
       <IconButton
         onClick={onClose}
         disabled={loading}
-        aria-label="Đóng hộp thoại hủy đặt phòng"
+        aria-label={t("bookingDetail.cancelDialog.closeAria")}
         sx={{
           position: "absolute",
           right: { xs: 12, sm: 18 },
@@ -107,15 +109,15 @@ const CancelBookingDialog = ({
 
       <DialogContent sx={{ px: { xs: 2.5, sm: 3.5 }, pt: 1.25, pb: 0 }}>
         <Typography sx={{ color: "#263F49", fontWeight: 600, mb: 0.5 }}>
-          Bạn có chắc muốn hủy đặt phòng này?
+          {t("bookingDetail.cancelDialog.confirmation")}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.65, mb: 2.5 }}>
-          Vui lòng cho chúng tôi biết lý do để khách sạn có thể ghi nhận yêu cầu của bạn.
+          {t("bookingDetail.cancelDialog.description")}
         </Typography>
 
         <Stack spacing={0.85}>
           <Typography component="label" htmlFor="cancel-booking-reason" variant="body2" fontWeight={600}>
-            Lý do hủy phòng{" "}
+            {t("bookingDetail.cancelDialog.reasonLabel")}{" "}
             <Box component="span" sx={{ color: "error.main" }} aria-hidden>
               *
             </Box>
@@ -127,8 +129,8 @@ const CancelBookingDialog = ({
             fullWidth
             required
             error={reasonError}
-            helperText={reasonError ? "Vui lòng nhập lý do hủy phòng." : " "}
-            placeholder="Nhập lý do hủy phòng của bạn…"
+            helperText={reasonError ? t("bookingDetail.cancelDialog.reasonRequired") : " "}
+            placeholder={t("bookingDetail.cancelDialog.reasonPlaceholder")}
             value={reason}
             onChange={(event) => handleReasonChange(event.target.value)}
             disabled={loading}
@@ -162,7 +164,7 @@ const CancelBookingDialog = ({
         }}
       >
         <Button variant="contained" onClick={onClose} disabled={loading}>
-          Giữ đặt phòng
+          {t("bookingDetail.cancelDialog.keepBooking")}
         </Button>
         <Button
           color="error"
@@ -171,7 +173,7 @@ const CancelBookingDialog = ({
           disabled={loading}
           startIcon={loading ? <CircularProgress size={16} color="inherit" /> : undefined}
         >
-          {loading ? "Đang hủy…" : "Xác nhận hủy"}
+          {loading ? t("bookingDetail.cancelDialog.cancelling") : t("bookingDetail.cancelDialog.confirmCancel")}
         </Button>
       </DialogActions>
     </Dialog>

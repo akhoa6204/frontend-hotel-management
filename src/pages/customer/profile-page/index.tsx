@@ -3,9 +3,11 @@ import { Box, Button, Skeleton, Stack, Tab, Tabs, Typography } from "@mui/materi
 import ChangePasswordTab from "./components/change-password";
 import InfoTab from "./components/info";
 import useAccountProfilePage, { type ActiveTab } from "./useAccountProfilePage";
+import { useTranslation } from "react-i18next";
 
-const ProfileLoading = () => (
-  <Box aria-label="Đang tải hồ sơ" sx={{ maxWidth: 720 }}>
+const ProfileLoading = () => {
+  const { t } = useTranslation("client");
+  return <Box aria-label={t("profile.aria.loading")} sx={{ maxWidth: 720 }}>
     <Skeleton width={132} height={18} />
     <Skeleton width="55%" height={54} sx={{ mt: 0.5 }} />
     <Skeleton width="80%" height={28} />
@@ -21,10 +23,11 @@ const ProfileLoading = () => (
         ))}
       </Stack>
     </Box>
-  </Box>
-);
+  </Box>;
+};
 
 const AccountProfilePage = () => {
+  const { t } = useTranslation("client");
   const {
     activeTab,
     onChangeTab,
@@ -51,12 +54,12 @@ const AccountProfilePage = () => {
     return (
       <Box sx={{ maxWidth: 720, py: { xs: 4, md: 6 }, borderTop: "1px solid", borderColor: "divider" }}>
         <Typography component="h1" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 30, md: 38 } }}>
-          Không thể tải hồ sơ
+          {t("profile.states.loadErrorTitle")}
         </Typography>
         <Typography color="text.secondary" sx={{ mt: 1, mb: 2.5, lineHeight: 1.7 }}>
-          Thông tin tài khoản hiện chưa thể truy cập. Vui lòng thử lại.
+          {t("profile.states.loadErrorDescription")}
         </Typography>
-        <Button variant="outlined" onClick={() => retry()}>Thử lại</Button>
+        <Button variant="outlined" onClick={() => retry()}>{t("profile.actions.retry")}</Button>
       </Box>
     );
   }
@@ -65,20 +68,20 @@ const AccountProfilePage = () => {
     <Box sx={{ width: 1, pb: { xs: 4, md: 7 } }}>
       <Box component="header" sx={{ mb: { xs: 3, md: 4 }, maxWidth: 720 }}>
         <Typography sx={{ color: "primary.main", fontSize: 12, fontWeight: 700, letterSpacing: ".16em", mb: 1 }}>
-          TÀI KHOẢN CỦA BẠN
+          {t("profile.hero.eyebrow")}
         </Typography>
         <Typography component="h1" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 32, md: 42 }, lineHeight: 1.15 }}>
-          Hồ sơ của tôi
+          {t("profile.hero.title")}
         </Typography>
         <Typography color="text.secondary" sx={{ mt: 1.25, maxWidth: 650, lineHeight: 1.7 }}>
-          Quản lý thông tin cá nhân được sử dụng cho các kỳ nghỉ tại Diamond Sea.
+          {t("profile.hero.description")}
         </Typography>
       </Box>
 
       <Tabs
         value={activeTab}
         onChange={(_, value: ActiveTab) => onChangeTab(value)}
-        aria-label="Nội dung hồ sơ"
+        aria-label={t("profile.aria.content")}
         variant="scrollable"
         scrollButtons={false}
         sx={{
@@ -100,8 +103,8 @@ const AccountProfilePage = () => {
           },
         }}
       >
-        <Tab value="info" label="Thông tin cá nhân" />
-        <Tab value="security" label="Bảo mật tài khoản" />
+        <Tab value="info" label={t("profile.tabs.information")} />
+        <Tab value="security" label={t("profile.tabs.security")} />
       </Tabs>
 
       <Box sx={{ maxWidth: 720 }}>

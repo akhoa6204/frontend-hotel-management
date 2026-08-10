@@ -6,8 +6,10 @@ import { diffNights } from "@utils/format";
 import MyBookingService from "@services/me/booking.service";
 import MyReviewService from "@services/me/review.service";
 import type { BookingCancelRequest } from "@constant/request/BookingCancelRequest";
+import { useTranslation } from "react-i18next";
 
 const useBookingDetail = () => {
+  const { t } = useTranslation("client");
   const queryClient = useQueryClient();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -59,18 +61,18 @@ const useBookingDetail = () => {
     mutationFn: async (payload: BookingCancelRequest) =>
       MyBookingService.cancel(payload),
     onSuccess: async () => {
-      showSuccess("Hủy đặt phòng thành công");
+      showSuccess(t("bookingDetail.messages.cancelSuccess"));
       closeCancelDialog();
       await queryClient.invalidateQueries({ queryKey: ["booking-detail", id] });
     },
     onError: () => {
-      showError("Không thể hủy đặt phòng lúc này. Vui lòng thử lại.");
+      showError(t("bookingDetail.messages.cancelError"));
     },
   });
 
   const confirmCancel = () => {
     if (!cancelReason.trim()) {
-      showError("Vui lòng nhập lý do hủy phòng.");
+      showError(t("bookingDetail.cancelDialog.reasonRequired"));
       return;
     }
     if (!booking?.id) return;

@@ -1,4 +1,4 @@
-import { Box, Stack, Skeleton, Divider, Button } from "@mui/material";
+import { Box, Stack, Skeleton, Divider } from "@mui/material";
 
 const BookingTimelineSkeleton = () => {
   return (

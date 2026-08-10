@@ -5,6 +5,7 @@ import MyReviewService from "@services/me/review.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export type RatingField =
   | "overall"
@@ -48,6 +49,7 @@ const RATING_FIELDS: RatingField[] = [
 ];
 
 const useReviewDetail = () => {
+  const { t } = useTranslation("client");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { id } = useParams();
@@ -114,13 +116,13 @@ const useReviewDetail = () => {
       ]);
       navigate("/account/reviews", { replace: true });
     },
-    onError: () => showError("Không thể gửi đánh giá lúc này. Vui lòng thử lại."),
+    onError: () => showError(t("reviews.messages.submitError")),
   });
 
   const handleSubmit = () => {
     if (mode !== "create") return;
     const nextErrors = RATING_FIELDS.reduce<ReviewFormErrors>((result, field) => {
-      if (createForm[field] < 1) result[field] = "Vui lòng chọn mức đánh giá.";
+      if (createForm[field] < 1) result[field] = t("reviews.validation.ratingRequired");
       return result;
     }, {});
 

@@ -15,9 +15,10 @@ import { useLocation, useNavigate, Link as RouterLink } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@hooks/useRedux";
 import { logout } from "@store/slice/account.slice";
 import type { ReactElement } from "react";
+import { useTranslation } from "react-i18next";
 
 type NavItem = {
-  label: string;
+  labelKey: string;
   icon: ReactElement;
   to?: string;
   action?: "logout";
@@ -25,34 +26,35 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   {
-    label: "Hồ sơ của tôi",
+    labelKey: "accountNavigation.profile",
     icon: <PersonOutlineIcon fontSize="small" />,
     to: "/account/profile",
   },
   {
-    label: "Lịch sử đặt phòng",
+    labelKey: "accountNavigation.bookings",
     icon: <HistoryIcon fontSize="small" />,
     to: "/account/bookings",
   },
   {
-    label: "Đánh giá",
+    labelKey: "accountNavigation.reviews",
     icon: <ReviewsIcon fontSize="small" />,
     to: "/account/reviews",
   },
   {
-    label: "Đăng xuất",
+    labelKey: "accountNavigation.logout",
     icon: <LogoutIcon fontSize="small" />,
     action: "logout",
   },
 ];
 
 const AccountSidebar = () => {
+  const { t } = useTranslation("client");
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
   const user = useAppSelector((state) => state.account.user);
-  const fullName = user?.fullName || "User";
+  const fullName = user?.fullName || t("accountNavigation.guest");
 
   const handleLogOut = () => {
     localStorage.removeItem("accessToken");
@@ -68,7 +70,7 @@ const AccountSidebar = () => {
   return (
     <Box
       component="nav"
-      aria-label="Điều hướng tài khoản khách hàng"
+      aria-label={t("accountNavigation.aria")}
       sx={{
         minWidth: 0,
         borderRadius: { xs: 1.5, lg: 0 },
@@ -85,7 +87,7 @@ const AccountSidebar = () => {
             {fullName}
           </Typography>
           <Typography sx={{ color: "text.secondary", fontSize: 11.5, mt: 0.15 }}>
-            Tài khoản khách hàng
+            {t("accountNavigation.title")}
           </Typography>
         </Box>
       </Box>
@@ -153,25 +155,25 @@ const AccountSidebar = () => {
           if (item.action === "logout") {
             return (
               <ListItemButton
-                key={item.label}
+                key={item.labelKey}
                 onClick={handleLogOut}
                 {...commonProps}
               >
                 <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.label} />
+                <ListItemText primary={t(item.labelKey)} />
               </ListItemButton>
             );
           }
 
           return (
             <ListItemButton
-              key={item.label}
+              key={item.labelKey}
               component={RouterLink}
               to={item.to!}
               {...commonProps}
             >
               <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} />
+              <ListItemText primary={t(item.labelKey)} />
             </ListItemButton>
           );
         })}

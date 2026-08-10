@@ -1,4 +1,5 @@
 import { Box, Button, CircularProgress, Stack, TextField, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   comment: string;
@@ -10,9 +11,6 @@ interface Props {
   submitting?: boolean;
 }
 
-const displayDate = (value: string) =>
-  new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(value));
-
 const ReviewCommentSection = ({
   comment,
   canEdit = false,
@@ -21,24 +19,28 @@ const ReviewCommentSection = ({
   onCancel,
   onSubmit,
   submitting = false,
-}: Props) => (
+}: Props) => {
+  const { t, i18n } = useTranslation("client");
+  const displayDate = (value: string) =>
+    new Intl.DateTimeFormat(i18n.resolvedLanguage === "en" ? "en-US" : "vi-VN", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(value));
+  return (
   <Box component="section" aria-labelledby="review-comment-title" sx={{ pt: { xs: 4, md: 5 } }}>
     <Typography id="review-comment-title" component="h2" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 24, md: 28 } }}>
-      {canEdit ? "Chia sẻ thêm về trải nghiệm của bạn" : "Nhận xét của bạn"}
+      {t(canEdit ? "reviews.comment.createTitle" : "reviews.comment.viewTitle")}
     </Typography>
     {canEdit ? (
       <>
         <Typography color="text.secondary" sx={{ mt: 0.75, mb: 2.25, lineHeight: 1.65 }}>
-          Những điều bạn yêu thích hoặc điều Diamond Sea có thể cải thiện.
+          {t("reviews.comment.description")}
         </Typography>
         <TextField
           multiline
           minRows={5}
           fullWidth
-          placeholder="Hãy chia sẻ trải nghiệm của bạn tại khách sạn."
+          placeholder={t("reviews.comment.placeholder")}
           value={comment}
           onChange={(event) => onChange?.(event.target.value)}
-          inputProps={{ "aria-label": "Nhận xét về kỳ nghỉ" }}
+          inputProps={{ "aria-label": t("reviews.comment.aria") }}
           sx={{ "& .MuiOutlinedInput-root": { bgcolor: "rgba(255,255,255,.55)", borderRadius: 1.5, alignItems: "flex-start" } }}
         />
 
@@ -55,21 +57,22 @@ const ReviewCommentSection = ({
             "& .MuiButton-text": { width: "auto" },
           }}
         >
-          <Button variant="text" onClick={onCancel} disabled={submitting}>Hủy</Button>
+          <Button variant="text" onClick={onCancel} disabled={submitting}>{t("reviews.actions.cancel")}</Button>
           <Button variant="contained" onClick={onSubmit} disabled={submitting} startIcon={submitting ? <CircularProgress size={17} color="inherit" /> : undefined}>
-            {submitting ? "Đang gửi…" : "Gửi đánh giá"}
+            {submitting ? t("reviews.actions.submitting") : t("reviews.actions.submit")}
           </Button>
         </Stack>
       </>
     ) : (
       <Box sx={{ mt: 2 }}>
         <Typography sx={{ color: "#465960", fontSize: { xs: 16, md: 17 }, lineHeight: 1.8, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>
-          {comment || "Bạn chưa để lại nhận xét bằng văn bản cho kỳ nghỉ này."}
+          {comment || t("reviews.comment.noComment")}
         </Typography>
-        {reviewDate && <Typography variant="body2" color="text.secondary" sx={{ mt: 2.25 }}>Đánh giá ngày {displayDate(reviewDate)}</Typography>}
+        {reviewDate && <Typography variant="body2" color="text.secondary" sx={{ mt: 2.25 }}>{t("reviews.comment.reviewDate", { date: displayDate(reviewDate) })}</Typography>}
       </Box>
     )}
   </Box>
-);
+  );
+};
 
 export default ReviewCommentSection;

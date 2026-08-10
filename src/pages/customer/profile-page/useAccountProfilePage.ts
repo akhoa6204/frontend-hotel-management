@@ -7,6 +7,8 @@ import { loginSuccess } from "@store/slice/account.slice";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 
 export type ActiveTab = "info" | "security";
 
@@ -32,21 +34,21 @@ const initialForm: Form = {
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const validateInfo = (form: Form): FormErrors => {
+const validateInfo = (form: Form, t: TFunction<"client">): FormErrors => {
   const errors: FormErrors = {};
-  if (!form.fullName.trim()) errors.fullName = "Họ và tên không được để trống.";
-  if (!form.email.trim()) errors.email = "Email không được để trống.";
-  else if (!emailRegex.test(form.email.trim())) errors.email = "Email không hợp lệ.";
+  if (!form.fullName.trim()) errors.fullName = t("profile.validation.fullNameRequired");
+  if (!form.email.trim()) errors.email = t("profile.validation.emailRequired");
+  else if (!emailRegex.test(form.email.trim())) errors.email = t("profile.validation.emailInvalid");
   return errors;
 };
 
-const validatePassword = (form: Form): FormErrors => {
+const validatePassword = (form: Form, t: TFunction<"client">): FormErrors => {
   const errors: FormErrors = {};
-  if (!form.password) errors.password = "Vui lòng nhập mật khẩu hiện tại.";
-  if (!form.newPassword) errors.newPassword = "Vui lòng nhập mật khẩu mới.";
-  else if (form.newPassword.length < 6) errors.newPassword = "Mật khẩu mới phải từ 6 ký tự trở lên.";
-  if (!form.confirmPassword) errors.confirmPassword = "Vui lòng xác nhận mật khẩu.";
-  else if (form.newPassword !== form.confirmPassword) errors.confirmPassword = "Mật khẩu xác nhận không khớp.";
+  if (!form.password) errors.password = t("profile.validation.currentPasswordRequired");
+  if (!form.newPassword) errors.newPassword = t("profile.validation.newPasswordRequired");
+  else if (form.newPassword.length < 6) errors.newPassword = t("profile.validation.newPasswordLength");
+  if (!form.confirmPassword) errors.confirmPassword = t("profile.validation.confirmPasswordRequired");
+  else if (form.newPassword !== form.confirmPassword) errors.confirmPassword = t("profile.validation.passwordMismatch");
   return errors;
 };
 
@@ -57,6 +59,7 @@ const profileFields = (user?: UserShortResponse): Partial<Form> => ({
 });
 
 const useAccountProfilePage = () => {
+  const { t } = useTranslation("client");
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
   const cachedUser = useAppSelector((state) => state.account.user);
@@ -103,10 +106,10 @@ const useAccountProfilePage = () => {
       dispatch(loginSuccess(updatedProfile));
       setForm((current) => ({ ...current, ...profileFields(updatedProfile) }));
       setEditing(false);
-      showSuccess("Thông tin của bạn đã được cập nhật.");
+      showSuccess(t("profile.messages.updateSuccess"));
       await queryClient.invalidateQueries({ queryKey: ["user"] });
     },
-    onError: () => showError("Không thể cập nhật thông tin lúc này. Vui lòng thử lại."),
+    onError: () => showError(t("profile.messages.updateError")),
   });
 
   const passwordMutation = useMutation({
@@ -115,15 +118,15 @@ const useAccountProfilePage = () => {
       setForm((current) => ({ ...current, password: "", newPassword: "", confirmPassword: "" }));
       setErrors({});
       setActiveTab("info");
-      showSuccess("Mật khẩu đã được cập nhật.");
+      showSuccess(t("profile.messages.passwordSuccess"));
     },
-    onError: () => showError("Không thể đổi mật khẩu lúc này. Vui lòng kiểm tra lại và thử lại."),
+    onError: () => showError(t("profile.messages.passwordError")),
   });
 
   const onSubmitInfo = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (updateMutation.isPending) return;
-    const nextErrors = validateInfo(form);
+    const nextErrors = validateInfo(form, t);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
     updateMutation.mutate();
@@ -132,7 +135,7 @@ const useAccountProfilePage = () => {
   const onSubmitPassword = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (passwordMutation.isPending) return;
-    const nextErrors = validatePassword(form);
+    const nextErrors = validatePassword(form, t);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
     passwordMutation.mutate({ password: form.password, newPassword: form.newPassword });

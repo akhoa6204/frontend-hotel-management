@@ -7,9 +7,11 @@ import ReviewDetailSection from "./components/ReviewDetailSection";
 import ReviewOverallSection from "./components/ReviewOverallSection";
 import ReviewStayOverview from "./components/ReviewStayOverview";
 import useReviewDetail from "./useReviewDetail";
+import { useTranslation } from "react-i18next";
 
-const ReviewDetailSkeleton = () => (
-  <Box aria-label="Đang tải đánh giá" sx={{ maxWidth: 960, pb: 6 }}>
+const ReviewDetailSkeleton = () => {
+  const { t } = useTranslation("client");
+  return <Box aria-label={t("reviews.aria.loadingDetail")} sx={{ maxWidth: 960, pb: 6 }}>
     <Skeleton width={150} height={38} />
     <Skeleton width="52%" height={58} sx={{ mt: 1 }} />
     <Skeleton width="70%" height={28} />
@@ -17,10 +19,11 @@ const ReviewDetailSkeleton = () => (
     <Skeleton width="45%" height={45} sx={{ mt: 4 }} />
     <Skeleton width={240} height={50} sx={{ mt: 1.5 }} />
     <Skeleton variant="rounded" height={150} sx={{ mt: 4 }} />
-  </Box>
-);
+  </Box>;
+};
 
 const ReviewDetailPage = () => {
+  const { t } = useTranslation("client");
   const {
     mode,
     review,
@@ -47,13 +50,13 @@ const ReviewDetailPage = () => {
         <ErrorOutlineRounded sx={{ color: "text.secondary", fontSize: 38 }} />
         <Box>
           <Typography component="h1" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 28 }}>
-            {mode === "create" ? "Không thể tải thông tin kỳ nghỉ" : "Không tìm thấy đánh giá này"}
+            {t(mode === "create" ? "reviews.states.stayLoadError" : "reviews.states.reviewNotFound")}
           </Typography>
           <Typography color="text.secondary" sx={{ mt: 0.75 }}>
-            Nội dung không tồn tại hoặc hiện không thể truy cập.
+            {t("reviews.states.unavailableDescription")}
           </Typography>
         </Box>
-        <Button onClick={onBack} startIcon={<ArrowBackRounded />}>Đánh giá của tôi</Button>
+        <Button onClick={onBack} startIcon={<ArrowBackRounded />}>{t("reviews.actions.myReviews")}</Button>
       </Stack>
     );
   }
@@ -63,20 +66,20 @@ const ReviewDetailPage = () => {
   return (
     <Box sx={{ width: 1, pb: { xs: 5, md: 7 } }}>
       <Button onClick={onBack} startIcon={<ArrowBackRounded />} sx={{ color: "text.secondary", px: 0, mb: { xs: 2.5, md: 3.25 } }}>
-        Đánh giá của tôi
+        {t("reviews.actions.myReviews")}
       </Button>
 
       <Box component="header" sx={{ mb: { xs: 3, md: 4 }, textAlign: { xs: "center", sm: "left" } }}>
         <Typography sx={{ color: "primary.main", fontSize: 12, fontWeight: 700, letterSpacing: ".16em", mb: 1 }}>
-          TRẢI NGHIỆM CỦA BẠN
+          {t("reviews.detail.eyebrow")}
         </Typography>
         <Typography component="h1" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 32, md: 44 }, lineHeight: 1.14 }}>
-          {canEdit ? "Chia sẻ cảm nhận về kỳ nghỉ của bạn." : "Đánh giá kỳ nghỉ tại Diamond Sea"}
+          {t(canEdit ? "reviews.detail.createTitle" : "reviews.detail.viewTitle")}
         </Typography>
         <Typography color="text.secondary" sx={{ mt: 1.1, maxWidth: 720, mx: { xs: "auto", sm: 0 }, lineHeight: 1.7 }}>
           {canEdit
-            ? "Phản hồi chân thành của bạn giúp Diamond Sea chăm chút hơn cho từng trải nghiệm lưu trú."
-            : "Những cảm nhận bạn đã chia sẻ sau kỳ nghỉ tại Diamond Sea."}
+            ? t("reviews.detail.createDescription")
+            : t("reviews.detail.viewDescription")}
         </Typography>
       </Box>
 

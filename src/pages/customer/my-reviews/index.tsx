@@ -4,8 +4,10 @@ import { Link as RouterLink } from "react-router-dom";
 import ReviewCardSkeleton from "./components/ReviewCardSkeleton";
 import ReviewCard from "./components/review-card";
 import useMyReview from "./useMyReview";
+import { useTranslation } from "react-i18next";
 
 const MyReviewPage = () => {
+  const { t } = useTranslation("client");
   const {
     reviews,
     loading,
@@ -21,39 +23,39 @@ const MyReviewPage = () => {
     <Box sx={{ width: 1, pb: { xs: 4, md: 7 } }}>
       <Box component="header" sx={{ mb: { xs: 3.5, md: 4.5 } }}>
         <Typography sx={{ color: "primary.main", fontSize: 12, fontWeight: 700, letterSpacing: ".16em", mb: 1 }}>
-          TRẢI NGHIỆM CỦA BẠN
+          {t("reviews.list.eyebrow")}
         </Typography>
         <Typography component="h1" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 32, md: 42 }, lineHeight: 1.15 }}>
-          Đánh giá của tôi
+          {t("reviews.list.title")}
         </Typography>
         <Typography color="text.secondary" sx={{ mt: 1.25, maxWidth: 650, lineHeight: 1.7 }}>
-          Nhìn lại và chia sẻ cảm nhận về những kỳ nghỉ của bạn tại Diamond Sea.
+          {t("reviews.list.description")}
         </Typography>
       </Box>
 
       {loading ? (
-        <Stack spacing={{ xs: 2.5, md: 3 }} aria-label="Đang tải danh sách đánh giá">
+        <Stack spacing={{ xs: 2.5, md: 3 }} aria-label={t("reviews.aria.loadingList")}>
           {Array.from({ length: 3 }).map((_, index) => <ReviewCardSkeleton key={index} />)}
         </Stack>
       ) : error ? (
         <Box sx={{ py: { xs: 5, md: 7 }, borderTop: "1px solid", borderColor: "divider" }}>
           <Typography component="h2" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 24 }}>
-            Không thể tải đánh giá
+            {t("reviews.states.loadErrorTitle")}
           </Typography>
           <Typography color="text.secondary" sx={{ mt: 1, mb: 2.5, lineHeight: 1.7 }}>
-            Những chia sẻ của bạn hiện chưa thể truy cập. Vui lòng thử lại.
+            {t("reviews.states.loadErrorDescription")}
           </Typography>
-          <Button variant="outlined" onClick={() => retry()}>Thử lại</Button>
+          <Button variant="outlined" onClick={() => retry()}>{t("reviews.actions.retry")}</Button>
         </Box>
       ) : reviews.length === 0 ? (
         <Box sx={{ py: { xs: 5, md: 7 }, borderTop: "1px solid", borderColor: "divider", maxWidth: 620 }}>
           <Typography component="h2" sx={{ color: "text.primary", fontFamily: 'Georgia, "Times New Roman", serif', fontSize: { xs: 24, sm: 27 } }}>
-            Chưa có đánh giá nào
+            {t("reviews.states.emptyTitle")}
           </Typography>
           <Typography color="text.secondary" sx={{ mt: 1, mb: 2.75, lineHeight: 1.7 }}>
-            Cảm nhận về kỳ nghỉ đầu tiên của bạn sẽ được lưu lại tại đây sau khi hoàn tất lưu trú.
+            {t("reviews.states.emptyDescription")}
           </Typography>
-          <Button component={RouterLink} to="/search" variant="outlined">Khám phá phòng</Button>
+          <Button component={RouterLink} to="/search" variant="outlined">{t("reviews.actions.exploreRooms")}</Button>
         </Box>
       ) : (
         <>

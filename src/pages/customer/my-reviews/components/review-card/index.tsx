@@ -4,6 +4,7 @@ import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
 import { Box, Button, Rating, Stack, Typography } from "@mui/material";
 import { diffNights } from "@utils/format";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface ReviewCardProps {
   review: ReviewResponse;
@@ -11,10 +12,10 @@ interface ReviewCardProps {
 }
 
 const unsuitableImagePattern = /(meme|joke|giphy|tenor|\.gif(?:\?|$))/i;
-const displayDate = (value: string) =>
-  new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
-
 const ReviewCard = ({ review, onView }: ReviewCardProps) => {
+  const { t, i18n } = useTranslation("client");
+  const displayDate = (value: string) =>
+    new Intl.DateTimeFormat(i18n.resolvedLanguage === "en" ? "en-US" : "vi-VN", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value));
   const [imageFailed, setImageFailed] = useState(false);
   const { booking } = review;
   const suitableImage = booking.room.roomType.roomTypeImages?.find(
@@ -39,7 +40,7 @@ const ReviewCard = ({ review, onView }: ReviewCardProps) => {
         component="img"
         src={image}
         onError={() => setImageFailed(true)}
-        alt={`Phòng ${booking.room.roomType.name} tại Diamond Sea`}
+        alt={t("reviews.stay.roomImageAlt", { room: booking.room.roomType.name })}
         loading="lazy"
         sx={{ width: 1, height: { xs: 190, sm: 225, md: 255 }, objectFit: "cover", display: "block" }}
       />
@@ -50,7 +51,7 @@ const ReviewCard = ({ review, onView }: ReviewCardProps) => {
             {booking.room.roomType.name}
           </Typography>
           <Typography color="text.secondary" variant="body2" sx={{ mt: 0.5, overflowWrap: "anywhere" }}>
-            Phòng {booking.room.name} · Mã đặt phòng {booking.bookingCode}
+            {t("reviews.stay.roomAndCode", { room: booking.room.name, code: booking.bookingCode })}
           </Typography>
 
           <Stack direction="row" alignItems="center" spacing={{ xs: 1, sm: 1.5 }} sx={{ mt: 1.8, flexWrap: "wrap", rowGap: 0.5 }}>
@@ -59,7 +60,7 @@ const ReviewCard = ({ review, onView }: ReviewCardProps) => {
             <Typography fontWeight={600} color="#263F49">{displayDate(booking.checkOutDate)}</Typography>
           </Stack>
           <Typography color="text.secondary" variant="body2" sx={{ mt: 0.6 }}>
-            {nights} đêm · Kỳ nghỉ đã hoàn tất
+            {t("reviews.stay.completedSummary", { count: nights })}
           </Typography>
 
           <Stack direction="row" alignItems="center" spacing={1.1} sx={{ mt: 2 }}>
@@ -68,7 +69,7 @@ const ReviewCard = ({ review, onView }: ReviewCardProps) => {
               max={5}
               precision={1}
               readOnly
-              aria-label={`${review.overall} trên 5 điểm`}
+              aria-label={t("reviews.rating.aria", { value: review.overall })}
               sx={{ color: "#B78945", fontSize: 21 }}
             />
             <Typography sx={{ color: "text.primary", fontSize: 14, fontWeight: 700 }}>
@@ -89,16 +90,16 @@ const ReviewCard = ({ review, onView }: ReviewCardProps) => {
               overflowWrap: "anywhere",
             }}
           >
-            “{review.comment || "Bạn chưa để lại nhận xét bằng văn bản cho kỳ nghỉ này."}”
+            “{review.comment || t("reviews.comment.noComment")}”
           </Typography>
         </Box>
 
         <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ sm: "center" }} gap={1.5} sx={{ pt: 1.75, borderTop: "1px solid rgba(23, 60, 75, 0.09)" }}>
           <Typography variant="caption" color="text.secondary">
-            Đánh giá ngày {displayDate(review.createdAt)}
+            {t("reviews.comment.reviewDate", { date: displayDate(review.createdAt) })}
           </Typography>
           <Button variant="outlined" onClick={onView} sx={{ minHeight: 40, width: { xs: 1, sm: "auto" } }}>
-            Xem chi tiết
+            {t("reviews.actions.viewDetails")}
           </Button>
         </Stack>
       </Stack>
