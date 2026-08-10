@@ -1,23 +1,30 @@
-import Title from "@components/Title";
 import useHouseKeeping from "./useHouseKeeping";
 import HousekeepingTaskTable from "./components/housekeeping-task-table";
 import { EntityPickerDialog, GlobalSnackbar, Pager } from "@components";
 import {
   Box,
-  Grid,
+  Button,
   InputAdornment,
   MenuItem,
   Stack,
   TextField,
+  Typography,
 } from "@mui/material";
-import { Search } from "@mui/icons-material";
+import { Add, Search } from "@mui/icons-material";
 import HousekeepingUpsertDialog from "./components/housekeeping-upsert-dialog";
-import { HousekeepingTaskStatus } from "@enums/HousekeepingTaskStatus";
+import type { HousekeepingTaskStatus } from "@enums/HousekeepingTaskStatus";
+import { useTranslation } from "react-i18next";
 
 const HouseKeeping = () => {
+  const { t } = useTranslation(["housekeeping", "common"]);
   const {
     tasks,
     meta,
+    isLoading,
+    isError,
+    refetch,
+    isUpdatingTask,
+    isCreatingTask,
     notHouseKeeping,
     filters,
     onChangeFilter,
@@ -31,6 +38,7 @@ const HouseKeeping = () => {
     mode,
     onOpen,
     form,
+    errors,
     onChange,
     onSubmit,
     onClose,
@@ -64,21 +72,66 @@ const HouseKeeping = () => {
     onPageChangeStaff,
     selectStaff,
     loadingStaffs,
+    staffOptionsError,
+    refetchStaffOptions,
   } = useHouseKeeping();
 
   return (
     <>
-      <Title
-        title="Quản lý buồng phòng"
-        subTitle="Tình trạng phòng & lịch dọn phòng"
-        onAdd={notHouseKeeping ? () => onOpen("CREATE") : undefined}
-      />
-      <Grid container spacing={1.5} sx={{ mb: 2 }}>
-        <Grid size={9}>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        alignItems={{ xs: "stretch", sm: "center" }}
+        justifyContent="space-between"
+        gap={2}
+        sx={{ mb: 2.5 }}
+      >
+        <Box>
+          <Typography
+            component="h1"
+            sx={{ color: "#163B47", fontSize: { xs: 26, md: 29 }, lineHeight: 1.25, fontWeight: 700 }}
+          >
+            {t("title", { ns: "housekeeping" })}
+          </Typography>
+          <Typography sx={{ mt: 0.5, color: "#667085", fontSize: 13.5 }}>
+            {t("subtitle", { ns: "housekeeping" })}
+          </Typography>
+        </Box>
+        {notHouseKeeping && (
+          <Button
+            startIcon={<Add />}
+            variant="contained"
+            onClick={() => onOpen("CREATE")}
+            sx={{ minHeight: 42, borderRadius: "8px", alignSelf: { sm: "center" } }}
+          >
+            {t("create", { ns: "housekeeping" })}
+          </Button>
+        )}
+      </Stack>
+      <Box
+        sx={{
+          mb: 2,
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "minmax(0, 1fr)",
+            sm: "minmax(280px, 1fr) 180px",
+          },
+          width: { xs: "100%", md: "clamp(520px, 58vw, 720px)" },
+          minHeight: 42,
+          bgcolor: "#FFFFFF",
+          border: "1px solid #D0D5DD",
+          borderRadius: "8px",
+          overflow: "hidden",
+          transition: "border-color 120ms ease, box-shadow 120ms ease",
+          "&:focus-within": {
+            borderColor: "#2E90FA",
+            boxShadow: "0 0 0 2px rgba(46, 144, 250, 0.08)",
+          },
+        }}
+      >
           <TextField
             fullWidth
             size="small"
-            placeholder="Tìm theo số phòng, người thực hiện,..."
+            placeholder={t("search", { ns: "housekeeping" })}
             value={filters.q ?? ""}
             onChange={(e) => onChangeFilter("q", e.target.value)}
             InputProps={{
@@ -88,9 +141,19 @@ const HouseKeeping = () => {
                 </InputAdornment>
               ),
             }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                height: 40,
+                bgcolor: "transparent",
+                borderRadius: 0,
+                px: 1.5,
+                "& fieldset": { border: 0 },
+                "&:hover fieldset, &.Mui-focused fieldset": { border: 0 },
+              },
+              "& .MuiInputBase-input": { py: 0, fontSize: 13.5 },
+              "& .MuiInputAdornment-root": { color: "#667085" },
+            }}
           />
-        </Grid>
-        <Grid size={3}>
           <TextField
             select
             size="small"
@@ -102,19 +165,34 @@ const HouseKeeping = () => {
               )
             }
             fullWidth
+            sx={{
+              borderTop: { xs: "1px solid #EAECF0", sm: 0 },
+              borderLeft: { xs: 0, sm: "1px solid #EAECF0" },
+              "& .MuiOutlinedInput-root": {
+                height: 40,
+                bgcolor: "transparent",
+                borderRadius: 0,
+                "& fieldset": { border: 0 },
+                "&:hover fieldset, &.Mui-focused fieldset": { border: 0 },
+              },
+              "& .MuiSelect-select": { py: 0, pl: 1.5, fontSize: 13.5 },
+            }}
           >
-            <MenuItem value={"ALL"}>Tất cả</MenuItem>
-            <MenuItem value={"PENDING"}>Chưa thực hiện</MenuItem>
-            <MenuItem value={"IN_PROGRESS"}>Đang thực hiện</MenuItem>
-            <MenuItem value={"COMPLETED"}>Đã xong</MenuItem>
+            <MenuItem value={"ALL"}>{t("status.all", { ns: "common" })}</MenuItem>
+            <MenuItem value={"PENDING"}>{t("status.PENDING", { ns: "housekeeping" })}</MenuItem>
+            <MenuItem value={"IN_PROGRESS"}>{t("status.IN_PROGRESS", { ns: "housekeeping" })}</MenuItem>
+            <MenuItem value={"COMPLETED"}>{t("status.COMPLETED", { ns: "housekeeping" })}</MenuItem>
           </TextField>
-        </Grid>
-      </Grid>
+      </Box>
 
       <HousekeepingTaskTable
         tasks={tasks}
         onStatusChange={handleUpdateTask}
         onRowClick={onOpen}
+        loading={isLoading}
+        error={isError}
+        onRetry={() => refetch()}
+        updating={isUpdatingTask}
       />
       {(meta?.totalPages || 1) > 1 && (
         <Box mt={2} display="flex" justifyContent="center">
@@ -129,6 +207,7 @@ const HouseKeeping = () => {
         open={open}
         mode={mode}
         form={form}
+        errors={errors}
         onChange={onChange}
         onSubmit={onSubmit}
         onClose={onClose}
@@ -141,6 +220,10 @@ const HouseKeeping = () => {
         onOpenPickerStaff={openPickerStaff}
         loadingTask={loadingTask}
         notHouseKeeping={notHouseKeeping}
+        saving={isCreatingTask || isUpdatingTask}
+        loadingStaffOptions={loadingStaffs}
+        staffOptionsError={staffOptionsError}
+        onRetryStaffOptions={() => refetchStaffOptions()}
       />
 
       <EntityPickerDialog
@@ -148,11 +231,11 @@ const HouseKeeping = () => {
         onClose={onClosePickerRoom}
         open={openEntityPickerRoomDialog}
         selectedId={selectedIdRoom}
-        title={"Xem danh sách phòng"}
+        title={t("pickers.roomsTitle", { ns: "housekeeping" })}
         columns={[
-          { label: "Tên phòng", name: "name" },
-          { label: "Loại phòng", name: "roomType.name" },
-          { label: "Sức chứa", name: "roomType.capacity" },
+          { label: t("pickers.roomColumns.name", { ns: "housekeeping" }), name: "name" },
+          { label: t("pickers.roomColumns.type", { ns: "housekeeping" }), name: "roomType.name" },
+          { label: t("pickers.roomColumns.capacity", { ns: "housekeeping" }), name: "roomType.capacity" },
         ]}
         q={filtersRoom.q}
         onSearch={onSearchRoom}
@@ -171,12 +254,12 @@ const HouseKeeping = () => {
         onClose={onClosePickerStaff}
         open={openEntityPickerStaffDialog}
         selectedId={selectedIdStaff}
-        title="Danh sách nhân viên"
+        title={t("pickers.staffTitle", { ns: "housekeeping" })}
         columns={[
-          { label: "Họ và tên", name: "fullName" },
-          { label: "Số điện thoại", name: "phone" },
-          { label: "Email", name: "email" },
-          { label: "Vị trí", name: "staff.position" },
+          { label: t("pickers.staffColumns.name", { ns: "housekeeping" }), name: "fullName" },
+          { label: t("pickers.staffColumns.phone", { ns: "housekeeping" }), name: "phone" },
+          { label: t("pickers.staffColumns.email", { ns: "housekeeping" }), name: "email" },
+          { label: t("pickers.staffColumns.position", { ns: "housekeeping" }), name: "staff.position" },
         ]}
         onSelect={(row) => {
           selectStaff(row);

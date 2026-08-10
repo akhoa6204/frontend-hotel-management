@@ -1,12 +1,11 @@
-import { SearchEmployee } from "@constant/internal/SearchEmployee";
-import { SearchFilter } from "@constant/internal/SearchFilter";
-import { ApiResponse } from "@constant/response/ApiResponse";
-import { UserShortResponse } from "@constant/response/UserShortResponse";
-import { UserRole } from "@enums/UserRole";
+import type { SearchEmployee } from "@constant/internal/SearchEmployee";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
+import type { ApiResponse } from "@constant/response/ApiResponse";
+import type { UserShortResponse } from "@constant/response/UserShortResponse";
 import httpClient from "..";
-import { EmployeeCreationRequest } from "@constant/request/EmployeeCreationRequest";
-import { EmployeeUpdateRequest } from "@constant/request/EmployeeUpdateRequest";
-import { EmployeeResetPasswordRequest } from "@constant/request/EmployeeResetPasswordRequest";
+import type { EmployeeCreationRequest } from "@constant/request/EmployeeCreationRequest";
+import type { EmployeeUpdateRequest } from "@constant/request/EmployeeUpdateRequest";
+import type { EmployeeResetPasswordRequest } from "@constant/request/EmployeeResetPasswordRequest";
 
 const BASE_URL = "/staff/employees";
 

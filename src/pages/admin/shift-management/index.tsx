@@ -1,10 +1,10 @@
-import Title from "@components/Title";
 import useShift from "./useShift";
 import WeeklyScheduleCalendar from "./components/weekly-schedule-calendar";
 import { GlobalSnackbar, EntityPickerDialog } from "@components";
 import CreateShiftDialog from "./components/create-shift-dialog";
 import {
   Box,
+  Button,
   IconButton,
   InputAdornment,
   MenuItem,
@@ -12,10 +12,12 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { ArrowBack, ArrowForward, Search } from "@mui/icons-material";
+import { Add, ArrowBack, ArrowForward, Search } from "@mui/icons-material";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 
 const ShiftManagement = () => {
+  const { t } = useTranslation(["schedules", "common"]);
   const {
     shifts,
     shiftDefinitions,
@@ -51,33 +53,83 @@ const ShiftManagement = () => {
     onSearchEmployee,
     filtersEmployee,
     isLoadingEmployees,
+    isLoading,
+    isError,
+    refetch,
+    isCreating,
+    isRemoving,
+    isLoadingDefinitions,
   } = useShift();
   return (
     <>
-      <Title
-        title="Quản lý lịch phân ca nhân viên"
-        subTitle="Theo dõi và sắp xếp ca làm việc theo tuần"
-        onAdd={() => openDialog(null)}
-        showAddButton={canEdit}
-      />
       <Stack
-        direction="row"
+        direction={{ xs: "column", sm: "row" }}
+        alignItems={{ xs: "stretch", sm: "center" }}
+        justifyContent="space-between"
         gap={2}
-        flexWrap="wrap"
-        alignItems="center"
-        justifyContent={"center"}
+        sx={{ mb: 2.5 }}
+      >
+        <Box>
+          <Typography component="h1" sx={{ color: "#163B47", fontSize: { xs: 26, md: 29 }, lineHeight: 1.25, fontWeight: 700 }}>{t("title", { ns: "schedules" })}</Typography>
+          <Typography sx={{ mt: 0.5, color: "#667085", fontSize: 13.5 }}>{t("subtitle", { ns: "schedules" })}</Typography>
+        </Box>
+        {canEdit && <Button startIcon={<Add />} variant="contained" onClick={() => openDialog(null)} sx={{ minHeight: 42, borderRadius: "8px", alignSelf: { sm: "center" } }}>{t("create", { ns: "schedules" })}</Button>}
+      </Stack>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          flexWrap: "nowrap",
+          alignItems: { xs: "stretch", md: "center" },
+          justifyContent: "space-between",
+          gap: { xs: 1.5, md: 1.5, lg: 2 },
+          width: "100%",
+        }}
       >
         {canEdit && (
-          <>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "minmax(0, 1fr)",
+                sm: "minmax(280px, 1fr) 180px",
+                md: "minmax(280px, 1fr) minmax(160px, 180px)",
+              },
+              width: { xs: "100%", md: "clamp(500px, 55vw, 680px)" },
+              height: { xs: "auto", sm: 42 },
+              flexShrink: 1,
+              bgcolor: "#FFFFFF",
+              border: "1px solid #D0D5DD",
+              borderRadius: "8px",
+              overflow: "hidden",
+              transition: "border-color 120ms ease, box-shadow 120ms ease",
+              "&:focus-within": {
+                borderColor: "#2E90FA",
+                boxShadow: "0 0 0 2px rgba(46, 144, 250, 0.08)",
+              },
+            }}
+          >
             <TextField
-              fullWidth
               size="small"
-              sx={{ flex: 1, minWidth: 240 }}
+              sx={{
+                width: "100%",
+                "& .MuiOutlinedInput-root": {
+                  height: 40,
+                  bgcolor: "transparent",
+                  borderRadius: 0,
+                  px: 1.5,
+                  "& fieldset": { border: 0 },
+                  "&:hover fieldset, &.Mui-focused fieldset": { border: 0 },
+                },
+                "& .MuiInputBase-input": { py: 0, fontSize: 13.5 },
+                "& .MuiInputAdornment-root": { color: "#667085" },
+              }}
               value={filters.q}
               onChange={(e) =>
                 setFilters((pre) => ({ ...pre, q: e.target.value }))
               }
-              placeholder="Tìm theo tên nhân viên…"
+              placeholder={t("search", { ns: "schedules" })}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -90,58 +142,81 @@ const ShiftManagement = () => {
               select
               size="small"
               defaultValue="ALL"
-              sx={{ width: 160 }}
+              sx={{
+                width: "100%",
+                borderTop: { xs: "1px solid #EAECF0", sm: 0 },
+                borderLeft: { xs: 0, sm: "1px solid #EAECF0" },
+                "& .MuiOutlinedInput-root": {
+                  height: 40,
+                  bgcolor: "transparent",
+                  borderRadius: 0,
+                  "& fieldset": { border: 0 },
+                  "&:hover fieldset, &.Mui-focused fieldset": { border: 0 },
+                },
+                "& .MuiSelect-select": { py: 0, pl: 1.5, fontSize: 13.5 },
+              }}
               value={filters.position}
               onChange={(e) =>
-                setFilters((pre) => ({ ...pre, position: e.target.value }))
+                setFilters((pre) => ({ ...pre, position: e.target.value as typeof filters.position }))
               }
             >
-              <MenuItem value="ALL">Tất cả vị trí</MenuItem>
-              <MenuItem value="RECEPTIONIST">Lễ tân</MenuItem>
-              <MenuItem value="HOUSEKEEPING">Buồng phòng</MenuItem>
-              <MenuItem value="ADMIN">Quản lý</MenuItem>
+              <MenuItem value="ALL">{t("allPositions", { ns: "schedules" })}</MenuItem>
+              <MenuItem value="RECEPTIONIST">{t("roles.RECEPTIONIST", { ns: "common" })}</MenuItem>
+              <MenuItem value="HOUSEKEEPING">{t("roles.HOUSEKEEPING", { ns: "common" })}</MenuItem>
+              <MenuItem value="ADMIN">{t("roles.MANAGER", { ns: "common" })}</MenuItem>
             </TextField>
-          </>
+          </Box>
         )}
 
-        <Box display="flex" justifyContent="center" sx={{ flexShrink: 0 }}>
+        <Box display="flex" justifyContent={{ xs: "stretch", md: "flex-end" }} sx={{ flexShrink: 0 }}>
           <Box
             sx={{
-              display: "flex",
+              display: "grid",
+              gridTemplateColumns: "40px minmax(200px, 1fr) 40px",
               alignItems: "center",
-              gap: 2,
-              px: 3,
-              borderRadius: "999px",
-              border: "2px solid #2E90FA",
+              width: { xs: "100%", md: "clamp(280px, 30vw, 320px)" },
+              height: 42,
+              borderRadius: "8px",
+              border: "1px solid #D0D5DD",
+              bgcolor: "#FFFFFF",
+              overflow: "hidden",
             }}
           >
-            <IconButton size="small" onClick={prevWeek} color="primary">
+            <IconButton aria-label={t("previousWeek", { ns: "schedules" })} size="small" onClick={prevWeek} sx={{ width: 40, height: 40, borderRadius: 0, color: "#667085", "&:hover": { bgcolor: "#F9FAFB" } }}>
               <ArrowBack fontSize="small" />
             </IconButton>
 
             <Typography
               sx={{
                 fontWeight: 600,
-                fontSize: 15,
+                flex: 1,
+                px: 1.25,
+                color: "#344054",
+                fontSize: 13.5,
+                textAlign: "center",
+                whiteSpace: "nowrap",
               }}
-              color="primary"
             >
-              {dayjs(start).format("DD/MM/YYYY")} -{" "}
+              {dayjs(start).format("DD/MM/YYYY")} –{" "}
               {dayjs(end).format("DD/MM/YYYY")}
             </Typography>
 
-            <IconButton size="small" onClick={nextWeek} color="primary">
+            <IconButton aria-label={t("nextWeek", { ns: "schedules" })} size="small" onClick={nextWeek} sx={{ width: 40, height: 40, borderRadius: 0, color: "#667085", "&:hover": { bgcolor: "#F9FAFB" } }}>
               <ArrowForward fontSize="small" />
             </IconButton>
           </Box>
         </Box>
-      </Stack>
+      </Box>
       <WeeklyScheduleCalendar
         shifts={shifts || []}
         start={start}
         onRemove={onRemove}
         onAdd={openDialog}
         canEdit={canEdit}
+        loading={isLoading}
+        error={isError}
+        onRetry={() => refetch()}
+        removing={isRemoving}
       />
       <CreateShiftDialog
         shifts={shiftDefinitions || []}
@@ -155,6 +230,8 @@ const ShiftManagement = () => {
         options={options}
         isMoreOptions={(meta?.totalPages ?? 0) > 1}
         seeMore={openPicker}
+        saving={isCreating}
+        loadingDefinitions={isLoadingDefinitions}
       />
 
       <GlobalSnackbar alert={alert} closeSnackbar={closeSnackbar} />
@@ -164,12 +241,12 @@ const ShiftManagement = () => {
         data={options}
         selectedId={selectedId || null}
         onClose={closePicker}
-        title="Danh sách nhân viên"
+        title={t("picker.title", { ns: "schedules" })}
         columns={[
-          { label: "Họ và tên", name: "fullName" },
-          { label: "Số điện thoại", name: "phone" },
-          { label: "Email", name: "email" },
-          { label: "Vị trí", name: "staff.position" },
+          { label: t("picker.columns.name", { ns: "schedules" }), name: "fullName" },
+          { label: t("picker.columns.phone", { ns: "schedules" }), name: "phone" },
+          { label: t("picker.columns.email", { ns: "schedules" }), name: "email" },
+          { label: t("picker.columns.position", { ns: "schedules" }), name: "staff.position" },
         ]}
         onSelect={(row) => {
           select(row);

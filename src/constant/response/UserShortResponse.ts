@@ -1,4 +1,4 @@
-import { UserRole } from "src/enums/UserRole";
+import type { UserRole } from "src/enums/UserRole";
 
 export interface UserShortResponse {
   id: string;

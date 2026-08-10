@@ -1,21 +1,38 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import useAuth from "@hooks/useAuth";
 import useSnackbar from "@hooks/useSnackbar";
 import useForm from "@hooks/useForm";
 import { useEntityPicker } from "@hooks/useEntityPickerDialog";
-import { UserShortResponse } from "@constant/response/UserShortResponse";
+import type { UserShortResponse } from "@constant/response/UserShortResponse";
 import StaffShiftService from "@services/staff/shift.service";
 import StaffEmployeeService from "@services/staff/employee.service";
-import { ShiftCreationRequest } from "@constant/request/ShiftCreationRequest";
+import type { ShiftCreationRequest } from "@constant/request/ShiftCreationRequest";
+import type { UserRole } from "@enums/UserRole";
+import { useTranslation } from "react-i18next";
 dayjs.extend(isoWeek);
 
+type PositionFilter = UserRole | "ALL";
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (typeof error !== "object" || error === null) return fallback;
+  const candidate = error as {
+    message?: string;
+    response?: { data?: { message?: string } };
+  };
+  return candidate.response?.data?.message || candidate.message || fallback;
+};
+
 const useShift = () => {
+  const { t } = useTranslation("schedules");
   const queryClient = useQueryClient();
   const [currentDate, setCurrentDate] = useState(dayjs());
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<{
+    q: string;
+    position: PositionFilter;
+  }>({
     q: "",
     position: "ALL",
   });
@@ -54,15 +71,13 @@ const useShift = () => {
   }>({ q: "", page: 1, limit: 4 });
   const {
     selectedId,
-    selectedRow,
-    setSelectedId,
     open: openEntityPickerDialog,
     openPicker,
     closePicker,
     select,
     mergeOptions,
     resetEntityPicker,
-  } = useEntityPicker();
+  } = useEntityPicker<UserShortResponse>();
   const start = useMemo(
     () => currentDate.startOf("isoWeek").format("YYYY-MM-DD"),
     [currentDate],
@@ -75,7 +90,7 @@ const useShift = () => {
 
   const canEdit = canAccessManager();
 
-  const { data: shiftDefinitions } = useQuery({
+  const { data: shiftDefinitions, isLoading: isLoadingDefinitions } = useQuery({
     queryKey: ["shift-definitions"],
     queryFn: async () => await StaffShiftService.getDefinitions(),
   });
@@ -84,7 +99,8 @@ const useShift = () => {
   const {
     data: shifts,
     isLoading,
-    error,
+    isError,
+    refetch,
   } = useQuery({
     queryKey: ["shift-list", start, end, filters],
     queryFn: async () => {
@@ -94,7 +110,7 @@ const useShift = () => {
           endDate: end,
           ...(filters.q ? { q: filters.q } : {}),
           ...(filters.position !== "ALL"
-            ? { position: filters.position as any }
+            ? { position: filters.position }
             : {}),
         });
       }
@@ -114,11 +130,10 @@ const useShift = () => {
       queryClient.invalidateQueries({
         queryKey: ["shift-list", start, end, filters],
       });
-      showSuccess("Xóa lịch làm thành công");
+      showSuccess(t("notifications.removeSuccess"));
     },
     onError: (error) => {
-      const msg = error?.message || "Xóa lịch làm thất bại";
-      showError(msg);
+      showError(getErrorMessage(error, t("notifications.removeError")));
     },
   });
   const mCreateShift = useMutation({
@@ -128,14 +143,10 @@ const useShift = () => {
       queryClient.invalidateQueries({
         queryKey: ["shift-list", start, end, filters],
       });
-      showSuccess("Tạo ca làm thành công");
+      showSuccess(t("notifications.createSuccess"));
     },
-    onError: (error: any) => {
-      const msg =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Tạo ca làm thất bại";
-      showError(msg);
+    onError: (error) => {
+      showError(getErrorMessage(error, t("notifications.createError")));
     },
   });
 
@@ -144,7 +155,7 @@ const useShift = () => {
   const onRemove = async (id: number) => await mRemoveShift.mutateAsync(id);
   const openDialog = (staff: UserShortResponse | null) => {
     if (shiftDefinitions?.length === 0) {
-      showError("Có lỗi xảy ra");
+      showError(t("notifications.noShiftDefinitions"));
       return;
     }
     onChangeDialog("open", true);
@@ -191,11 +202,12 @@ const useShift = () => {
   const onSearchEmployee = (value: string) =>
     setFiltersEmployee((prev) => ({ ...prev, q: value }));
 
-  const changeFormHandler = (
-    field: "staff" | "workDate" | "shiftId",
-    value: any,
+  type ShiftForm = typeof form;
+  const changeFormHandler = <K extends keyof ShiftForm>(
+    field: K,
+    value: ShiftForm[K],
   ) => {
-    if (field === "staff") {
+    if (field === "staff" && value && typeof value === "object") {
       select(value);
     }
     onChangeField(field, value);
@@ -210,6 +222,12 @@ const useShift = () => {
     end,
     onRemove,
     canEdit,
+    isLoading,
+    isError,
+    refetch,
+    isCreating: mCreateShift.isPending,
+    isRemoving: mRemoveShift.isPending,
+    isLoadingDefinitions,
 
     alert,
     closeSnackbar,
@@ -230,13 +248,10 @@ const useShift = () => {
     meta,
 
     selectedId,
-    selectedRow,
-    setSelectedId,
     openEntityPickerDialog,
     openPicker: handleOpenPicker,
     closePicker: handleClosePicker,
     select,
-    mergeOptions,
     onChangePage,
     onSearchEmployee,
     filtersEmployee,
