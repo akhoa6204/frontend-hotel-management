@@ -1,13 +1,14 @@
-import { DialogMode, DialogState } from "@constant/internal/DialogState";
+import type { DialogMode, DialogState } from "@constant/internal/DialogState";
 import useForm from "@hooks/useForm";
 import useSnackbar from "@hooks/useSnackbar";
 import { StaffExtraServiceService } from "@services/staff/extraService.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { SearchFilter } from "@constant/internal/SearchFilter";
-import { ServiceCreationRequest } from "@constant/request/ServiceCreationRequest";
-import { ServiceUpdateRequest } from "@constant/request/ServiceUpdateRequest";
-import { ServiceResponse } from "@constant/response/ServiceResponse";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
+import type { ServiceCreationRequest } from "@constant/request/ServiceCreationRequest";
+import type { ServiceUpdateRequest } from "@constant/request/ServiceUpdateRequest";
+import type { ServiceResponse } from "@constant/response/ServiceResponse";
+import { useTranslation } from "react-i18next";
 
 export type ServiceForm = Omit<ServiceResponse, "id"> & {
   id?: number;
@@ -18,7 +19,17 @@ const defaultForm: ServiceForm = {
   type: "SERVICE",
   description: "",
 };
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (typeof error !== "object" || error === null) return fallback;
+  const candidate = error as {
+    message?: string;
+    response?: { data?: { message?: string } };
+  };
+  return candidate.response?.data?.message || candidate.message || fallback;
+};
 const useService = () => {
+  const { t } = useTranslation("services");
   const queryClient = useQueryClient();
   const { alert, showSuccess, showError, closeSnackbar } = useSnackbar();
   const [filters, setFilters] = useState<SearchFilter>({
@@ -31,7 +42,7 @@ const useService = () => {
     open: false,
   });
 
-  const { form, resetForm, onChangeField, onSubmit, updateForm } =
+  const { form, setForm, resetForm, onChangeField, onSubmit } =
     useForm<ServiceForm>(defaultForm, undefined, async () => {
       if (dialog.mode === "CREATE") {
         await mCreateService.mutateAsync(form);
@@ -52,14 +63,22 @@ const useService = () => {
     setSelectedId(undefined);
     resetForm();
   };
-  const { data: servicesResponse, isLoading: loadingServices } = useQuery({
+  const {
+    data: servicesResponse,
+    isLoading: loadingServices,
+    isError: servicesError,
+    refetch: refetchServices,
+  } = useQuery({
     queryKey: ["services", filters.q, filters.page, filters.limit],
     queryFn: async () => await StaffExtraServiceService.getAll({ ...filters }),
   });
 
   const services = servicesResponse?.data || [];
   const meta = servicesResponse?.pagination;
-  const onChangeFilter = (field: keyof SearchFilter, value: any) =>
+  const onChangeFilter = <K extends keyof SearchFilter>(
+    field: K,
+    value: SearchFilter[K],
+  ) =>
     setFilters((pre) => ({ ...pre, [field]: value }));
 
   const { data: service, isLoading: loadingServiceDetail } = useQuery({
@@ -73,20 +92,20 @@ const useService = () => {
   useEffect(() => {
     if (!service) return;
 
-    updateForm({
-      id: selectedId,
+    setForm({
+      id: service.id,
       name: service?.name || "",
       basePrice: service?.basePrice || 0,
       type: service?.type || "SERVICE",
       description: service?.description || "",
     });
-  }, [service]);
+  }, [service, setForm]);
 
   const mUpdateService = useMutation({
     mutationFn: async (data: ServiceUpdateRequest) =>
       await StaffExtraServiceService.update(data),
     onSuccess() {
-      showSuccess("Cập nhật thông tin dịch vụ thành công");
+      showSuccess(t("messages.updateSuccess"));
       queryClient.invalidateQueries({
         queryKey: ["services", filters.q, filters.page, filters.limit],
       });
@@ -94,18 +113,16 @@ const useService = () => {
         queryKey: ["service", selectedId],
       });
     },
-    onError(error: any) {
-      const msg =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Cập nhật thông tin dịch vụ thất bại";
-      showError(msg);
+    onError(error) {
+      showError(
+        getErrorMessage(error, t("messages.updateError")),
+      );
     },
   });
   const mRemoveService = useMutation({
     mutationFn: async (id: number) => await StaffExtraServiceService.delete(id),
-    onSuccess(data, variables, onMutateResult, context) {
-      showSuccess("Xóa dịch vụ thành công");
+    onSuccess() {
+      showSuccess(t("messages.deleteSuccess"));
       queryClient.invalidateQueries({
         queryKey: ["services", filters.q, filters.page, filters.limit],
       });
@@ -113,20 +130,16 @@ const useService = () => {
         queryKey: ["service", selectedId],
       });
     },
-    onError(error: any) {
-      const msg =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Xóa dịch vụ thất bại";
-      showError(msg);
+    onError(error) {
+      showError(getErrorMessage(error, t("messages.deleteError")));
     },
   });
 
   const mCreateService = useMutation({
     mutationFn: async (data: ServiceCreationRequest) =>
       await StaffExtraServiceService.create(data),
-    onSuccess(data, variables, onMutateResult, context) {
-      showSuccess("Tạo mới dịch vụ thành công");
+    onSuccess() {
+      showSuccess(t("messages.createSuccess"));
       queryClient.invalidateQueries({
         queryKey: ["services", filters.q, filters.page, filters.limit],
       });
@@ -134,12 +147,8 @@ const useService = () => {
         queryKey: ["service", selectedId],
       });
     },
-    onError(error: any) {
-      const msg =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Tạo mới dịch vụ thất bại";
-      showError(msg);
+    onError(error) {
+      showError(getErrorMessage(error, t("messages.createError")));
     },
   });
   const removeServiceHandler = async (id: number) =>
@@ -151,6 +160,8 @@ const useService = () => {
 
     loadingServices,
     loadingServiceDetail,
+    servicesError,
+    refetchServices,
     creatingService: mCreateService.isPending,
     updatingService: mUpdateService.isPending,
     removingService: mRemoveService.isPending,
