@@ -2,14 +2,14 @@ import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import useForm from "@hooks/useForm";
 import useSnackbar from "@hooks/useSnackbar";
-import { RoomResponse } from "@constant/response/RoomResponse";
-import { SearchFilter } from "@constant/internal/SearchFilter";
-import { RoomUpdateRequest } from "@constant/request/RoomUpdateRequest";
-import { RoomStatus } from "../../../enums/RoomStatus";
-import { RoomCreationRequest } from "@constant/request/RoomCreationRequest";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
+import type { RoomUpdateRequest } from "@constant/request/RoomUpdateRequest";
+import type { RoomStatus } from "../../../enums/RoomStatus";
+import type { RoomCreationRequest } from "@constant/request/RoomCreationRequest";
 import StaffRoomTypeService from "@services/staff/roomType.service";
 import StaffRoomService from "@services/staff/room.service";
-import { DialogState } from "@constant/internal/DialogState";
+import type { DialogState } from "@constant/internal/DialogState";
+import { useTranslation } from "react-i18next";
 
 type RoomFilter = SearchFilter & { roomTypeId?: number };
 
@@ -20,20 +20,33 @@ const defaultRoomFilter: RoomFilter = {
   limit: 6,
 };
 
-function validateForm(form: RoomUpdateRequest) {
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (typeof error !== "object" || error === null || !("response" in error)) {
+    return fallback;
+  }
+
+  const response = (error as { response?: { data?: { message?: unknown } } }).response;
+  return typeof response?.data?.message === "string" ? response.data.message : fallback;
+};
+
+function validateForm(
+  form: RoomUpdateRequest,
+  messages: { roomNameRequired: string; roomTypeRequired: string },
+) {
   const errors: Partial<Record<keyof RoomUpdateRequest, string>> = {};
 
   if (!form.name) {
-    errors.name = "Tên phòng là bắt buộc.";
+    errors.name = messages.roomNameRequired;
   }
 
   if (!form.roomTypeId) {
-    errors.roomTypeId = "Loại phòng là bắt buộc.";
+    errors.roomTypeId = messages.roomTypeRequired;
   }
 
   return errors;
 }
 export default function useRoomManagement() {
+  const { t } = useTranslation("rooms");
   const queryClient = useQueryClient();
 
   const { alert, showSuccess, showError, closeSnackbar } = useSnackbar();
@@ -48,6 +61,7 @@ export default function useRoomManagement() {
   } = useForm<RoomFilter>(defaultRoomFilter);
   const {
     form,
+    errors: formErrors,
     updateForm,
     onChangeField,
     resetForm,
@@ -58,7 +72,11 @@ export default function useRoomManagement() {
       name: "",
       status: "VACANT_CLEAN",
     },
-    validateForm,
+    (values) =>
+      validateForm(values, {
+        roomNameRequired: t("validation.roomNameRequired"),
+        roomTypeRequired: t("validation.roomTypeRequired"),
+      }),
     async () => {
       if (editingRoomId) {
         await updateMutation.mutateAsync({
@@ -95,6 +113,8 @@ export default function useRoomManagement() {
     data: roomResponse,
     isLoading: isRoomLoading,
     isFetching: isRoomFetching,
+    isError: isRoomError,
+    refetch: refetchRooms,
   } = useQuery({
     queryKey: ["rooms", filters],
     queryFn: async () =>
@@ -120,7 +140,6 @@ export default function useRoomManagement() {
         name: roomDetail.name,
         status: roomDetail.status,
       });
-      console.log("check:", roomDetail.roomType.id);
     }
   }, [roomDetail, editingRoomId]);
 
@@ -158,11 +177,9 @@ export default function useRoomManagement() {
 
       await queryClient.invalidateQueries({ queryKey: ["rooms"] });
 
-      showSuccess("Cập nhật trạng thái phòng thành công");
-    } catch (err: any) {
-      const msg =
-        err?.response?.data?.message || "Không thể cập nhật trạng thái phòng";
-      showError(msg);
+      showSuccess(t("notifications.statusUpdateSuccess"));
+    } catch (error: unknown) {
+      showError(getErrorMessage(error, t("notifications.statusUpdateError")));
     }
   };
 
@@ -175,11 +192,10 @@ export default function useRoomManagement() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rooms"] });
       closeDialog();
-      showSuccess("Tạo phòng mới thành công");
+      showSuccess(t("notifications.createSuccess"));
     },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message || "Có lỗi xảy ra";
-      showError(msg);
+    onError: (error: unknown) => {
+      showError(getErrorMessage(error, t("notifications.genericError")));
     },
   });
 
@@ -193,11 +209,10 @@ export default function useRoomManagement() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rooms"] });
       closeDialog();
-      showSuccess("Cập nhật phòng thành công");
+      showSuccess(t("notifications.updateSuccess"));
     },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message || "Có lỗi xảy ra";
-      showError(msg);
+    onError: (error: unknown) => {
+      showError(getErrorMessage(error, t("notifications.genericError")));
     },
   });
 
@@ -205,11 +220,10 @@ export default function useRoomManagement() {
     mutationFn: (args: { id: number }) => StaffRoomService.delete(args.id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["rooms"] });
-      showSuccess("Xóa phòng thành công");
+      showSuccess(t("notifications.deleteSuccess"));
     },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message || "Có lỗi xảy ra";
-      showError(msg);
+    onError: (error: unknown) => {
+      showError(getErrorMessage(error, t("notifications.genericError")));
     },
   });
 
@@ -243,6 +257,7 @@ export default function useRoomManagement() {
     roomTypes,
     paginationMetadata,
     formValues: form,
+    formErrors,
 
     // Filters
     filters,
@@ -263,6 +278,9 @@ export default function useRoomManagement() {
 
     // Loading
     isRoomLoading: isRoomLoading || isRoomFetching || isRoomTypeLoading,
+    isRoomError,
+    refetchRooms,
+    isRoomDetailLoading,
     isSubmitting: createMutation.isPending || updateMutation.isPending,
 
     // UI helpers

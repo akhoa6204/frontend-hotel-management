@@ -2,16 +2,17 @@ import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import useSnackbar from "@hooks/useSnackbar";
 import useForm from "@hooks/useForm";
-import { RoomTypeResponse } from "@constant/response/RoomTypeResponse";
-import { RoomTypeUpdateRequest } from "@constant/request/RoomTypeUpdateRequest";
-import { AmenityResponse } from "@constant/response/AmenityResponse";
-import { RoomTypeImageResponse } from "@constant/response/RoomTypeImageResponse";
+import type { RoomTypeResponse } from "@constant/response/RoomTypeResponse";
+import type { RoomTypeUpdateRequest } from "@constant/request/RoomTypeUpdateRequest";
+import type { AmenityResponse } from "@constant/response/AmenityResponse";
+import type { RoomTypeImageResponse } from "@constant/response/RoomTypeImageResponse";
 import UploadImageService from "@services/UploadImageService";
-import { RoomTypeCreationRequest } from "@constant/request/RoomTypeCreationRequest";
-import { SearchFilter } from "@constant/internal/SearchFilter";
+import type { RoomTypeCreationRequest } from "@constant/request/RoomTypeCreationRequest";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
 import StaffRoomTypeService from "@services/staff/roomType.service";
 import StaffAmenityService from "@services/staff/amenity.service";
-import { DialogState } from "@constant/internal/DialogState";
+import type { DialogState } from "@constant/internal/DialogState";
+import { useTranslation } from "react-i18next";
 
 export type UpsertFormRoomType = RoomTypeUpdateRequest & {
   roomTypeId?: number;
@@ -19,17 +20,26 @@ export type UpsertFormRoomType = RoomTypeUpdateRequest & {
   roomTypeImagesResponse?: RoomTypeImageResponse[];
   files: File[];
 };
-const validateForm = (form: UpsertFormRoomType) => {
+interface ValidationMessages {
+  invalidPrice: string;
+  capacityRequired: string;
+  invalidCapacity: string;
+}
+
+const validateForm = (
+  form: UpsertFormRoomType,
+  messages: ValidationMessages,
+) => {
   const errors: Partial<Record<keyof UpsertFormRoomType, string>> = {};
 
   if (!form.basePrice || isNaN(Number(form.basePrice))) {
-    errors.basePrice = "Giá phòng là bắt buộc và phải là một số hợp lệ.";
+    errors.basePrice = messages.invalidPrice;
   }
 
   if (!form.capacity) {
-    errors.capacity = "Số người là bắt buộc.";
+    errors.capacity = messages.capacityRequired;
   } else if (isNaN(Number(form.capacity)) || Number(form.capacity) <= 0) {
-    errors.capacity = "Số người phải là một số lớn hơn 0.";
+    errors.capacity = messages.invalidCapacity;
   }
 
   return errors;
@@ -47,7 +57,14 @@ const initialForm: UpsertFormRoomType = {
   roomTypeImagesResponse: [],
 };
 
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (typeof error !== "object" || error === null || !("response" in error)) return fallback;
+  const response = (error as { response?: { data?: { message?: unknown } } }).response;
+  return typeof response?.data?.message === "string" ? response.data.message : fallback;
+};
+
 const useRoomTypesManagement = () => {
+  const { t } = useTranslation("roomTypes");
   const qc = useQueryClient();
 
   const [filters, setFilters] = useState<SearchFilter>({
@@ -58,46 +75,37 @@ const useRoomTypesManagement = () => {
 
   const [dialogState, setDialogState] = useState<DialogState>({ open: false });
   const [editingId, setEditingId] = useState<number | undefined>();
-  const { form, updateForm, onChangeField, resetForm, setForm, onSubmit } =
-    useForm<UpsertFormRoomType>(initialForm, validateForm, async () => {
-      const uploadedImages =
-        form.files.length > 0
-          ? await Promise.all(
-              form.files.map((file) => {
-                console.log(file);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const { form, updateForm, onChangeField, resetForm, setForm, errors, onSubmit } =
+    useForm<UpsertFormRoomType>(
+      initialForm,
+      (values) =>
+        validateForm(values, {
+          invalidPrice: t("validation.invalidPrice"),
+          capacityRequired: t("validation.capacityRequired"),
+          invalidCapacity: t("validation.invalidCapacity"),
+        }),
+      async () => {
+        setIsUploadingImages(form.files.length > 0);
+        try {
+          const uploadedImages = form.files.length > 0
+            ? await Promise.all(form.files.map((file) => UploadImageService.upload({ file })))
+            : [];
 
-                return UploadImageService.upload({ file });
-              }),
-            )
-          : [];
-      console.log(dialogState.mode);
-
-      if (dialogState.mode === "EDIT" && editingId) {
-        updateMutation.mutateAsync({
-          id: editingId,
-          payload: {
-            ...form,
-            roomTypeImages: [
-              ...(form.roomTypeImages || []),
-              ...uploadedImages.map((image) => image.secure_url),
-            ],
-          },
-        });
-      } else {
-        createMutation.mutateAsync({
-          name: form.name || "",
-          description: form.description || "",
-          basePrice: form.basePrice || 0,
-          capacity: form.capacity || 2,
-          amenities: form.amenities || [],
-          roomTypeImages: [...uploadedImages.map((image) => image.secure_url)],
-        });
-      }
-    });
+          if (dialogState.mode === "EDIT" && editingId) {
+            await updateMutation.mutateAsync({ id: editingId, payload: { ...form, roomTypeImages: [...(form.roomTypeImages || []), ...uploadedImages.map((image) => image.secure_url)] } });
+          } else {
+            await createMutation.mutateAsync({ name: form.name || "", description: form.description || "", basePrice: form.basePrice || 0, capacity: form.capacity || 2, amenities: form.amenities || [], roomTypeImages: uploadedImages.map((image) => image.secure_url) });
+          }
+        } finally {
+          setIsUploadingImages(false);
+        }
+      },
+    );
 
   const { alert, closeSnackbar, showError, showSuccess } = useSnackbar();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["roomTypes", filters],
     queryFn: () =>
       StaffRoomTypeService.getList({
@@ -142,7 +150,7 @@ const useRoomTypesManagement = () => {
     setDialogState({ open: true, mode: "EDIT" });
   };
 
-  const { data: roomTypeDetail } = useQuery({
+  const { data: roomTypeDetail, isLoading: isDetailLoading } = useQuery({
     queryKey: ["roomDetail", editingId],
     queryFn: () => StaffRoomTypeService.getById(editingId as number),
     enabled: !!editingId && dialogState.open && dialogState.mode === "EDIT",
@@ -166,7 +174,7 @@ const useRoomTypesManagement = () => {
   }, [roomTypeDetail, dialogState.mode]);
 
   const handlePickFiles = (files: File[]) => {
-    const currentCount = form.roomTypeImages?.length ?? 0;
+    const currentCount = form.roomTypeImagesResponse?.length ?? 0;
     if (currentCount >= 8) return;
 
     const allow = Math.max(0, 8 - currentCount);
@@ -199,7 +207,7 @@ const useRoomTypesManagement = () => {
 
       const fileIndex = index - (uploadedCount - prev.files.length);
 
-      let nextFiles = [...prev.files];
+      const nextFiles = [...prev.files];
 
       if (fileIndex >= 0 && fileIndex < prev.files.length) {
         nextFiles.splice(fileIndex, 1);
@@ -219,26 +227,24 @@ const useRoomTypesManagement = () => {
       StaffRoomTypeService.create(payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["roomTypes"] });
-      showSuccess("Tạo loại phòng thành công");
+      showSuccess(t("notifications.createSuccess"));
       onClose();
     },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message;
-      showError(msg);
+    onError: (error: unknown) => {
+      showError(getErrorMessage(error, t("notifications.createError")));
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: (vars: { id: number; payload: any }) =>
+    mutationFn: (vars: { id: number; payload: RoomTypeUpdateRequest }) =>
       StaffRoomTypeService.update(vars.id, vars.payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["roomTypes"] });
-      showSuccess("Cập nhật loại phòng thành công");
+      showSuccess(t("notifications.updateSuccess"));
       onClose();
     },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message;
-      showError(msg);
+    onError: (error: unknown) => {
+      showError(getErrorMessage(error, t("notifications.updateError")));
     },
   });
 
@@ -246,19 +252,16 @@ const useRoomTypesManagement = () => {
     mutationFn: (id: number) => StaffRoomTypeService.delete(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["roomTypes"] });
-      showSuccess("Xóa loại phòng thành công");
+      showSuccess(t("notifications.deleteSuccess"));
     },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message;
-      showError(msg);
+    onError: (error: unknown) => {
+      showError(getErrorMessage(error, t("notifications.deleteError")));
     },
   });
 
-  const handleDeleteRoomType = (id: number) => {
-    deleteMutation.mutate(id);
-  };
+  const handleDeleteRoomType = (id: number) => deleteMutation.mutateAsync(id);
 
-  const showAddButton = meta?.total ? meta?.total < 6 : false;
+  const showAddButton = (meta?.total ?? 0) < 6;
 
   return {
     showAddButton,
@@ -266,6 +269,8 @@ const useRoomTypesManagement = () => {
     roomTypes,
     meta,
     isLoading,
+    isError,
+    refetch,
 
     amenityOptions,
     isAmenitiesLoading,
@@ -281,6 +286,7 @@ const useRoomTypesManagement = () => {
     onEditDialog,
 
     form,
+    errors,
     onChange: onChangeField,
 
     onPickFiles: handlePickFiles,
@@ -288,9 +294,10 @@ const useRoomTypesManagement = () => {
 
     handleDeleteRoomType,
     isDeleting: deleteMutation.isPending,
+    isDetailLoading,
 
     onSubmit,
-    isSaving: createMutation.isPending || updateMutation.isPending,
+    isSaving: isUploadingImages || createMutation.isPending || updateMutation.isPending,
 
     alert,
     closeSnackbar,
