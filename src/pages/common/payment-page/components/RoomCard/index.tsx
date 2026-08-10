@@ -1,5 +1,6 @@
 import { Box, Paper, Stack, Typography } from "@mui/material";
-import { Person, MeetingRoom } from "@mui/icons-material";
+import { Person } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   image: string;
@@ -8,6 +9,7 @@ interface Props {
 }
 
 const RoomCard: React.FC<Props> = ({ image, name, capacity }) => {
+  const { t } = useTranslation("client");
   return (
     <Paper
       elevation={0}
@@ -37,12 +39,12 @@ const RoomCard: React.FC<Props> = ({ image, name, capacity }) => {
         }}
       >
         <Typography variant="h6" fontWeight={600} mb={1}>
-          Phòng {name}
+          {t("payment.legacy.roomName", { name })}
         </Typography>
 
         <Stack direction="row" spacing={1} alignItems="center">
           <Person fontSize="small" />
-          <Typography variant="body2">{capacity} người</Typography>
+          <Typography variant="body2">{t("payment.legacy.people", { count: capacity })}</Typography>
         </Stack>
       </Box>
     </Paper>

@@ -9,60 +9,10 @@ import type { QuoteResponse } from "@constant/response/QuoteResponse";
 import type { BookingCreationRequest } from "@constant/request/BookingCreationRequest";
 import GuestRoomService from "@services/guest/room.service";
 import GuestBookingService from "@services/guest/booking.service";
-const validateForm = (form: BookingForm) => {
-  const errors: Partial<Record<keyof BookingForm, string>> = {};
-
-  const fullName = form.guestName?.trim() || "";
-  const phone = form.guestPhone?.trim() || "";
-  const email = form.guestEmail?.trim() || "";
-  const checkIn = form.checkInDate || "";
-  const checkOut = form.checkOutDate || "";
-
-  if (!fullName) {
-    errors.guestName = "Vui lòng nhập họ tên người đặt phòng";
-  }
-
-  if (!phone) {
-    errors.guestPhone = "Vui lòng nhập số điện thoại";
-  } else if (!/^\d{9,11}$/.test(phone)) {
-    errors.guestPhone = "Số điện thoại không hợp lệ";
-  }
-
-  if (!email) {
-    errors.guestEmail = "Vui lòng nhập email";
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    errors.guestEmail = "Email không hợp lệ";
-  }
-
-  if (!checkIn) {
-    errors.checkInDate = "Vui lòng chọn ngày nhận phòng";
-  }
-
-  if (!checkOut) {
-    errors.checkOutDate = "Vui lòng chọn ngày trả phòng";
-  }
-
-  if (checkIn && checkOut) {
-    const start = new Date(checkIn);
-    const end = new Date(checkOut);
-
-    if (isNaN(start.getTime())) {
-      errors.checkInDate = "Ngày nhận phòng không hợp lệ";
-    }
-
-    if (isNaN(end.getTime())) {
-      errors.checkOutDate = "Ngày trả phòng không hợp lệ";
-    }
-
-    if (!errors.checkInDate && !errors.checkOutDate && start >= end) {
-      errors.checkOutDate = "Ngày trả phòng phải sau ngày nhận phòng";
-    }
-  }
-
-  return errors;
-};
+import { useTranslation } from "react-i18next";
 export type BookingForm = BookingCreationRequest;
 const useBooking = () => {
+  const { t, i18n } = useTranslation("client");
   const navigate = useNavigate();
   const auth = useAuth();
   const { state } = useLocation() as {
@@ -93,8 +43,36 @@ const useBooking = () => {
       checkOutDate: state?.endDate ?? "",
       roomId: state?.roomId ?? 0,
       customerId: auth.user?.id,
+      locale: i18n.resolvedLanguage === "en" ? "EN" : "VI",
     },
-    validateForm,
+    (form) => {
+      const validationErrors: Partial<Record<keyof BookingForm, string>> = {};
+      const fullName = form.guestName?.trim() || "";
+      const phone = form.guestPhone?.trim() || "";
+      const email = form.guestEmail?.trim() || "";
+      const checkIn = form.checkInDate || "";
+      const checkOut = form.checkOutDate || "";
+
+      if (!fullName) validationErrors.guestName = t("booking.validation.guestNameRequired");
+      if (!phone) validationErrors.guestPhone = t("booking.validation.phoneRequired");
+      else if (!/^\d{9,11}$/.test(phone)) validationErrors.guestPhone = t("booking.validation.phoneInvalid");
+      if (!email) validationErrors.guestEmail = t("booking.validation.emailRequired");
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) validationErrors.guestEmail = t("booking.validation.emailInvalid");
+      if (!checkIn) validationErrors.checkInDate = t("booking.validation.checkInRequired");
+      if (!checkOut) validationErrors.checkOutDate = t("booking.validation.checkOutRequired");
+
+      if (checkIn && checkOut) {
+        const start = new Date(checkIn);
+        const end = new Date(checkOut);
+        if (isNaN(start.getTime())) validationErrors.checkInDate = t("booking.validation.checkInInvalid");
+        if (isNaN(end.getTime())) validationErrors.checkOutDate = t("booking.validation.checkOutInvalid");
+        if (!validationErrors.checkInDate && !validationErrors.checkOutDate && start >= end) {
+          validationErrors.checkOutDate = t("booking.validation.checkOutAfterCheckIn");
+        }
+      }
+
+      return validationErrors;
+    },
     async () => {
       if (mCreateBooking.isPending) return;
       await mCreateBooking.mutateAsync(bookingForm);
@@ -115,11 +93,14 @@ const useBooking = () => {
   const mCreateBooking = useMutation({
     mutationFn: async (data: BookingCreationRequest) => {
       if (!data.roomId) {
-        showError("Thiếu thông tin phòng");
+        showError(t("booking.errors.missingRoom"));
         return;
       }
 
-      return GuestBookingService.create(data);
+      return GuestBookingService.create({
+        ...data,
+        locale: i18n.resolvedLanguage === "en" ? "EN" : "VI",
+      });
     },
     onSuccess: (data) => {
       navigate(`/payment`, {
@@ -130,7 +111,7 @@ const useBooking = () => {
     },
     onError: (error: AxiosError<{ message?: string }>) => {
       const msg = error.response?.data?.message;
-      showError(msg || "Tạo đặt phòng thất bại");
+      showError(msg || t("booking.errors.creationFailed"));
     },
   });
 
@@ -149,7 +130,7 @@ const useBooking = () => {
       });
     },
     onSuccess: (data) => setPricing(data),
-    onError: () => showError("Không thể cập nhật giá cho kỳ nghỉ này"),
+    onError: () => showError(t("booking.errors.quoteFailed")),
   });
   useEffect(() => {
     if (!room) return;

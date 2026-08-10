@@ -11,13 +11,15 @@ import {
   Radio,
 } from "@mui/material";
 import { BookingForm } from "../../interface";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   value: BookingForm;
-  onChange: (field: keyof BookingForm, value: any) => void;
+  onChange: (field: keyof BookingForm, value: unknown) => void;
 };
 
 const BookingInfoCard = ({ value, onChange }: Props) => {
+  const { t } = useTranslation("client");
   return (
     <Paper
       elevation={0}
@@ -30,24 +32,24 @@ const BookingInfoCard = ({ value, onChange }: Props) => {
     >
       <Box mb={2}>
         <Typography variant="h6" fontWeight={700} mb={0.5}>
-          Thông tin đặt phòng
+          {t("payment.legacy.bookingInfo")}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Vui lòng kiểm tra thông tin đặt phòng.
+          {t("payment.legacy.bookingInfoDescription")}
         </Typography>
       </Box>
 
       {/* Họ tên */}
       <Box mb={2.5}>
         <Typography fontWeight={600} mb={1} color="#555555" fontSize={14}>
-          Họ tên
+          {t("payment.legacy.fullName")}
         </Typography>
         <TextField
           fullWidth
           value={value.fullName}
           name="fullName"
           onChange={(e) => onChange("fullName", e.target.value)}
-          placeholder="Nhập họ tên"
+          placeholder={t("payment.legacy.fullNamePlaceholder")}
         />
       </Box>
 
@@ -55,7 +57,7 @@ const BookingInfoCard = ({ value, onChange }: Props) => {
       <Grid container spacing={2.5} mb={2.5}>
         <Grid size={{ xs: 12, md: 6 }}>
           <Typography fontWeight={600} mb={1} color="#555555" fontSize={14}>
-            Số điện thoại
+            {t("payment.legacy.phone")}
           </Typography>
           <TextField
             fullWidth
@@ -67,7 +69,7 @@ const BookingInfoCard = ({ value, onChange }: Props) => {
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <Typography fontWeight={600} mb={1} color="#555555" fontSize={14}>
-            Email
+            {t("payment.legacy.email")}
           </Typography>
           <TextField
             fullWidth
@@ -84,14 +86,14 @@ const BookingInfoCard = ({ value, onChange }: Props) => {
       {/* Bạn đặt phòng cho ai? */}
       <Box>
         <Typography fontWeight={600} mb={0.5}>
-          Bạn đặt phòng cho ai?{" "}
+          {t("payment.legacy.bookingFor")}{" "}
           <Typography
             component="span"
             variant="body2"
             color="text.secondary"
             fontWeight={400}
           >
-            (không bắt buộc)
+            {t("payment.legacy.optional")}
           </Typography>
         </Typography>
 
@@ -103,12 +105,12 @@ const BookingInfoCard = ({ value, onChange }: Props) => {
           <FormControlLabel
             value="SELF"
             control={<Radio />}
-            label="Tôi là khách lưu trú"
+            label={t("payment.legacy.selfGuest")}
           />
           <FormControlLabel
             value="OTHER"
             control={<Radio />}
-            label="Đặt phòng này là cho người khác"
+            label={t("payment.legacy.otherGuest")}
           />
         </RadioGroup>
       </Box>

@@ -1,6 +1,8 @@
-import { Box, List, ListItem, Paper, Typography } from "@mui/material";
+import { List, ListItem, Paper, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 const RulesCard = () => {
+  const { t } = useTranslation("client");
   return (
     <Paper
       elevation={0}
@@ -11,11 +13,11 @@ const RulesCard = () => {
       variant="outlined"
     >
       <Typography variant="h6" fontWeight={700} mb={1.5}>
-        Xem lại quy tắc chung
+        {t("payment.legacy.rulesTitle")}
       </Typography>
 
       <Typography variant="body2" mb={1}>
-        Chủ chỗ nghỉ muốn bạn đồng ý với các quy tắc chung này:
+        {t("payment.legacy.rulesDescription")}
       </Typography>
 
       <List dense sx={{ mb: 1, pl: 2 }}>
@@ -23,21 +25,18 @@ const RulesCard = () => {
           sx={{ display: "list-item", listStyleType: "disc", pl: 0, py: 0.5 }}
         >
           <Typography variant="body2">
-            Thời gian yên lặng từ{" "}
-            <Box component="span" fontWeight={600}>
-              22:00 đến 06:00
-            </Box>
+            {t("payment.legacy.quietHours", { start: "22:00", end: "06:00" })}
           </Typography>
         </ListItem>
         <ListItem
           sx={{ display: "list-item", listStyleType: "disc", pl: 0, py: 0.5 }}
         >
-          <Typography variant="body2">Không cho phép thú cưng</Typography>
+          <Typography variant="body2">{t("payment.legacy.noPets")}</Typography>
         </ListItem>
       </List>
 
       <Typography variant="body2" fontWeight={600}>
-        Khi tiếp tục các bước tiếp theo, bạn đồng ý với các quy tắc chung này.
+        {t("payment.legacy.rulesConfirmation")}
       </Typography>
     </Paper>
   );

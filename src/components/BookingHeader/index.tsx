@@ -1,14 +1,7 @@
-import { BookingStatus } from "@enums/BookingStatus";
+import type { BookingStatus } from "@enums/BookingStatus";
 import { ArrowBack } from "@mui/icons-material";
-import { Box, Divider, IconButton, Stack, Typography } from "@mui/material";
-
-const statusLabelMap: Record<BookingStatus, string> = {
-  PENDING: "Đang chờ",
-  CONFIRMED: "Sắp nhận phòng",
-  CHECKED_IN: "Đã check-in",
-  CHECKED_OUT: "Đã hoàn thành",
-  CANCELLED: "Đã hủy",
-};
+import { Divider, IconButton, Stack, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 const statusColorMap: Record<BookingStatus, string> = {
   PENDING: "text.secondary",
@@ -25,6 +18,7 @@ type Props = {
 };
 
 const BookingHeader = ({ id, status, onBack }: Props) => {
+  const { t } = useTranslation("client");
   return (
     <Stack
       direction="row"
@@ -40,18 +34,18 @@ const BookingHeader = ({ id, status, onBack }: Props) => {
           <ArrowBack />
         </IconButton>
         <Typography variant="body1" fontWeight={500}>
-          Trở lại
+          {t("shared.booking.back")}
         </Typography>
       </Stack>
       <Stack direction={"row"} spacing={1.5}>
         <Typography>
-          MÃ ĐẶT PHÒNG: <strong>{id}</strong>
+          {t("shared.booking.bookingCode")}: <strong>{id}</strong>
         </Typography>
 
         <Divider orientation="vertical" flexItem />
 
         <Typography fontWeight={600} color={statusColorMap[status]}>
-          {statusLabelMap[status]}
+          {t(`shared.booking.status.${status}`)}
         </Typography>
       </Stack>
     </Stack>

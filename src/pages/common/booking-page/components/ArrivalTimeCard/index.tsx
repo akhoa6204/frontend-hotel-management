@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import { useMemo } from "react";
 import { formatDate } from "@utils/format";
 import type { BookingForm } from "../../useBooking";
+import { useTranslation } from "react-i18next";
 
 interface Option {
   value: string;
@@ -42,23 +43,26 @@ const buildArrivalOptions = (checkInDate?: string): Option[] => {
 };
 
 const ArrivalTimeCard = ({ value = "14:00", onChange, checkInDate }: Props) => {
+  const { t } = useTranslation("client");
   const options = useMemo(() => buildArrivalOptions(checkInDate), [checkInDate]);
 
   return (
     <Box component="section" aria-labelledby="arrival-time-title">
       <Typography id="arrival-time-title" component="h2" sx={{ fontSize: { xs: 24, md: 27 }, fontWeight: 650, color: "text.primary" }}>
-        Thời gian đến
+        {t("booking.arrival.title")}
       </Typography>
       <Stack direction="row" spacing={1.25} alignItems="flex-start" sx={{ mt: 1.5, color: "text.secondary" }}>
         <CheckCircleOutlineRoundedIcon sx={{ mt: 0.15, color: "primary.main", fontSize: 21 }} />
         <Typography variant="body2" sx={{ lineHeight: 1.7 }}>
-          Nhận phòng từ 14:00 đến 22:00{checkInDate ? ` ngày ${formatDate(checkInDate)}` : ""}.
+          {checkInDate
+            ? t("booking.arrival.checkInWindowWithDate", { date: formatDate(checkInDate) })
+            : t("booking.arrival.checkInWindow")}
         </Typography>
       </Stack>
 
       <Box sx={{ mt: 2.5, maxWidth: 360 }}>
         <Typography component="label" htmlFor="estimated-arrival-time" sx={{ display: "block", mb: 1, fontSize: 14, fontWeight: 650 }}>
-          Giờ đến dự kiến <Typography component="span" variant="body2" color="text.secondary">(không bắt buộc)</Typography>
+          {t("booking.arrival.estimatedTime")} <Typography component="span" variant="body2" color="text.secondary">{t("booking.arrival.optional")}</Typography>
         </Typography>
         <FormControl fullWidth>
           <Select
@@ -68,12 +72,12 @@ const ArrivalTimeCard = ({ value = "14:00", onChange, checkInDate }: Props) => {
             onChange={(event) => onChange("estimatedArrivalTime", event.target.value)}
             sx={{ minHeight: 50, borderRadius: 1.25, bgcolor: "#fff", "& fieldset": { borderColor: "#d8d6cf" } }}
           >
-            <MenuItem value=""><em>Chưa xác định</em></MenuItem>
+            <MenuItem value=""><em>{t("booking.arrival.unspecified")}</em></MenuItem>
             {options.map((option) => <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>)}
           </Select>
         </FormControl>
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
-          Giờ địa phương tại Đà Nẵng
+          {t("booking.arrival.localTime")}
         </Typography>
       </Box>
     </Box>

@@ -7,6 +7,7 @@ import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import { Box, Button, Divider, Stack, Typography } from "@mui/material";
 import { diffNights, fmtVND, formatDate } from "@utils/format";
 import { ArrowForward } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   room: RoomResponse;
@@ -27,6 +28,7 @@ const ReservationSummary = ({
   loadingPricing,
   submitting,
 }: Props) => {
+  const { t } = useTranslation("client");
   const [imageFailed, setImageFailed] = useState(false);
   const suitableImage = room.roomType.roomTypeImages?.find(
     (image) =>
@@ -64,7 +66,7 @@ const ReservationSummary = ({
         <Box
           component="img"
           src={image}
-          alt={suitableImage?.alt || `Phòng ${room.roomType.name}`}
+          alt={suitableImage?.alt || t("booking.summary.roomImageAlt", { room: room.roomType.name })}
           onError={() => setImageFailed(true)}
           sx={{
             position: "absolute",
@@ -88,7 +90,7 @@ const ReservationSummary = ({
             fontWeight: 750,
           }}
         >
-          KỲ NGHỈ CỦA BẠN
+          {t("booking.summary.eyebrow")}
         </Typography>
         <Typography
           component="h2"
@@ -110,7 +112,7 @@ const ReservationSummary = ({
         >
           <PeopleAltOutlinedIcon sx={{ fontSize: 19 }} />
           <Typography variant="body2">
-            Sức chứa tối đa {room.roomType.capacity} khách
+            {t("booking.summary.capacity", { count: room.roomType.capacity })}
           </Typography>
         </Stack>
 
@@ -131,7 +133,7 @@ const ReservationSummary = ({
               color="text.secondary"
               sx={{ display: "block" }}
             >
-              Nhận phòng
+              {t("booking.summary.checkIn")}
             </Typography>
 
             <Typography
@@ -173,7 +175,7 @@ const ReservationSummary = ({
                 fontSize: { xs: 12, sm: 13 },
               }}
             >
-              {nights} đêm
+              {t("booking.summary.nights", { count: nights })}
             </Typography>
           </Stack>
 
@@ -184,7 +186,7 @@ const ReservationSummary = ({
               color="text.secondary"
               sx={{ display: "block" }}
             >
-              Trả phòng
+              {t("booking.summary.checkOut")}
             </Typography>
 
             <Typography
@@ -206,11 +208,11 @@ const ReservationSummary = ({
           component="h3"
           sx={{ fontSize: 17, fontWeight: 700, color: "text.primary" }}
         >
-          Tóm tắt giá
+          {t("booking.summary.priceSummary")}
         </Typography>
         <Stack spacing={1.25} sx={{ mt: 2 }}>
           <Stack direction="row" justifyContent="space-between" spacing={2}>
-            <Typography color="text.secondary">Giá phòng</Typography>
+            <Typography color="text.secondary">{t("booking.summary.roomSubtotal")}</Typography>
             <Typography fontWeight={600}>
               {fmtVND(pricing?.subtotal ?? 0)} VND
             </Typography>
@@ -218,7 +220,7 @@ const ReservationSummary = ({
           {(pricing?.totalDiscount ?? 0) > 0 && (
             <Stack direction="row" justifyContent="space-between" spacing={2}>
               <Box>
-                <Typography color="text.secondary">Ưu đãi</Typography>
+                <Typography color="text.secondary">{t("booking.summary.discount")}</Typography>
                 {promotion?.name && (
                   <Typography variant="caption" color="text.secondary">
                     {promotion.name}
@@ -241,7 +243,7 @@ const ReservationSummary = ({
           spacing={2}
         >
           <Typography fontWeight={700} color="text.primary">
-            Tổng cộng
+            {t("booking.summary.total")}
           </Typography>
           <Typography
             sx={{
@@ -263,7 +265,7 @@ const ReservationSummary = ({
           endIcon={<ArrowForwardRoundedIcon />}
           sx={{ mt: 3, minHeight: 50, borderRadius: 1.25, fontWeight: 700 }}
         >
-          {submitting ? "Đang tạo đặt phòng…" : "Tiếp theo thanh toán"}
+          {submitting ? t("booking.actions.creating") : t("booking.actions.continueToPayment")}
         </Button>
         <Typography
           variant="caption"
@@ -275,7 +277,7 @@ const ReservationSummary = ({
             lineHeight: 1.6,
           }}
         >
-          Bạn sẽ kiểm tra bước thanh toán trước khi hoàn tất.
+          {t("booking.summary.paymentReviewNote")}
         </Typography>
       </Box>
     </Box>

@@ -1,5 +1,4 @@
 import {
-  Box,
   FormControl,
   InputAdornment,
   MenuItem,
@@ -10,6 +9,7 @@ import {
 } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { SortKey } from "../../interface";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   total: number;
@@ -21,7 +21,9 @@ const SearchResultsHeader: React.FC<Props> = ({
   total,
   sort,
   onSortChange,
-}) => (
+}) => {
+  const { t } = useTranslation("client");
+  return (
   <Stack
     direction="row"
     justifyContent="space-between"
@@ -34,7 +36,7 @@ const SearchResultsHeader: React.FC<Props> = ({
     }}
   >
     <Typography variant="body1">
-      Có <b>{total}</b> kết quả tìm kiếm phù hợp
+      {t("payment.legacy.resultCount", { count: total })}
     </Typography>
 
     <FormControl size="small">
@@ -61,11 +63,12 @@ const SearchResultsHeader: React.FC<Props> = ({
           "& .MuiSelect-icon": { mr: 0.5 },
         }}
       >
-        <MenuItem value="price-asc">Giá tăng dần</MenuItem>
-        <MenuItem value="price-desc">Giá giảm dần</MenuItem>
+        <MenuItem value="price-asc">{t("payment.legacy.priceAscending")}</MenuItem>
+        <MenuItem value="price-desc">{t("payment.legacy.priceDescending")}</MenuItem>
       </Select>
     </FormControl>
   </Stack>
-);
+  );
+};
 
 export default SearchResultsHeader;

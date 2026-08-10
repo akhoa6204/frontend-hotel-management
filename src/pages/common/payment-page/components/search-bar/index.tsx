@@ -7,6 +7,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import { SearchState } from "@constant/types";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   form: SearchState;
@@ -19,6 +20,7 @@ type Props = {
 };
 
 export default function SearchBar({ form, onSubmit, onChange }: Props) {
+  const { t } = useTranslation("client");
   const pickerTextField = {
     variant: "standard",
     placeholder: "DD/MM/YYYY",
@@ -67,7 +69,7 @@ export default function SearchBar({ form, onSubmit, onChange }: Props) {
               color="text.secondary"
               sx={{ lineHeight: 1 }}
             >
-              Ngày nhận phòng
+              {t("payment.summary.checkIn")}
             </Typography>
             <DatePicker
               value={fromD}
@@ -116,7 +118,7 @@ export default function SearchBar({ form, onSubmit, onChange }: Props) {
               color="text.secondary"
               sx={{ lineHeight: 1 }}
             >
-              Ngày trả phòng
+              {t("payment.summary.checkOut")}
             </Typography>
             <DatePicker
               value={toD}
@@ -149,7 +151,7 @@ export default function SearchBar({ form, onSubmit, onChange }: Props) {
               color="text.secondary"
               sx={{ lineHeight: 1 }}
             >
-              Số lượng khách
+              {t("payment.legacy.guestCount")}
             </Typography>
             <TextField
               name="capacity"
@@ -168,6 +170,7 @@ export default function SearchBar({ form, onSubmit, onChange }: Props) {
 
         <IconButton
           type="submit"
+          aria-label={t("payment.legacy.search")}
           sx={{
             ml: "auto",
             bgcolor: "primary.main",

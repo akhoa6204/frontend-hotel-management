@@ -1,15 +1,12 @@
 import {
   Paper,
   Box,
-  Typography,
   Divider,
   Stack,
   Skeleton,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import BlockIcon from "@mui/icons-material/Block";
-import PhoneIcon from "@mui/icons-material/Phone";
-import EmailIcon from "@mui/icons-material/Email";
 
 const BookingSummaryCardSkeleton = () => {
   return (

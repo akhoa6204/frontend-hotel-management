@@ -1,5 +1,6 @@
 import { Box, Divider, FormControlLabel, Grid, Radio, RadioGroup, TextField, Typography } from "@mui/material";
 import type { BookingForm } from "../../useBooking";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   value: BookingForm;
@@ -18,13 +19,16 @@ const fieldSx = {
   },
 } as const;
 
-const BookingInfoCard = ({ value, onChange, errors }: Props) => (
+const BookingInfoCard = ({ value, onChange, errors }: Props) => {
+  const { t } = useTranslation("client");
+
+  return (
   <Box component="section" aria-labelledby="guest-information-title">
     <Typography id="guest-information-title" component="h2" sx={{ fontSize: { xs: 24, md: 27 }, fontWeight: 650, color: "text.primary" }}>
-      Thông tin khách lưu trú
+      {t("booking.guestInformation.title")}
     </Typography>
     <Typography color="text.secondary" sx={{ mt: 1, lineHeight: 1.7 }}>
-      Thông tin này sẽ được dùng để xác nhận và liên hệ về kỳ nghỉ của bạn.
+      {t("booking.guestInformation.description")}
     </Typography>
 
     <Grid container spacing={2.5} sx={{ mt: 1.5 }}>
@@ -32,7 +36,7 @@ const BookingInfoCard = ({ value, onChange, errors }: Props) => (
         <TextField
           fullWidth
           required
-          label="Họ và tên"
+          label={t("booking.guestInformation.fullName")}
           value={value.guestName}
           name="guestName"
           autoComplete="name"
@@ -46,7 +50,7 @@ const BookingInfoCard = ({ value, onChange, errors }: Props) => (
         <TextField
           fullWidth
           required
-          label="Số điện thoại"
+          label={t("booking.guestInformation.phone")}
           value={value.guestPhone}
           name="guestPhone"
           type="tel"
@@ -61,7 +65,7 @@ const BookingInfoCard = ({ value, onChange, errors }: Props) => (
         <TextField
           fullWidth
           required
-          label="Email"
+          label={t("booking.guestInformation.email")}
           value={value.guestEmail}
           name="guestEmail"
           type="email"
@@ -77,18 +81,19 @@ const BookingInfoCard = ({ value, onChange, errors }: Props) => (
     <Divider sx={{ my: { xs: 4, md: 5 } }} />
 
     <Typography component="h3" sx={{ fontSize: 18, fontWeight: 650, color: "text.primary" }}>
-      Bạn đặt phòng cho ai?
+      {t("booking.guestInformation.bookingForTitle")}
     </Typography>
     <RadioGroup
-      aria-label="Người lưu trú"
+      aria-label={t("booking.guestInformation.stayingGuestLabel")}
       value={value.bookingForSomeoneElse ? "other" : "self"}
       onChange={(event) => onChange("bookingForSomeoneElse", event.target.value === "other")}
       sx={{ mt: 1.25, gap: 0.25 }}
     >
-      <FormControlLabel value="self" control={<Radio />} label="Tôi là khách lưu trú" />
-      <FormControlLabel value="other" control={<Radio />} label="Đặt phòng này cho người khác" />
+      <FormControlLabel value="self" control={<Radio />} label={t("booking.guestInformation.self")} />
+      <FormControlLabel value="other" control={<Radio />} label={t("booking.guestInformation.someoneElse")} />
     </RadioGroup>
   </Box>
-);
+  );
+};
 
 export default BookingInfoCard;

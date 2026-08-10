@@ -11,12 +11,13 @@ import dayjs from "dayjs";
 import { useMemo } from "react";
 import { formatDate } from "@utils/format";
 import { BookingForm } from "@pages/common/booking-page/interface";
+import { useTranslation } from "react-i18next";
 
 type Option = { value: string; label: string };
 
 type Props = {
   value: string;
-  onChange: (field: keyof BookingForm, value: any) => void;
+  onChange: (field: keyof BookingForm, value: unknown) => void;
   checkInDate?: string;
 };
 
@@ -62,6 +63,7 @@ const buildArrivalOptions = (checkInDate?: string): Option[] => {
 };
 
 const ArrivalTimeCard = ({ value, onChange, checkInDate }: Props) => {
+  const { t } = useTranslation("client");
   const options = useMemo(
     () => buildArrivalOptions(checkInDate),
     [checkInDate],
@@ -79,7 +81,7 @@ const ArrivalTimeCard = ({ value, onChange, checkInDate }: Props) => {
     >
       <Box mb={2}>
         <Typography variant="h5" fontWeight={700} mb={0.5}>
-          Thời gian đến của bạn
+          {t("payment.legacy.arrivalTitle")}
         </Typography>
       </Box>
 
@@ -88,21 +90,20 @@ const ArrivalTimeCard = ({ value, onChange, checkInDate }: Props) => {
           sx={{ color: "#2E90FA", mr: 1.5, fontSize: 24 }}
         />
         <Typography variant="body2">
-          Bạn có thể nhận chỗ nghỉ trong khoảng từ 14:00 - 22:00 ngày
-          {formatDate(checkInDate)}
+          {t("payment.legacy.arrivalWindow", { date: formatDate(checkInDate) })}
         </Typography>
       </Box>
 
       <Box mb={1}>
         <Typography fontWeight={600} mb={0.5}>
-          Thêm thời gian dự kiến đến của bạn{" "}
+          {t("payment.legacy.estimatedArrival")}{" "}
           <Typography
             component="span"
             variant="body2"
             color="text.secondary"
             fontWeight={400}
           >
-            (không bắt buộc)
+            {t("payment.legacy.optional")}
           </Typography>
         </Typography>
 
@@ -114,7 +115,7 @@ const ArrivalTimeCard = ({ value, onChange, checkInDate }: Props) => {
             sx={{ bgcolor: "#fff" }}
           >
             <MenuItem value="">
-              <em>Vui lòng chọn</em>
+              <em>{t("payment.legacy.select")}</em>
             </MenuItem>
 
             {options.map((opt) => (
@@ -127,7 +128,7 @@ const ArrivalTimeCard = ({ value, onChange, checkInDate }: Props) => {
       </Box>
 
       <Typography variant="body2" color="text.secondary">
-        Thời gian theo múi giờ Đà Nẵng
+        {t("payment.legacy.localTime")}
       </Typography>
     </Paper>
   );

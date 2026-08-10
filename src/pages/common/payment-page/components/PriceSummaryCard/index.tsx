@@ -1,4 +1,5 @@
 import { Box, Paper, Stack, Typography, Divider } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 interface PriceSummaryProps {
   originalPrice: number;
@@ -12,9 +13,10 @@ const formatVND = (n: number) => n.toLocaleString("vi-VN") + " VND";
 const PriceSummaryCard: React.FC<PriceSummaryProps> = ({
   originalPrice,
   discount,
-  discountLabel = "Ưu đãi",
-  discountNote = "Hãy nhập mã giảm giá nếu bạn sỡ hữu",
+  discountLabel,
+  discountNote,
 }) => {
+  const { t } = useTranslation("client");
   const finalPrice = originalPrice - discount;
 
   return (
@@ -29,21 +31,21 @@ const PriceSummaryCard: React.FC<PriceSummaryProps> = ({
       <Box py={3.5} px={2.5}>
         {/* Title */}
         <Typography variant="h6" fontWeight={700} mb={2}>
-          Tóm tắt giá
+          {t("payment.legacy.priceSummary")}
         </Typography>
 
         {/* Giá gốc */}
         <Stack direction="row" justifyContent="space-between" mb={1}>
-          <Typography>Giá gốc</Typography>
+          <Typography>{t("payment.legacy.originalPrice")}</Typography>
           <Typography>{formatVND(originalPrice)}</Typography>
         </Stack>
 
         {/* Discount */}
         <Stack direction="row" justifyContent="space-between">
           <Box>
-            <Typography>{discountLabel}</Typography>
+            <Typography>{discountLabel ?? t("payment.legacy.discount")}</Typography>
             <Typography variant="caption" color="text.secondary">
-              {discountNote}
+              {discountNote ?? t("payment.legacy.discountHint")}
             </Typography>
           </Box>
           <Typography color="error">- {formatVND(discount)}</Typography>
@@ -61,7 +63,7 @@ const PriceSummaryCard: React.FC<PriceSummaryProps> = ({
         sx={{ py: 1.5, px: 2.5, bgcolor: "#2E90FA0d" }}
       >
         <Typography fontWeight={700} color="error" sx={{ fontSize: 18 }}>
-          Tổng cộng
+          {t("payment.legacy.total")}
         </Typography>
         <Typography fontWeight={700} color="error" sx={{ fontSize: 18 }}>
           {formatVND(finalPrice)}
