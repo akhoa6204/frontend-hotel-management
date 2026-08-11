@@ -1,20 +1,26 @@
 import { useState } from "react";
+import type {
+  SnackbarAlertState,
+  SnackbarSeverity,
+} from "@components/GlobalSnackbar";
 
 const useSnackbar = () => {
-  const [alert, setAlert] = useState({
+  const [alert, setAlert] = useState<SnackbarAlertState>({
     open: false,
-    severity: "success" as "success" | "error" | "warning",
+    severity: "success",
     message: "",
   });
 
-  const showSuccess = (msg: string) =>
-    setAlert({ open: true, severity: "success", message: msg });
+  const showSnackbar = (severity: SnackbarSeverity, message: string) =>
+    setAlert({ open: true, severity, message });
 
-  const showError = (msg: string) =>
-    setAlert({ open: true, severity: "error", message: msg });
+  const showSuccess = (message: string) => showSnackbar("success", message);
 
-  const showWarning = (msg: string) =>
-    setAlert({ open: true, severity: "warning", message: msg });
+  const showError = (message: string) => showSnackbar("error", message);
+
+  const showWarning = (message: string) => showSnackbar("warning", message);
+
+  const showInfo = (message: string) => showSnackbar("info", message);
 
   const closeSnackbar = () => setAlert((a) => ({ ...a, open: false }));
 
@@ -24,6 +30,7 @@ const useSnackbar = () => {
     showSuccess,
     closeSnackbar,
     showWarning,
+    showInfo,
   };
 };
 export default useSnackbar;
