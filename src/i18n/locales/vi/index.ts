@@ -118,7 +118,7 @@ const vi = {
         invalidPassword: "Mật khẩu không hợp lệ",
       },
       errors: {
-        loginFailed: "Không thể đăng nhập. Vui lòng kiểm tra thông tin và thử lại.",
+        loginFailed: "Email hoặc mật khẩu không hợp lệ.",
       },
       messages: {
         registrationCompleted: "Tài khoản đã được tạo. Bạn có thể đăng nhập để tiếp tục.",

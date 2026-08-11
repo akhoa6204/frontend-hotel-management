@@ -1,4 +1,3 @@
-import type { AxiosError } from "axios";
 import type { Errors } from "@constant/internal/Errors";
 import useForm from "@hooks/useForm";
 import { useAppDispatch } from "@hooks/useRedux";
@@ -49,10 +48,7 @@ const useLogin = () => {
 
       navigate("/", { replace: true });
     },
-    onError: (error: AxiosError<{ message?: string }>) => {
-      const msg = error.response?.data?.message || t("login.errors.loginFailed");
-      showError(msg);
-    },
+    onError: () => showError(t("login.errors.loginFailed")),
   });
   const location = useLocation();
 

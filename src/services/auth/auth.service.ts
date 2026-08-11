@@ -1,18 +1,30 @@
-import { LoginRequest } from "@constant/request/LoginRequest";
+import type { LoginRequest } from "@constant/request/LoginRequest";
 import httpPublic from "..";
-import { AuthenticationResponse } from "@constant/response/AuthenticationResponse";
-import { RegisterRequest } from "@constant/request/RegisterRequest";
-import { UserShortResponse } from "@constant/response/UserShortResponse";
-import { IntrospectResponse } from "@constant/response/IntrospectResponse";
-import { ResetPasswordRequest } from "@constant/request/ResetPasswordRequest";
+import type { AuthenticationResponse } from "@constant/response/AuthenticationResponse";
+import type { RegisterRequest } from "@constant/request/RegisterRequest";
+import type { UserShortResponse } from "@constant/response/UserShortResponse";
+import type { IntrospectResponse } from "@constant/response/IntrospectResponse";
+import type { ResetPasswordRequest } from "@constant/request/ResetPasswordRequest";
 
 const BASE_URL = "/auth";
 
+class PublicLoginError extends Error {
+  constructor() {
+    super("LOGIN_FAILED");
+    this.name = "PublicLoginError";
+  }
+}
+
 class AuthService {
   static async login(request: LoginRequest): Promise<AuthenticationResponse> {
-    const { data } = await httpPublic.post(`${BASE_URL}/login`, request);
+    try {
+      const { data } = await httpPublic.post(`${BASE_URL}/login`, request);
 
-    return data;
+      return data;
+    } catch {
+      // Do not let backend authentication details cross the public login boundary.
+      throw new PublicLoginError();
+    }
   }
 
   static async register(request: RegisterRequest): Promise<UserShortResponse> {
