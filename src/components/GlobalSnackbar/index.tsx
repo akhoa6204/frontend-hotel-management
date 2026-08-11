@@ -2,7 +2,7 @@ import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlin
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
-import { Alert, Snackbar, useMediaQuery, useTheme } from "@mui/material";
+import { Alert, Portal, Snackbar, useMediaQuery, useTheme } from "@mui/material";
 import type { AlertColor } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useLocation } from "react-router-dom";
@@ -56,7 +56,8 @@ const GlobalSnackbar = ({ alert, closeSnackbar }: GlobalSnackbarProps) => {
     : theme.palette[alert.severity].main;
 
   return (
-    <Snackbar
+    <Portal>
+      <Snackbar
       open={alert.open}
       autoHideDuration={1000}
       onClose={closeSnackbar}
@@ -66,7 +67,7 @@ const GlobalSnackbar = ({ alert, closeSnackbar }: GlobalSnackbarProps) => {
       }}
       transitionDuration={{ enter: isAdmin ? 180 : 220, exit: 150 }}
       sx={{
-        zIndex: theme.zIndex.appBar + 1,
+        zIndex: theme.zIndex.snackbar,
         top: isAdmin
           ? mobile
             ? 16
@@ -141,7 +142,8 @@ const GlobalSnackbar = ({ alert, closeSnackbar }: GlobalSnackbarProps) => {
       >
         {alert.message}
       </Alert>
-    </Snackbar>
+      </Snackbar>
+    </Portal>
   );
 };
 
