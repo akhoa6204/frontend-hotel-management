@@ -2,6 +2,7 @@ import useShift from "./useShift";
 import WeeklyScheduleCalendar from "./components/weekly-schedule-calendar";
 import { GlobalSnackbar, EntityPickerDialog } from "@components";
 import CreateShiftDialog from "./components/create-shift-dialog";
+import StaffShiftImportDialog from "./components/staff-shift-import-dialog";
 import {
   Box,
   Button,
@@ -14,7 +15,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Add, ArrowBack, ArrowForward, Search } from "@mui/icons-material";
+import { Add, ArrowBack, ArrowForward, Search, UploadFile } from "@mui/icons-material";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -29,6 +30,7 @@ const ShiftManagement = () => {
     start,
     end,
     onRemove,
+    onImportSuccess,
     canEdit,
     alert,
     closeSnackbar,
@@ -68,6 +70,7 @@ const ShiftManagement = () => {
     isLoadingDefinitions,
   } = useShift();
   const [rangeAnchor, setRangeAnchor] = useState<HTMLElement | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
   const [draftRange, setDraftRange] = useState({ start, end });
   const invalidDraftRange =
     !draftRange.start ||
@@ -100,7 +103,16 @@ const ShiftManagement = () => {
           <Typography component="h1" sx={{ color: "#163B47", fontSize: { xs: 26, md: 29 }, lineHeight: 1.25, fontWeight: 700 }}>{t("title", { ns: "schedules" })}</Typography>
           <Typography sx={{ mt: 0.5, color: "#667085", fontSize: 13.5 }}>{t("subtitle", { ns: "schedules" })}</Typography>
         </Box>
-        {canEdit && <Button startIcon={<Add />} variant="contained" onClick={() => openDialog(null)} sx={{ minHeight: 42, borderRadius: "8px", alignSelf: { sm: "center" } }}>{t("create", { ns: "schedules" })}</Button>}
+        {canEdit && (
+          <Stack direction={{ xs: "column", sm: "row" }} gap={1}>
+            <Button startIcon={<UploadFile />} variant="outlined" onClick={() => setImportOpen(true)} sx={{ minHeight: 42, borderRadius: "8px" }}>
+              {t("import.action", { ns: "schedules" })}
+            </Button>
+            <Button startIcon={<Add />} variant="contained" onClick={() => openDialog(null)} sx={{ minHeight: 42, borderRadius: "8px" }}>
+              {t("create", { ns: "schedules" })}
+            </Button>
+          </Stack>
+        )}
       </Stack>
 
       <Box
@@ -338,6 +350,15 @@ const ShiftManagement = () => {
         seeMore={openPicker}
         saving={isCreating}
         loadingDefinitions={isLoadingDefinitions}
+      />
+      <StaffShiftImportDialog
+        open={importOpen}
+        shifts={shiftDefinitions || []}
+        onClose={() => setImportOpen(false)}
+        onImported={(count) => {
+          setImportOpen(false);
+          onImportSuccess(count);
+        }}
       />
 
       <GlobalSnackbar alert={alert} closeSnackbar={closeSnackbar} />

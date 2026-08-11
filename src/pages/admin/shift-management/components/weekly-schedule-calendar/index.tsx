@@ -19,6 +19,7 @@ import type { UserShortResponse } from "@constant/response/UserShortResponse";
 import type { UserRole } from "@enums/UserRole";
 import { formatTime } from "@utils/format";
 import { useTranslation } from "react-i18next";
+import { getShiftVisual } from "../../shift-visual";
 
 interface Props {
   shifts: StaffShiftResponse[];
@@ -290,22 +291,25 @@ export default function WeeklyScheduleCalendar({
                       }}
                     >
                       <Stack spacing={0.75}>
-                        {assignments.map((assignment) => (
-                          <Box
-                            key={assignment.id}
-                            sx={{
-                              position: "relative",
-                              px: 1,
-                              py: 0.8,
-                              border: "1px solid #D6E9FC",
-                              borderRadius: "7px",
-                              bgcolor: "#EFF7FF",
-                            }}
-                          >
+                        {assignments.map((assignment) => {
+                          const shiftVisual = getShiftVisual(assignment.shift.code);
+                          return (
+                            <Box
+                              key={assignment.id}
+                              sx={{
+                                position: "relative",
+                                px: 1,
+                                py: 0.8,
+                                border: `1px solid ${shiftVisual.border}`,
+                                borderLeft: `3px solid ${shiftVisual.accent}`,
+                                borderRadius: "7px",
+                                bgcolor: shiftVisual.background,
+                              }}
+                            >
                             <Typography
                               sx={{
                                 pr: canEdit ? 2 : 0,
-                                color: "#175CD3",
+                                color: shiftVisual.text,
                                 fontSize: 12.5,
                                 fontWeight: 650,
                               }}
@@ -361,8 +365,9 @@ export default function WeeklyScheduleCalendar({
                                 <Close sx={{ fontSize: 14 }} />
                               </IconButton>
                             )}
-                          </Box>
-                        ))}
+                            </Box>
+                          );
+                        })}
                       </Stack>
                       {canEdit && (
                         <IconButton

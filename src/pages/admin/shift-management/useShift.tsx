@@ -187,6 +187,10 @@ const useShift = () => {
     setDateRange({ start: rangeStart, end: rangeEnd });
   };
   const onRemove = async (id: number) => await mRemoveShift.mutateAsync(id);
+  const onImportSuccess = (count: number) => {
+    queryClient.invalidateQueries({ queryKey: ["shift-list"] });
+    showSuccess(t("notifications.importSuccess", { count }));
+  };
   const openDialog = (
     staff: UserShortResponse | null,
     workDate = dayjs().format("YYYY-MM-DD"),
@@ -258,6 +262,7 @@ const useShift = () => {
     start,
     end,
     onRemove,
+    onImportSuccess,
     canEdit,
     isLoading,
     isError,
