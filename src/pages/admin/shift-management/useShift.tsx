@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import { useMemo, useState } from "react";
@@ -7,6 +12,7 @@ import useSnackbar from "@hooks/useSnackbar";
 import useForm from "@hooks/useForm";
 import { useEntityPicker } from "@hooks/useEntityPickerDialog";
 import type { UserShortResponse } from "@constant/response/UserShortResponse";
+import type { StaffShiftResponse } from "@constant/response/StaffShiftResponse";
 import StaffShiftService from "@services/staff/shift.service";
 import StaffEmployeeService from "@services/staff/employee.service";
 import type { ShiftCreationRequest } from "@constant/request/ShiftCreationRequest";
@@ -28,7 +34,10 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 const useShift = () => {
   const { t } = useTranslation("schedules");
   const queryClient = useQueryClient();
-  const [currentDate, setCurrentDate] = useState(dayjs());
+  const [dateRange, setDateRange] = useState(() => ({
+    start: dayjs().startOf("isoWeek").format("YYYY-MM-DD"),
+    end: dayjs().endOf("isoWeek").format("YYYY-MM-DD"),
+  }));
   const [filters, setFilters] = useState<{
     q: string;
     position: PositionFilter;
@@ -78,15 +87,8 @@ const useShift = () => {
     mergeOptions,
     resetEntityPicker,
   } = useEntityPicker<UserShortResponse>();
-  const start = useMemo(
-    () => currentDate.startOf("isoWeek").format("YYYY-MM-DD"),
-    [currentDate],
-  );
-
-  const end = useMemo(
-    () => currentDate.endOf("isoWeek").format("YYYY-MM-DD"),
-    [currentDate],
-  );
+  const start = dateRange.start;
+  const end = dateRange.end;
 
   const canEdit = canAccessManager();
 
@@ -96,31 +98,50 @@ const useShift = () => {
   });
 
   const { user } = useAuth();
-  const {
-    data: shifts,
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery({
+  const isManager = user?.roleName === "ADMIN" || user?.roleName === "MANAGER";
+  const managerSchedule = useInfiniteQuery({
     queryKey: ["shift-list", start, end, filters],
+    initialPageParam: 0,
+    enabled: isManager,
+    queryFn: async ({ pageParam }) =>
+      await StaffShiftService.getSchedule({
+        page: pageParam,
+        limit: 10,
+        startDate: start,
+        endDate: end,
+        sort: "name,asc",
+        ...(filters.q ? { q: filters.q } : {}),
+        ...(filters.position !== "ALL" ? { position: filters.position } : {}),
+      }),
+    getNextPageParam: (lastPage) =>
+      lastPage.pagination?.hasNext
+        ? (lastPage.pagination.page ?? 0) + 1
+        : undefined,
+  });
+  const personalSchedule = useQuery({
+    queryKey: ["my-shift-list", start, end],
+    enabled: !isManager,
     queryFn: async () => {
-      if (user?.roleName === "ADMIN" || user?.roleName === "MANAGER") {
-        return await StaffShiftService.getSchedule({
-          startDate: start,
-          endDate: end,
-          ...(filters.q ? { q: filters.q } : {}),
-          ...(filters.position !== "ALL"
-            ? { position: filters.position }
-            : {}),
-        });
-      }
-
       return await StaffShiftService.getMySchedule({
         startDate: start,
         endDate: end,
       });
     },
   });
+  const shifts = useMemo(() => {
+    if (!isManager) return personalSchedule.data || [];
+
+    const uniqueRows = new Map<string, StaffShiftResponse>();
+    managerSchedule.data?.pages.forEach((response) => {
+      response.data.forEach((row) => uniqueRows.set(row.staff.id, row));
+    });
+    return Array.from(uniqueRows.values());
+  }, [isManager, managerSchedule.data, personalSchedule.data]);
+  const isLoading = isManager
+    ? managerSchedule.isLoading
+    : personalSchedule.isLoading;
+  const isError = isManager ? managerSchedule.isError : personalSchedule.isError;
+  const refetch = isManager ? managerSchedule.refetch : personalSchedule.refetch;
 
   const mRemoveShift = useMutation({
     mutationFn: async (id: number) => {
@@ -150,10 +171,26 @@ const useShift = () => {
     },
   });
 
-  const nextWeek = () => setCurrentDate((prev) => prev.add(7, "day"));
-  const prevWeek = () => setCurrentDate((prev) => prev.subtract(7, "day"));
+  const shiftDateRange = (direction: 1 | -1) => {
+    const dayCount = dayjs(end).diff(dayjs(start), "day") + 1;
+    setDateRange((previous) => ({
+      start: dayjs(previous.start).add(direction * dayCount, "day").format("YYYY-MM-DD"),
+      end: dayjs(previous.end).add(direction * dayCount, "day").format("YYYY-MM-DD"),
+    }));
+  };
+  const nextWeek = () => shiftDateRange(1);
+  const prevWeek = () => shiftDateRange(-1);
+  const applyDateRange = (rangeStart: string, rangeEnd: string) => {
+    if (!rangeStart || !rangeEnd || dayjs(rangeEnd).isBefore(rangeStart, "day")) {
+      return;
+    }
+    setDateRange({ start: rangeStart, end: rangeEnd });
+  };
   const onRemove = async (id: number) => await mRemoveShift.mutateAsync(id);
-  const openDialog = (staff: UserShortResponse | null) => {
+  const openDialog = (
+    staff: UserShortResponse | null,
+    workDate = dayjs().format("YYYY-MM-DD"),
+  ) => {
     if (shiftDefinitions?.length === 0) {
       showError(t("notifications.noShiftDefinitions"));
       return;
@@ -161,7 +198,7 @@ const useShift = () => {
     onChangeDialog("open", true);
     updateForm({
       staff: staff || undefined,
-      workDate: dayjs().format("YYYY-MM-DD"),
+      workDate,
       shiftId: shiftDefinitions?.[0].id || null,
     });
     if (staff?.id) {
@@ -241,8 +278,10 @@ const useShift = () => {
 
     filters,
     setFilters,
-    currentDate,
-    setCurrentDate,
+    applyDateRange,
+    hasNextPage: managerSchedule.hasNextPage,
+    loadMore: managerSchedule.fetchNextPage,
+    isLoadingMore: managerSchedule.isFetchingNextPage,
 
     options,
     meta,

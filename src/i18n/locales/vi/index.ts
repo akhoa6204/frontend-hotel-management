@@ -1589,12 +1589,20 @@ const vi = {
   schedules: {
     title: "Quản lý lịch làm",
     subtitle: "Theo dõi và phân công ca làm cho nhân viên.",
-    search: "Tìm theo tên nhân viên…",
+    search: "Tìm theo tên hoặc email nhân viên…",
     create: "Tạo lịch",
 
     allPositions: "Tất cả vị trí",
     previousWeek: "Tuần trước",
     nextWeek: "Tuần sau",
+    previousRange: "Khoảng ngày trước",
+    nextRange: "Khoảng ngày sau",
+    chooseRange: "Chọn khoảng ngày",
+    applyRange: "Áp dụng",
+    fromDate: "Từ ngày",
+    toDate: "Đến ngày",
+    loadMore: "Tải thêm nhân viên",
+    loadingMore: "Đang tải…",
 
     staff: "Nhân viên",
     workDate: "Ngày làm",

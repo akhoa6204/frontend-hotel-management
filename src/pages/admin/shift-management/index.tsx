@@ -5,15 +5,18 @@ import CreateShiftDialog from "./components/create-shift-dialog";
 import {
   Box,
   Button,
+  ButtonBase,
   IconButton,
   InputAdornment,
   MenuItem,
+  Popover,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import { Add, ArrowBack, ArrowForward, Search } from "@mui/icons-material";
 import dayjs from "dayjs";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 const ShiftManagement = () => {
@@ -38,6 +41,10 @@ const ShiftManagement = () => {
     onChangeForm,
     filters,
     setFilters,
+    applyDateRange,
+    hasNextPage,
+    loadMore,
+    isLoadingMore,
 
     options,
     meta,
@@ -60,6 +67,26 @@ const ShiftManagement = () => {
     isRemoving,
     isLoadingDefinitions,
   } = useShift();
+  const [rangeAnchor, setRangeAnchor] = useState<HTMLElement | null>(null);
+  const [draftRange, setDraftRange] = useState({ start, end });
+  const invalidDraftRange =
+    !draftRange.start ||
+    !draftRange.end ||
+    dayjs(draftRange.end).isBefore(draftRange.start, "day");
+
+  const openRangePicker = (event: React.MouseEvent<HTMLElement>) => {
+    setDraftRange({ start, end });
+    setRangeAnchor(event.currentTarget);
+  };
+
+  const closeRangePicker = () => setRangeAnchor(null);
+
+  const applyRange = () => {
+    if (invalidDraftRange) return;
+    applyDateRange(draftRange.start, draftRange.end);
+    closeRangePicker();
+  };
+
   return (
     <>
       <Stack
@@ -182,34 +209,100 @@ const ShiftManagement = () => {
               overflow: "hidden",
             }}
           >
-            <IconButton aria-label={t("previousWeek", { ns: "schedules" })} size="small" onClick={prevWeek} sx={{ width: 40, height: 40, borderRadius: 0, color: "#667085", "&:hover": { bgcolor: "#F9FAFB" } }}>
+            <IconButton aria-label={t("previousRange", { ns: "schedules" })} size="small" onClick={prevWeek} sx={{ width: 40, height: 40, borderRadius: 0, color: "#667085", "&:hover": { bgcolor: "#F9FAFB" } }}>
               <ArrowBack fontSize="small" />
             </IconButton>
 
-            <Typography
+            <ButtonBase
+              aria-label={t("chooseRange", { ns: "schedules" })}
+              aria-haspopup="dialog"
+              aria-expanded={Boolean(rangeAnchor)}
+              onClick={openRangePicker}
               sx={{
-                fontWeight: 600,
-                flex: 1,
+                height: 40,
                 px: 1.25,
                 color: "#344054",
                 fontSize: 13.5,
+                fontWeight: 600,
                 textAlign: "center",
                 whiteSpace: "nowrap",
+                borderLeft: "1px solid #EAECF0",
+                borderRight: "1px solid #EAECF0",
+                "&:hover": { bgcolor: "#F9FAFB", color: "#1D6FC2" },
               }}
             >
               {dayjs(start).format("DD/MM/YYYY")} –{" "}
               {dayjs(end).format("DD/MM/YYYY")}
-            </Typography>
+            </ButtonBase>
 
-            <IconButton aria-label={t("nextWeek", { ns: "schedules" })} size="small" onClick={nextWeek} sx={{ width: 40, height: 40, borderRadius: 0, color: "#667085", "&:hover": { bgcolor: "#F9FAFB" } }}>
+            <IconButton aria-label={t("nextRange", { ns: "schedules" })} size="small" onClick={nextWeek} sx={{ width: 40, height: 40, borderRadius: 0, color: "#667085", "&:hover": { bgcolor: "#F9FAFB" } }}>
               <ArrowForward fontSize="small" />
             </IconButton>
           </Box>
+          <Popover
+            open={Boolean(rangeAnchor)}
+            anchorEl={rangeAnchor}
+            onClose={closeRangePicker}
+            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            transformOrigin={{ vertical: "top", horizontal: "center" }}
+            slotProps={{
+              paper: {
+                sx: {
+                  mt: 1,
+                  width: { xs: "calc(100vw - 32px)", sm: 360 },
+                  maxWidth: 360,
+                  p: 2,
+                  border: "1px solid #E4E7EC",
+                  borderRadius: "10px",
+                  boxShadow: "0 10px 28px rgba(16, 24, 40, 0.14)",
+                },
+              },
+            }}
+          >
+            <Stack spacing={2}>
+              <Typography sx={{ color: "#1F2937", fontSize: 14, fontWeight: 650 }}>
+                {t("chooseRange", { ns: "schedules" })}
+              </Typography>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+                <TextField
+                  type="date"
+                  size="small"
+                  fullWidth
+                  label={t("fromDate", { ns: "schedules" })}
+                  value={draftRange.start}
+                  onChange={(event) =>
+                    setDraftRange((previous) => ({ ...previous, start: event.target.value }))
+                  }
+                  slotProps={{ inputLabel: { shrink: true }, htmlInput: { max: draftRange.end || undefined } }}
+                />
+                <TextField
+                  type="date"
+                  size="small"
+                  fullWidth
+                  label={t("toDate", { ns: "schedules" })}
+                  value={draftRange.end}
+                  onChange={(event) =>
+                    setDraftRange((previous) => ({ ...previous, end: event.target.value }))
+                  }
+                  slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: draftRange.start || undefined } }}
+                />
+              </Stack>
+              <Stack direction="row" justifyContent="flex-end" spacing={1}>
+                <Button size="small" variant="outlined" onClick={closeRangePicker}>
+                  {t("actions.cancel", { ns: "common" })}
+                </Button>
+                <Button size="small" variant="contained" disabled={invalidDraftRange} onClick={applyRange}>
+                  {t("applyRange", { ns: "schedules" })}
+                </Button>
+              </Stack>
+            </Stack>
+          </Popover>
         </Box>
       </Box>
       <WeeklyScheduleCalendar
         shifts={shifts || []}
         start={start}
+        end={end}
         onRemove={onRemove}
         onAdd={openDialog}
         canEdit={canEdit}
@@ -218,6 +311,19 @@ const ShiftManagement = () => {
         onRetry={() => refetch()}
         removing={isRemoving}
       />
+      {canEdit && hasNextPage && (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+          <Button
+            variant="outlined"
+            disabled={isLoadingMore}
+            onClick={() => void loadMore()}
+          >
+            {isLoadingMore
+              ? t("loadingMore", { ns: "schedules" })
+              : t("loadMore", { ns: "schedules" })}
+          </Button>
+        </Box>
+      )}
       <CreateShiftDialog
         shifts={shiftDefinitions || []}
         open={open}

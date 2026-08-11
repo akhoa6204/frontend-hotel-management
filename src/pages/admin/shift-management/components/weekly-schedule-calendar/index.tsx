@@ -23,7 +23,8 @@ import { useTranslation } from "react-i18next";
 interface Props {
   shifts: StaffShiftResponse[];
   start: string;
-  onAdd?: (staff: UserShortResponse) => void;
+  end: string;
+  onAdd?: (staff: UserShortResponse, workDate: string) => void;
   onRemove: (id: number) => Promise<unknown>;
   canEdit: boolean;
   loading: boolean;
@@ -50,14 +51,14 @@ const weekdayKeys = [
   "sunday",
 ] as const;
 
-const ScheduleSkeleton = () => (
+const ScheduleSkeleton = ({ dayCount }: { dayCount: number }) => (
   <>
     {Array.from({ length: 5 }).map((_, row) => (
       <Box
         key={row}
         sx={{
           display: "grid",
-          gridTemplateColumns: "210px repeat(7, 160px)",
+          gridTemplateColumns: `210px repeat(${dayCount}, 160px)`,
           minHeight: 98,
         }}
       >
@@ -71,7 +72,7 @@ const ScheduleSkeleton = () => (
           <Skeleton width="72%" />
           <Skeleton width="45%" />
         </Box>
-        {Array.from({ length: 7 }).map((__, column) => (
+        {Array.from({ length: dayCount }).map((__, column) => (
           <Box
             key={column}
             sx={{
@@ -91,6 +92,7 @@ const ScheduleSkeleton = () => (
 export default function WeeklyScheduleCalendar({
   shifts,
   start,
+  end,
   onAdd,
   onRemove,
   canEdit,
@@ -104,10 +106,12 @@ export default function WeeklyScheduleCalendar({
     useState<AssignmentInfoResponse | null>(null);
   const weekDays = useMemo(() => {
     const startDate = dayjs(start, "YYYY-MM-DD").startOf("day");
-    return Array.from({ length: 7 }, (_, index) =>
+    const endDate = dayjs(end, "YYYY-MM-DD").startOf("day");
+    const dayCount = Math.max(endDate.diff(startDate, "day") + 1, 1);
+    return Array.from({ length: dayCount }, (_, index) =>
       startDate.add(index, "day"),
     );
-  }, [start]);
+  }, [end, start]);
 
   const confirmRemove = async () => {
     if (!removeTarget) return;
@@ -128,11 +132,11 @@ export default function WeeklyScheduleCalendar({
           bgcolor: "#FFFFFF",
         }}
       >
-        <Box sx={{ minWidth: 1330 }}>
+        <Box sx={{ minWidth: 210 + weekDays.length * 160 }}>
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: "210px repeat(7, 160px)",
+              gridTemplateColumns: `210px repeat(${weekDays.length}, 160px)`,
               minHeight: 60,
               bgcolor: "#F9FAFB",
               borderBottom: "1px solid #EAECF0",
@@ -156,7 +160,7 @@ export default function WeeklyScheduleCalendar({
                 {t("staff", { ns: "schedules" })}
               </Typography>
             </Box>
-            {weekDays.map((day, index) => {
+            {weekDays.map((day) => {
               const isToday = day.isSame(dayjs(), "day");
               return (
                 <Stack
@@ -176,7 +180,7 @@ export default function WeeklyScheduleCalendar({
                       textTransform: "capitalize",
                     }}
                   >
-                    {t(`weekdays.${weekdayKeys[index]}`, { ns: "schedules" })}
+                    {t(`weekdays.${weekdayKeys[(day.day() + 6) % 7]}`, { ns: "schedules" })}
                   </Typography>
                   <Typography
                     sx={{
@@ -194,7 +198,7 @@ export default function WeeklyScheduleCalendar({
           </Box>
 
           {loading ? (
-            <ScheduleSkeleton />
+            <ScheduleSkeleton dayCount={weekDays.length} />
           ) : error ? (
             <Stack
               alignItems="center"
@@ -234,7 +238,7 @@ export default function WeeklyScheduleCalendar({
                 key={item.staff.id}
                 sx={{
                   display: "grid",
-                  gridTemplateColumns: "210px repeat(7, 160px)",
+                  gridTemplateColumns: `210px repeat(${weekDays.length}, 160px)`,
                   minHeight: 98,
                 }}
               >
@@ -365,7 +369,9 @@ export default function WeeklyScheduleCalendar({
                           className="schedule-add"
                           aria-label={t("addFor", { ns: "schedules", name: item.staff.fullName, date: day.format("DD/MM/YYYY") })}
                           size="small"
-                          onClick={() => onAdd?.(item.staff)}
+                          onClick={() =>
+                            onAdd?.(item.staff, day.format("YYYY-MM-DD"))
+                          }
                           sx={{
                             position: assignments.length
                               ? "relative"

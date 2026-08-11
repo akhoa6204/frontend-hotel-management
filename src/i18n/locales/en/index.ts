@@ -1585,12 +1585,20 @@ const en = {
   schedules: {
     title: "Staff Schedule",
     subtitle: "Review and assign employee shifts.",
-    search: "Search by employee name…",
+    search: "Search by employee name or email…",
     create: "Create schedule",
 
     allPositions: "All positions",
     previousWeek: "Previous week",
     nextWeek: "Next week",
+    previousRange: "Previous date range",
+    nextRange: "Next date range",
+    chooseRange: "Choose date range",
+    applyRange: "Apply",
+    fromDate: "From",
+    toDate: "To",
+    loadMore: "Load more employees",
+    loadingMore: "Loading…",
 
     staff: "Employee",
     workDate: "Work date",
