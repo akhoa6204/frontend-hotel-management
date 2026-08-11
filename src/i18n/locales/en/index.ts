@@ -114,7 +114,7 @@ const en = {
         invalidPassword: "Enter your password.",
       },
       errors: {
-        loginFailed: "Unable to sign in. Check your details and try again.",
+        loginFailed: "Invalid email or password.",
       },
       messages: {
         registrationCompleted: "Your account has been created. You can now sign in to continue.",
