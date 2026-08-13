@@ -160,14 +160,18 @@ npm install
 
 ### Environment
 
-Create a local `.env` file when image-upload features are required:
+Cloudinary uploads are authorized by the backend. Configure these values on the
+Spring Boot backend, not in Vite:
 
 ```env
-VITE_CLOUDINARY_URL_UPLOAD=your_cloudinary_upload_url
-VITE_CLOUDINARY_UPLOAD_PRESET=your_unsigned_upload_preset
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+CLOUDINARY_ROOT_FOLDER=diamond-sea
 ```
 
-Do not commit real credentials or private upload configuration. All Vite environment variables are bundled into the browser and must be treated as public configuration.
+Do not commit real credentials. All Vite environment variables are bundled into
+the browser and must be treated as public configuration.
 
 ### Development
 

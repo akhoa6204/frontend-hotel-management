@@ -1,3 +1,9 @@
+export type RoomTypeImageMetadata = {
+  secureUrl: string;
+  publicId?: string;
+  alt?: string;
+};
+
 export type RoomTypeCreationRequest = {
   name: string;
   description: string;
@@ -6,4 +12,5 @@ export type RoomTypeCreationRequest = {
 
   amenities: string[];
   roomTypeImages: string[];
+  roomTypeImageMetadata?: RoomTypeImageMetadata[];
 }

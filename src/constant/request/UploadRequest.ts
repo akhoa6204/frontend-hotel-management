@@ -1,1 +1,6 @@
-export type UpLoadRequest = { file: File };
+export type UploadContext = "room-types";
+
+export type UpLoadRequest = {
+  file: File;
+  context?: UploadContext;
+};
