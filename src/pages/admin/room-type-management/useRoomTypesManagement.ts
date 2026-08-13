@@ -7,7 +7,10 @@ import type { RoomTypeUpdateRequest } from "@constant/request/RoomTypeUpdateRequ
 import type { AmenityResponse } from "@constant/response/AmenityResponse";
 import type { RoomTypeImageResponse } from "@constant/response/RoomTypeImageResponse";
 import UploadImageService from "@services/UploadImageService";
-import type { RoomTypeCreationRequest } from "@constant/request/RoomTypeCreationRequest";
+import type {
+  RoomTypeCreationRequest,
+  RoomTypeImageMetadata,
+} from "@constant/request/RoomTypeCreationRequest";
 import type { SearchFilter } from "@constant/internal/SearchFilter";
 import StaffRoomTypeService from "@services/staff/roomType.service";
 import StaffAmenityService from "@services/staff/amenity.service";
@@ -58,9 +61,15 @@ const initialForm: UpsertFormRoomType = {
 };
 
 const getErrorMessage = (error: unknown, fallback: string) => {
-  if (typeof error !== "object" || error === null || !("response" in error)) return fallback;
-  const response = (error as { response?: { data?: { message?: unknown } } }).response;
-  return typeof response?.data?.message === "string" ? response.data.message : fallback;
+  if (typeof error === "object" && error !== null && "response" in error) {
+    const response = (error as { response?: { data?: { message?: unknown } } })
+      .response;
+    if (typeof response?.data?.message === "string") {
+      return response.data.message;
+    }
+  }
+
+  return error instanceof Error && error.message ? error.message : fallback;
 };
 
 const useRoomTypesManagement = () => {
@@ -87,15 +96,78 @@ const useRoomTypesManagement = () => {
         }),
       async () => {
         setIsUploadingImages(form.files.length > 0);
+        const uploadedImageMetadata: RoomTypeImageMetadata[] = [];
+        let entityMutationStarted = false;
         try {
-          const uploadedImages = form.files.length > 0
-            ? await Promise.all(form.files.map((file) => UploadImageService.upload({ file })))
-            : [];
+          await Promise.all(
+            form.files.map(async (file, index) => {
+              const image = await UploadImageService.upload({
+                file,
+                context: "room-types",
+              });
+              uploadedImageMetadata[index] = {
+                secureUrl: image.secure_url,
+                publicId: image.public_id,
+              };
+            }),
+          );
+
+          const existingImageMetadata = (form.roomTypeImagesResponse || [])
+            .filter((image) => !image.url.startsWith("blob:"))
+            .map((image) => ({
+              secureUrl: image.url,
+              publicId: image.publicId,
+              alt: image.alt,
+            }));
+          const roomTypeImageMetadata = [
+            ...existingImageMetadata,
+            ...uploadedImageMetadata,
+          ];
+          const roomTypeImages = roomTypeImageMetadata.map(
+            (image) => image.secureUrl,
+          );
+
+          entityMutationStarted = true;
 
           if (dialogState.mode === "EDIT" && editingId) {
-            await updateMutation.mutateAsync({ id: editingId, payload: { ...form, roomTypeImages: [...(form.roomTypeImages || []), ...uploadedImages.map((image) => image.secure_url)] } });
+            await updateMutation.mutateAsync({
+              id: editingId,
+              payload: {
+                ...form,
+                roomTypeImages,
+                roomTypeImageMetadata,
+              },
+            });
           } else {
-            await createMutation.mutateAsync({ name: form.name || "", description: form.description || "", basePrice: form.basePrice || 0, capacity: form.capacity || 2, amenities: form.amenities || [], roomTypeImages: uploadedImages.map((image) => image.secure_url) });
+            await createMutation.mutateAsync({
+              name: form.name || "",
+              description: form.description || "",
+              basePrice: form.basePrice || 0,
+              capacity: form.capacity || 2,
+              amenities: form.amenities || [],
+              roomTypeImages,
+              roomTypeImageMetadata,
+            });
+          }
+        } catch (error) {
+          await Promise.allSettled(
+            uploadedImageMetadata
+              .map((image) => image.publicId)
+              .filter((publicId): publicId is string => Boolean(publicId))
+              .map((publicId) =>
+                UploadImageService.deleteUploadedImage(publicId),
+              ),
+          );
+
+          if (!entityMutationStarted) {
+            showError(
+              getErrorMessage(
+                error,
+                dialogState.mode === "EDIT"
+                  ? t("notifications.updateError")
+                  : t("notifications.createError"),
+              ),
+            );
           }
         } finally {
           setIsUploadingImages(false);
@@ -167,6 +239,11 @@ const useRoomTypesManagement = () => {
       description: roomTypeDetail.description || "",
       amenities: roomTypeDetail.amenities.map((amenity) => amenity.id),
       roomTypeImages: roomTypeDetail.roomTypeImages?.map((image) => image.url),
+      roomTypeImageMetadata: roomTypeDetail.roomTypeImages?.map((image) => ({
+        secureUrl: image.url,
+        publicId: image.publicId,
+        alt: image.alt,
+      })),
       amenitiesResponse: roomTypeDetail.amenities || [],
       roomTypeImagesResponse: roomTypeDetail.roomTypeImages || [],
       files: [],
@@ -200,8 +277,17 @@ const useRoomTypesManagement = () => {
       nextImages.splice(index, 1);
 
       const nextRoomTypeImages = nextImages
+        .filter((img) => !img.url.startsWith("blob:"))
         .map((img) => img.url)
         .filter(Boolean);
+
+      const nextRoomTypeImageMetadata = nextImages
+        .filter((img) => !img.url.startsWith("blob:"))
+        .map((img) => ({
+          secureUrl: img.url,
+          publicId: img.publicId,
+          alt: img.alt,
+        }));
 
       const uploadedCount = prev.roomTypeImagesResponse?.length || 0;
 
@@ -217,6 +303,7 @@ const useRoomTypesManagement = () => {
         ...prev,
         roomTypeImagesResponse: nextImages,
         roomTypeImages: nextRoomTypeImages,
+        roomTypeImageMetadata: nextRoomTypeImageMetadata,
         files: nextFiles,
       };
     });
