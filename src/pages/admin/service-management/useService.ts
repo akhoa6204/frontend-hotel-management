@@ -83,10 +83,7 @@ const useService = () => {
 
   const { data: service, isLoading: loadingServiceDetail } = useQuery({
     queryKey: ["service", selectedId],
-    queryFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      return await StaffExtraServiceService.getById(Number(selectedId));
-    },
+    queryFn: () => StaffExtraServiceService.getById(Number(selectedId)),
     enabled: !!selectedId,
   });
   useEffect(() => {
@@ -104,14 +101,12 @@ const useService = () => {
   const mUpdateService = useMutation({
     mutationFn: async (data: ServiceUpdateRequest) =>
       await StaffExtraServiceService.update(data),
-    onSuccess() {
+    async onSuccess() {
       showSuccess(t("messages.updateSuccess"));
-      queryClient.invalidateQueries({
-        queryKey: ["services", filters.q, filters.page, filters.limit],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["service", selectedId],
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["services"] }),
+        queryClient.invalidateQueries({ queryKey: ["service", selectedId] }),
+      ]);
     },
     onError(error) {
       showError(
@@ -121,14 +116,12 @@ const useService = () => {
   });
   const mRemoveService = useMutation({
     mutationFn: async (id: number) => await StaffExtraServiceService.delete(id),
-    onSuccess() {
+    async onSuccess() {
       showSuccess(t("messages.deleteSuccess"));
-      queryClient.invalidateQueries({
-        queryKey: ["services", filters.q, filters.page, filters.limit],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["service", selectedId],
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["services"] }),
+        queryClient.invalidateQueries({ queryKey: ["service", selectedId] }),
+      ]);
     },
     onError(error) {
       showError(getErrorMessage(error, t("messages.deleteError")));
@@ -138,14 +131,12 @@ const useService = () => {
   const mCreateService = useMutation({
     mutationFn: async (data: ServiceCreationRequest) =>
       await StaffExtraServiceService.create(data),
-    onSuccess() {
+    async onSuccess() {
       showSuccess(t("messages.createSuccess"));
-      queryClient.invalidateQueries({
-        queryKey: ["services", filters.q, filters.page, filters.limit],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["service", selectedId],
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["services"] }),
+        queryClient.invalidateQueries({ queryKey: ["service", selectedId] }),
+      ]);
     },
     onError(error) {
       showError(getErrorMessage(error, t("messages.createError")));
