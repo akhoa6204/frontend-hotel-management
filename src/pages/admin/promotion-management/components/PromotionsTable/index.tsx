@@ -173,7 +173,9 @@ export default function PromotionsTable({
                   <TableRow
                     key={promotion.id}
                     hover
+                    onClick={() => onEdit?.(promotion.id)}
                     sx={{
+                      cursor: onEdit ? "pointer" : "default",
                       "&:last-child td": { borderBottom: 0 },
                       "&:hover": { bgcolor: "#F9FAFB" },
                       "& td": { height: 58, py: 1 },
@@ -243,12 +245,13 @@ export default function PromotionsTable({
                       <IconButton
                         aria-label={t("actions.openMenu", { ns: "promotions", name: promotion.code || promotion.name })}
                         size="small"
-                        onClick={(event) =>
+                        onClick={(event) => {
+                          event.stopPropagation();
                           setActionMenu({
                             anchor: event.currentTarget,
                             promotion,
-                          })
-                        }
+                          });
+                        }}
                         sx={{ color: "#667085" }}
                       >
                         <MoreVert fontSize="small" />

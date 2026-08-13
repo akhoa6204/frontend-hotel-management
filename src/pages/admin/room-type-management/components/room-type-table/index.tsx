@@ -48,12 +48,12 @@ export default function RoomTypeTable({ rows, loading = false, error = false, on
           ) : rows.length === 0 ? (
             <TableRow><TableCell colSpan={5} align="center" sx={{ py: 6 }}><Typography fontWeight={650}>{t("states.empty", { ns: "roomTypes" })}</Typography><Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{t("states.emptyHint", { ns: "roomTypes" })}</Typography></TableCell></TableRow>
           ) : rows.map((roomType) => (
-            <TableRow key={roomType.id} hover sx={{ height: 56, "& td": { py: 1, borderColor: "#EAECF0", color: "#1F2937", fontSize: 13.5 }, "&:hover": { bgcolor: "#F9FAFB" } }}>
+            <TableRow key={roomType.id} hover onClick={() => onEdit(roomType.id)} sx={{ height: 56, cursor: "pointer", "& td": { py: 1, borderColor: "#EAECF0", color: "#1F2937", fontSize: 13.5 }, "&:hover": { bgcolor: "#F9FAFB" } }}>
               <TableCell>{roomType.id}</TableCell>
               <TableCell sx={{ fontWeight: 650 }}>{roomType.name}</TableCell>
               <TableCell>{t("guests", { ns: "roomTypes", count: roomType.capacity })}</TableCell>
               <TableCell align="right" sx={{ fontWeight: 600 }}>{Number(roomType.basePrice).toLocaleString(i18n.resolvedLanguage === "en" ? "en-US" : "vi-VN")} {t("currency", { ns: "roomTypes" })}</TableCell>
-              <TableCell align="right"><IconButton size="small" aria-label={t("aria.rowActions", { ns: "roomTypes", name: roomType.name })} onClick={(event) => { setMenuAnchor(event.currentTarget); setActiveRow(roomType); }} sx={{ width: 32, height: 32, color: "#667085" }}><MoreVert fontSize="small" /></IconButton></TableCell>
+              <TableCell align="right"><IconButton size="small" aria-label={t("aria.rowActions", { ns: "roomTypes", name: roomType.name })} onClick={(event) => { event.stopPropagation(); setMenuAnchor(event.currentTarget); setActiveRow(roomType); }} sx={{ width: 32, height: 32, color: "#667085" }}><MoreVert fontSize="small" /></IconButton></TableCell>
             </TableRow>
           ))}
         </TableBody>
