@@ -32,6 +32,8 @@ import StaffRoomTypeService from "@services/staff/roomType.service";
 import StaffHousekeepingService from "@services/staff/housekeeping.service";
 import { BookingCancelRequest } from "@constant/request/BookingCancelRequest";
 import { useTranslation } from "react-i18next";
+import type { ApiResponse } from "@constant/response/ApiResponse";
+import type { HouseKeepingTaskResponse } from "@constant/response/HousekeepingResponse";
 
 export type BookingForm = Omit<BookingCreationRequest, "roomId"> & {
   roomTypeId?: number;
@@ -797,7 +799,7 @@ export default function useBookingManagement() {
   const mCreateHousekeepingTask = useMutation({
     mutationFn: async (data: HousekeepingCreationRequest) =>
       await StaffHousekeepingService.create(data),
-    onSuccess: async (data) => {
+    onSuccess: (data) => {
       if (data.staff?.id) {
         showSuccess(t("messages.housekeepingTaskCreated"));
       } else {
@@ -818,19 +820,43 @@ export default function useBookingManagement() {
         );
       }
 
-      await qc.invalidateQueries({
+      const listKey = [
+        "housekeeping-list",
+        selectedBookingId,
+        filtersHouseKeepingList.limit,
+        filtersHouseKeepingList.page,
+      ];
+
+      qc.setQueryData<ApiResponse<HouseKeepingTaskResponse[]>>(
+        listKey,
+        (current) => {
+          if (!current?.data) return current;
+          const exists = current.data.some((task) => task.id === data.id);
+          return {
+            ...current,
+            data: exists
+              ? current.data.map((task) => (task.id === data.id ? data : task))
+              : [data, ...current.data],
+            pagination: current.pagination
+              ? {
+                  ...current.pagination,
+                  total: exists
+                    ? current.pagination.total
+                    : current.pagination.total + 1,
+                }
+              : current.pagination,
+          };
+        },
+      );
+
+      void qc.invalidateQueries({
         queryKey: ["booking-detail", selectedBookingId],
       });
-      qc.invalidateQueries({
+      void qc.invalidateQueries({
         queryKey: ["housekeeping-detail", selectedBookingId, selectedTaskId],
       });
-      qc.invalidateQueries({
-        queryKey: [
-          "housekeeping-list",
-          selectedBookingId,
-          filtersHouseKeepingList.limit,
-          filtersHouseKeepingList.page,
-        ],
+      void qc.invalidateQueries({
+        queryKey: listKey,
       });
     },
     onError: (error: any) => {
@@ -884,8 +910,10 @@ export default function useBookingManagement() {
   const handleUpdateTask = async (data: HousekeepingUpdateRequest) =>
     await mUpdateInspectionTask.mutateAsync(data);
 
-  const handleCreateTask = async (data: HousekeepingCreationRequest) =>
+  const handleCreateTask = async (data: HousekeepingCreationRequest) => {
+    if (mCreateHousekeepingTask.isPending) return;
     await mCreateHousekeepingTask.mutateAsync(data);
+  };
 
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [filtersHouseKeepingList, setFiltersHouseKeepingList] = useState<{
@@ -1126,6 +1154,7 @@ export default function useBookingManagement() {
     updateService,
     removeService,
     handleCreateTask,
+    isCreatingHousekeepingTask: mCreateHousekeepingTask.isPending,
     handleUpdateTask,
     housekeepingDetail,
     loadingHousekeepingDetail,

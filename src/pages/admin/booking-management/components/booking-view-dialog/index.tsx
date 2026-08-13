@@ -50,6 +50,7 @@ export default function BookingViewDialog() {
     handleCheckout,
     isCheckingIn,
     isCheckingOut,
+    isCreatingHousekeepingTask,
     invoiceSummary,
   } = useBookingManagementContext();
 
@@ -59,7 +60,7 @@ export default function BookingViewDialog() {
   const renderActionButton = () => {
     const now = dayjs();
     const checkInTime = dayjs(bookingDetail.checkInDate)
-      .hour(14)
+      .hour(10)
       .minute(0)
       .second(0);
     const checkOutTime = dayjs(bookingDetail.checkOutDate)
@@ -194,6 +195,7 @@ export default function BookingViewDialog() {
             size="small"
             variant="outlined"
             color="primary"
+            disabled={isCreatingHousekeepingTask}
             onClick={() =>
               bookingDetail.id &&
               bookingDetail.room.id &&
