@@ -1,7 +1,7 @@
-import { InvoiceResponse } from "@constant/response/InvoiceResponse";
+import type { InvoiceResponse } from "@constant/response/InvoiceResponse";
 import httpClient from "..";
-import { InvoiceItemCreationRequest } from "@constant/request/InvoiceItemCreationRequest";
-import { InvoiceItemUpdateRequest } from "@constant/request/InvoiceItemUpdateRequest";
+import type { InvoiceItemCreationRequest } from "@constant/request/InvoiceItemCreationRequest";
+import type { InvoiceItemUpdateRequest } from "@constant/request/InvoiceItemUpdateRequest";
 
 const BASE_URL = "/staff/invoices";
 

@@ -1,13 +1,12 @@
-import { SearchFilter } from "@constant/internal/SearchFilter";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
 import httpClient from "..";
-import { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
-import { ApiResponse } from "@constant/response/ApiResponse";
-import { BookingResponse } from "@constant/response/BookingResponse";
-import { BookingCreationRequest } from "@constant/request/BookingCreationRequest";
-import { BookingUpdateRequest } from "@constant/request/BookingUpdateRequest";
-import { QuoteRequest } from "@constant/request/QuoteRequest";
-import { QuoteResponse } from "@constant/response/QuoteResponse";
-import { BookingCancelRequest } from "@constant/request/BookingCancelRequest";
+import type { ApiResponse } from "@constant/response/ApiResponse";
+import type { BookingResponse } from "@constant/response/BookingResponse";
+import type { BookingCreationRequest } from "@constant/request/BookingCreationRequest";
+import type { BookingUpdateRequest } from "@constant/request/BookingUpdateRequest";
+import type { QuoteRequest } from "@constant/request/QuoteRequest";
+import type { QuoteResponse } from "@constant/response/QuoteResponse";
+import type { BookingCancelRequest } from "@constant/request/BookingCancelRequest";
 
 const BASE_URL = "/staff/bookings";
 

@@ -1,6 +1,6 @@
-import { BookingStatus } from "@enums/BookingStatus";
-import { RoomResponse } from "./RoomResponse";
-import { UserShortResponse } from "./UserShortResponse";
+import type { BookingStatus } from "@enums/BookingStatus";
+import type { RoomResponse } from "./RoomResponse";
+import type { UserShortResponse } from "./UserShortResponse";
 
 export interface BookingResponse {
   id: string;

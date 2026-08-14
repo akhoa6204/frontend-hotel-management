@@ -1,5 +1,5 @@
-import { DiscountType } from "src/enums/DiscountType";
-import { PromotionScope } from "src/enums/PromotionScope";
+import type { DiscountType } from "src/enums/DiscountType";
+import type { PromotionScope } from "src/enums/PromotionScope";
 
 export interface PromotionUpdateRequest {
   name: string;

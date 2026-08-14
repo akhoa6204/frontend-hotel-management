@@ -1,4 +1,4 @@
-import { RoomResponse } from "@constant/response/RoomResponse";
+import type { RoomResponse } from "@constant/response/RoomResponse";
 import httpPublic from "..";
 
 const BASE_URL = "/public/rooms";

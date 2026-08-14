@@ -1,4 +1,4 @@
-import { Booking, PaymentMethod } from "@constant/types";
+import type { Booking, PaymentMethod } from "@constant/types";
 import {
   Button,
   Dialog,

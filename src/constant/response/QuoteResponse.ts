@@ -1,4 +1,4 @@
-import { PromotionResponse } from "./PromotionResponse";
+import type { PromotionResponse } from "./PromotionResponse";
 
 export type QuoteResponse = {
   nights: number;

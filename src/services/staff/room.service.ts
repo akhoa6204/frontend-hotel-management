@@ -1,10 +1,10 @@
-import { SearchFilter } from "@constant/internal/SearchFilter";
-import { ApiResponse } from "@constant/response/ApiResponse";
-import { RoomResponse } from "@constant/response/RoomResponse";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
+import type { ApiResponse } from "@constant/response/ApiResponse";
+import type { RoomResponse } from "@constant/response/RoomResponse";
 import httpClient from "..";
-import { RoomCreationRequest } from "@constant/request/RoomCreationRequest";
-import { RoomUpdateRequest } from "@constant/request/RoomUpdateRequest";
-import { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
+import type { RoomCreationRequest } from "@constant/request/RoomCreationRequest";
+import type { RoomUpdateRequest } from "@constant/request/RoomUpdateRequest";
+import type { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
 
 const BASE_URL = "/staff/rooms";
 

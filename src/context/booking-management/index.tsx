@@ -1,5 +1,6 @@
 import useBookingManagement from "@pages/admin/booking-management/useBookingManagement";
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, useContext } from "react";
+import type { ReactNode } from "react";
 
 type BookingManagementContextValue = ReturnType<typeof useBookingManagement>;
 

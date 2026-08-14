@@ -1,5 +1,5 @@
-import { UserShortResponse } from "@constant/response/UserShortResponse";
-import { UserRole } from "src/enums/UserRole";
+import type { UserShortResponse } from "@constant/response/UserShortResponse";
+import type { UserRole } from "src/enums/UserRole";
 
 export const isManager = (user?: UserShortResponse): boolean =>
   user?.roleName === "ADMIN" || user?.roleName === "MANAGER";

@@ -8,7 +8,7 @@ export const UnProtectedRoute = () => {
 };
 
 export default function PublicGate() {
-  const { user, hasRole, hasAnyRole } = useAuth();
+  const { user, hasRole } = useAuth();
 
   const managerPath = useMemo(() => {
     if (!user) return "/";

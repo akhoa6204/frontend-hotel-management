@@ -1,10 +1,10 @@
-import { HouseKeepingTaskResponse } from "@constant/response/HousekeepingResponse";
+import type { HouseKeepingTaskResponse } from "@constant/response/HousekeepingResponse";
 import httpClient from "..";
-import { ApiResponse } from "@constant/response/ApiResponse";
-import { SearchFilter } from "@constant/internal/SearchFilter";
-import { SearchHouseKeepingTask } from "@constant/internal/SearchHousekeepingTask";
-import { HousekeepingCreationRequest } from "@constant/request/HousekeepingCreationRequest";
-import { HousekeepingUpdateRequest } from "@constant/request/HousekeepingUpdateRequest";
+import type { ApiResponse } from "@constant/response/ApiResponse";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
+import type { SearchHouseKeepingTask } from "@constant/internal/SearchHousekeepingTask";
+import type { HousekeepingCreationRequest } from "@constant/request/HousekeepingCreationRequest";
+import type { HousekeepingUpdateRequest } from "@constant/request/HousekeepingUpdateRequest";
 
 const BASE_URL = "/staff/housekeepings";
 

@@ -1,8 +1,8 @@
-import { BookingCreationRequest } from "@constant/request/BookingCreationRequest";
+import type { BookingCreationRequest } from "@constant/request/BookingCreationRequest";
 import httpPublic from "..";
-import { BookingResponse } from "@constant/response/BookingResponse";
-import { QuoteRequest } from "@constant/request/QuoteRequest";
-import { QuoteResponse } from "@constant/response/QuoteResponse";
+import type { BookingResponse } from "@constant/response/BookingResponse";
+import type { QuoteRequest } from "@constant/request/QuoteRequest";
+import type { QuoteResponse } from "@constant/response/QuoteResponse";
 
 const BASE_URL = "/public/bookings";
 

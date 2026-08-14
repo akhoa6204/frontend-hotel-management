@@ -1,8 +1,8 @@
-import { HousekeepingTaskType } from "@enums/HousekeepingTaskType";
-import { HousekeepingTaskStatus } from "@enums/HousekeepingTaskStatus";
+import type { HousekeepingTaskType } from "@enums/HousekeepingTaskType";
+import type { HousekeepingTaskStatus } from "@enums/HousekeepingTaskStatus";
 
-import { RoomResponse } from "./RoomResponse";
-import { UserShortResponse } from "./UserShortResponse";
+import type { RoomResponse } from "./RoomResponse";
+import type { UserShortResponse } from "./UserShortResponse";
 
 export type HouseKeepingTaskResponse = {
   id: number;

@@ -1,8 +1,8 @@
-import { SearchFilter } from "@constant/internal/SearchFilter";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
 import httpPublic from "..";
-import { ApiResponse } from "@constant/response/ApiResponse";
-import { ReviewResponse } from "@constant/response/ReviewResponse";
-import { ReviewOverviewResponse } from "@constant/response/ReviewOverviewResponse";
+import type { ApiResponse } from "@constant/response/ApiResponse";
+import type { ReviewResponse } from "@constant/response/ReviewResponse";
+import type { ReviewOverviewResponse } from "@constant/response/ReviewOverviewResponse";
 
 const BASE_URL = "/public/reviews";
 

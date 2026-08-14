@@ -1,4 +1,4 @@
-import { ServiceType } from "src/enums/ServiceType";
+import type { ServiceType } from "src/enums/ServiceType";
 
 export type ServiceUpdateRequest = {
   id: number;

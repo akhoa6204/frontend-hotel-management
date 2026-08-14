@@ -8,29 +8,29 @@ import useForm from "@hooks/useForm";
 
 import useSocket from "@hooks/useSocket";
 import { useEntityPicker } from "@hooks/useEntityPickerDialog";
-import { SearchFilter } from "@constant/internal/SearchFilter";
-import { BookingCreationRequest } from "@constant/request/BookingCreationRequest";
-import { PaymentCreationRequest } from "@constant/request/PaymentCreationRequest";
-import { PaymentMethod } from "@enums/PaymentMethod";
-import { QuoteResponse } from "@constant/response/QuoteResponse";
-import { InvoiceItemUpdateRequest } from "@constant/request/InvoiceItemUpdateRequest";
-import { BookingResponse } from "@constant/response/BookingResponse";
-import { RoomResponse } from "@constant/response/RoomResponse";
-import { HousekeepingCreationRequest } from "@constant/request/HousekeepingCreationRequest";
-import { HousekeepingUpdateRequest } from "@constant/request/HousekeepingUpdateRequest";
-import { ServiceType } from "@enums/ServiceType";
-import { QrState } from "@constant/internal/QrState";
-import { DialogState } from "@constant/internal/DialogState";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
+import type { BookingCreationRequest } from "@constant/request/BookingCreationRequest";
+import type { PaymentCreationRequest } from "@constant/request/PaymentCreationRequest";
+import type { PaymentMethod } from "@enums/PaymentMethod";
+import type { QuoteResponse } from "@constant/response/QuoteResponse";
+import type { InvoiceItemUpdateRequest } from "@constant/request/InvoiceItemUpdateRequest";
+import type { BookingResponse } from "@constant/response/BookingResponse";
+import type { RoomResponse } from "@constant/response/RoomResponse";
+import type { HousekeepingCreationRequest } from "@constant/request/HousekeepingCreationRequest";
+import type { HousekeepingUpdateRequest } from "@constant/request/HousekeepingUpdateRequest";
+import type { ServiceType } from "@enums/ServiceType";
+import type { QrState } from "@constant/internal/QrState";
+import type { DialogState } from "@constant/internal/DialogState";
 import StaffBookingService from "@services/staff/booking.service";
 import StaffInvoiceService from "@services/staff/invoice.service";
 import { StaffExtraServiceService } from "@services/staff/extraService.service";
-import { SearchExtraService } from "@constant/internal/SearchExtraService";
-import { InvoiceItemCreationRequest } from "@constant/request/InvoiceItemCreationRequest";
+import type { SearchExtraService } from "@constant/internal/SearchExtraService";
+import type { InvoiceItemCreationRequest } from "@constant/request/InvoiceItemCreationRequest";
 import StaffRoomService from "@services/staff/room.service";
 import StaffPaymentService from "@services/staff/payment.service";
 import StaffRoomTypeService from "@services/staff/roomType.service";
 import StaffHousekeepingService from "@services/staff/housekeeping.service";
-import { BookingCancelRequest } from "@constant/request/BookingCancelRequest";
+import type { BookingCancelRequest } from "@constant/request/BookingCancelRequest";
 import { useTranslation } from "react-i18next";
 import type { ApiResponse } from "@constant/response/ApiResponse";
 import type { HouseKeepingTaskResponse } from "@constant/response/HousekeepingResponse";
@@ -104,10 +104,6 @@ export default function useBookingManagement() {
   } = useForm<{
     method: PaymentMethod;
   }>({ method: "CASH" }, undefined, async () => {
-    const subtotal = Number(invoiceDetail?.subtotal || 0);
-    const discount = Number(invoiceDetail?.discountAmount || 0);
-    const tax = Number(invoiceDetail?.taxAmount || 0);
-    const total = subtotal - discount + tax;
     const remain = Number(invoiceDetail?.remainingAmount || 0);
 
     if (!bookingDetail) return;
@@ -136,7 +132,6 @@ export default function useBookingManagement() {
 
   const {
     selectedId,
-    selectedRow,
     setSelectedId,
     open: openEntityPickerDialog,
     openPicker,
@@ -168,10 +163,8 @@ export default function useBookingManagement() {
 
   const {
     form: bookingForm,
-    updateForm,
     onChangeField,
     resetForm: resetBookingForm,
-    errors: bookingFormErrors,
     onSubmit: onSubmitBookingForm,
   } = useForm<BookingForm>(
     {
@@ -187,7 +180,7 @@ export default function useBookingManagement() {
     (form) => validateBookingForm(form, t),
     async (form: BookingForm) => {
       try {
-        const { id, invoiceId, remainingAmount } =
+        const { invoiceId, remainingAmount } =
           await mCreateBooking.mutateAsync(form);
 
         const { id: paymentId } = await mCreatePayment.mutateAsync({
@@ -575,7 +568,7 @@ export default function useBookingManagement() {
         status: "SUCCESS",
       });
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-bookings", filter] });
       qc.invalidateQueries({ queryKey: ["available-rooms-create"] });
       showSuccess(t("messages.paymentSuccess"));
@@ -703,7 +696,7 @@ export default function useBookingManagement() {
   const mConfirmCancelled = useMutation({
     mutationFn: (body: BookingCancelRequest) =>
       StaffBookingService.cancel(body),
-    onSuccess: (_data, bookingId) => {
+    onSuccess: () => {
       showSuccess(t("messages.cancelBookingSuccess"));
       closeCancelDialog();
       qc.invalidateQueries({ queryKey: ["admin-bookings", filter] });

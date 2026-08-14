@@ -1,4 +1,4 @@
-import { PaymentStatus } from "@enums/PaymentStatus";
+import type { PaymentStatus } from "@enums/PaymentStatus";
 
 export type PaymentUpdateRequest = {
   paymentId: number;

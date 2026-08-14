@@ -1,5 +1,5 @@
-import { UserRole } from "@enums/UserRole";
-import { ShiftResponse } from "./ShiftResponse";
+import type { UserRole } from "@enums/UserRole";
+import type { ShiftResponse } from "./ShiftResponse";
 
 export type AssignmentInfoResponse = {
   id: number;

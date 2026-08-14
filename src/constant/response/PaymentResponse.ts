@@ -1,6 +1,6 @@
-import { PaymentMethod } from "@enums/PaymentMethod";
-import { PaymentStatus } from "@enums/PaymentStatus";
-import { PaymentType } from "@enums/PaymentType";
+import type { PaymentMethod } from "@enums/PaymentMethod";
+import type { PaymentStatus } from "@enums/PaymentStatus";
+import type { PaymentType } from "@enums/PaymentType";
 
 export type PaymentResponse = {
   id: number;

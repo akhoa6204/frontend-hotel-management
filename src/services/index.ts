@@ -1,5 +1,5 @@
-import axios, {
-  AxiosError,
+import axios, { AxiosError } from "axios";
+import type {
   AxiosRequestConfig,
   InternalAxiosRequestConfig,
 } from "axios";

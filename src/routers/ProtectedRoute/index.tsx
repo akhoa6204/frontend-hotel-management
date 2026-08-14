@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 import useAuth from "@hooks/useAuth";
 import { useMemo } from "react";
-import { UserRole } from "src/enums/UserRole";
+import type { UserRole } from "src/enums/UserRole";
 
 interface ProtectedRouteProps {
   children?: React.ReactNode;
@@ -37,7 +37,8 @@ export function ProtectedRoute({
     return <Navigate to={defaultUnauthorized} replace />;
   }
 
-  if (requiredRoles && requiredRoles.length && !hasAnyRole(requiredRoles)) {
+  const acceptedRoles = requiredRoles ?? requiredAnyRole;
+  if (acceptedRoles?.length && !hasAnyRole(acceptedRoles)) {
     return <Navigate to={defaultUnauthorized} replace />;
   }
 

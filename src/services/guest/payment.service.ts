@@ -1,7 +1,7 @@
-import { PaymentCreationRequest } from "@constant/request/PaymentCreationRequest";
+import type { PaymentCreationRequest } from "@constant/request/PaymentCreationRequest";
 import httpPublic from "..";
-import { CheckoutLinkResponse } from "@constant/response/CheckoutLinkResponse";
-import { PaymentResponse } from "@constant/response/PaymentResponse";
+import type { CheckoutLinkResponse } from "@constant/response/CheckoutLinkResponse";
+import type { PaymentResponse } from "@constant/response/PaymentResponse";
 
 const BASE_URL = "/public/payments";
 
