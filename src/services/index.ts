@@ -5,7 +5,8 @@ import axios, {
 } from "axios";
 import { store } from "@store";
 import { logout } from "@store/slice/account.slice";
-const BASE_URL = "http://localhost:3001/api";
+const BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:3001/api";
 const TIME_REQUEST = 25_000;
 
 export const AxiosInstanceDefault = axios.create({
