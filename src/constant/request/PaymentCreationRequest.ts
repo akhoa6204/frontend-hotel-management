@@ -1,5 +1,5 @@
-import { PaymentMethod } from "@enums/PaymentMethod";
-import { PaymentType } from "@enums/PaymentType";
+import type { PaymentMethod } from "@enums/PaymentMethod";
+import type { PaymentType } from "@enums/PaymentType";
 
 export type PaymentCreationRequest = {
   invoiceId: string;

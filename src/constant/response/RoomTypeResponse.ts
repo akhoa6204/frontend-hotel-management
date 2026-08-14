@@ -1,5 +1,5 @@
-import { AmenityResponse } from "./AmenityResponse";
-import { RoomTypeImageResponse } from "./RoomTypeImageResponse";
+import type { AmenityResponse } from "./AmenityResponse";
+import type { RoomTypeImageResponse } from "./RoomTypeImageResponse";
 
 export interface RoomTypeResponse {
   id: number;

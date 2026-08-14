@@ -1,4 +1,4 @@
-import { RoomStatus } from "src/enums/RoomStatus";
+import type { RoomStatus } from "src/enums/RoomStatus";
 
 export type RoomUpdateRequest = {
   name?: string;

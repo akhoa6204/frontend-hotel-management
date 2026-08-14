@@ -1,6 +1,6 @@
-import { InvoiceStatus } from "@enums/InvoiceStatus";
-import { ServiceResponse } from "./ServiceResponse";
-import { PaymentResponse } from "./PaymentResponse";
+import type { InvoiceStatus } from "@enums/InvoiceStatus";
+import type { ServiceResponse } from "./ServiceResponse";
+import type { PaymentResponse } from "./PaymentResponse";
 
 export interface InvoiceResponse {
   id: string;

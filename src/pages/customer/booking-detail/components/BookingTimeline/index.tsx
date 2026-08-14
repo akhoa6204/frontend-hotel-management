@@ -1,4 +1,4 @@
-import { BookingResponse } from "@constant/response/BookingResponse";
+import type { BookingResponse } from "@constant/response/BookingResponse";
 import {
   StarBorderRounded,
   HotelRounded,

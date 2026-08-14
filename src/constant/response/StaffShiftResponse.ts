@@ -1,5 +1,5 @@
-import { AssignmentInfoResponse } from "./AssignmentInfoResponse";
-import { UserShortResponse } from "./UserShortResponse";
+import type { AssignmentInfoResponse } from "./AssignmentInfoResponse";
+import type { UserShortResponse } from "./UserShortResponse";
 
 export type StaffShiftResponse = {
   staff: UserShortResponse;

@@ -1,4 +1,4 @@
-import { HousekeepingTaskStatus } from "@enums/HousekeepingTaskStatus";
+import type { HousekeepingTaskStatus } from "@enums/HousekeepingTaskStatus";
 
 export type SearchHouseKeepingTask = {
   status?: HousekeepingTaskStatus;

@@ -1,10 +1,10 @@
-import { ApiResponse } from "@constant/response/ApiResponse";
+import type { ApiResponse } from "@constant/response/ApiResponse";
 import httpClient from "..";
-import { ServiceResponse } from "@constant/response/ServiceResponse";
-import { ServiceCreationRequest } from "@constant/request/ServiceCreationRequest";
-import { ServiceUpdateRequest } from "@constant/request/ServiceUpdateRequest";
-import { SearchFilter } from "@constant/internal/SearchFilter";
-import { SearchExtraService } from "@constant/internal/SearchExtraService";
+import type { ServiceResponse } from "@constant/response/ServiceResponse";
+import type { ServiceCreationRequest } from "@constant/request/ServiceCreationRequest";
+import type { ServiceUpdateRequest } from "@constant/request/ServiceUpdateRequest";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
+import type { SearchExtraService } from "@constant/internal/SearchExtraService";
 
 const BASE_URL = "/staff/extra-services";
 

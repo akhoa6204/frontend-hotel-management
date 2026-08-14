@@ -1,4 +1,4 @@
-import { Room } from "@constant/types";
+import type { Room } from "@constant/types";
 import { BgRoom } from "@images";
 export const mockRooms: Room[] = [
   {

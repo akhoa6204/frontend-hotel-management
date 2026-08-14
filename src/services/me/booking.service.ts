@@ -1,10 +1,10 @@
-import { ApiResponse } from "@constant/response/ApiResponse";
-import { BookingResponse } from "@constant/response/BookingResponse";
+import type { ApiResponse } from "@constant/response/ApiResponse";
+import type { BookingResponse } from "@constant/response/BookingResponse";
 import httpClient from "..";
-import { SearchFilter } from "@constant/internal/SearchFilter";
-import { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
-import { BookingStatus } from "@enums/BookingStatus";
-import { BookingCancelRequest } from "@constant/request/BookingCancelRequest";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
+import type { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
+import type { BookingStatus } from "@enums/BookingStatus";
+import type { BookingCancelRequest } from "@constant/request/BookingCancelRequest";
 
 const BASE_URL = "/me/bookings";
 

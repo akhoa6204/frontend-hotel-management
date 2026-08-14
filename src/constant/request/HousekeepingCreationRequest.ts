@@ -1,4 +1,4 @@
-import { HousekeepingTaskType } from "@enums/HousekeepingTaskType";
+import type { HousekeepingTaskType } from "@enums/HousekeepingTaskType";
 
 export type HousekeepingCreationRequest = {
   staffId?: string;

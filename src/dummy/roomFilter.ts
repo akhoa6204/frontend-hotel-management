@@ -1,4 +1,4 @@
-import { RoomType } from "@pages/search-results-page/interface";
+import type { RoomType } from "@constant/types";
 
 export const mockRoomFilters: {
   key: RoomType;

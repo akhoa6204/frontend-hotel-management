@@ -1,6 +1,5 @@
-import { SearchFilter } from "@constant/internal/SearchFilter";
-import { AmenityResponse } from "@constant/response/AmenityResponse";
-import { ApiResponse } from "@constant/response/ApiResponse";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
+import type { AmenityResponse } from "@constant/response/AmenityResponse";
 import httpClient from "..";
 
 const BASE_URL = "/staff/amenities";

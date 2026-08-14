@@ -2,7 +2,7 @@ import GuestReviewService from "@services/guest/review.service";
 import GuestRoomTypeService from "@services/guest/roomType.service";
 import { useQuery } from "@tanstack/react-query";
 import { buildDefaultSearchParams } from "@utils/dateRange";
-import { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
+import type { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 

@@ -7,7 +7,7 @@ import {
   canAccessCustomer,
 } from "@utils/roleUtils";
 import { useAppSelector } from "./useRedux";
-import { UserRole } from "src/enums/UserRole";
+import type { UserRole } from "src/enums/UserRole";
 
 const useAuth = () => {
   const user = useAppSelector((state) => state.account.user);

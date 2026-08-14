@@ -1,9 +1,9 @@
-import { SearchFilter } from "@constant/internal/SearchFilter";
-import { ApiResponse } from "@constant/response/ApiResponse";
-import { RoomTypeResponse } from "@constant/response/RoomTypeResponse";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
+import type { ApiResponse } from "@constant/response/ApiResponse";
+import type { RoomTypeResponse } from "@constant/response/RoomTypeResponse";
 import httpClient from "..";
-import { RoomTypeCreationRequest } from "@constant/request/RoomTypeCreationRequest";
-import { RoomTypeUpdateRequest } from "@constant/request/RoomTypeUpdateRequest";
+import type { RoomTypeCreationRequest } from "@constant/request/RoomTypeCreationRequest";
+import type { RoomTypeUpdateRequest } from "@constant/request/RoomTypeUpdateRequest";
 
 const BASE_URL = "/staff/room-types";
 

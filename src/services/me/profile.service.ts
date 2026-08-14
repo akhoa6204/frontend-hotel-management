@@ -1,7 +1,7 @@
-import { UserShortResponse } from "@constant/response/UserShortResponse";
+import type { UserShortResponse } from "@constant/response/UserShortResponse";
 import httpClient from "..";
-import { UserUpdateRequest } from "@constant/request/UserPasswordRequest";
-import { UserUpdatePasswordRequest } from "@constant/request/UserUpdatePasswordRequest";
+import type { UserUpdateRequest } from "@constant/request/UserPasswordRequest";
+import type { UserUpdatePasswordRequest } from "@constant/request/UserUpdatePasswordRequest";
 
 const BASE_URL = "/api/me";
 

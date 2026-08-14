@@ -10,7 +10,7 @@ import {
   FormControlLabel,
   Radio,
 } from "@mui/material";
-import { BookingForm } from "../../interface";
+import type { BookingForm } from "../../interface";
 import { useTranslation } from "react-i18next";
 
 type Props = {

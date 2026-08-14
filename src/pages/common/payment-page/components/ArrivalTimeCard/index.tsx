@@ -10,7 +10,7 @@ import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import dayjs from "dayjs";
 import { useMemo } from "react";
 import { formatDate } from "@utils/format";
-import { BookingForm } from "@pages/common/booking-page/interface";
+import type { BookingForm } from "../../interface";
 import { useTranslation } from "react-i18next";
 
 type Option = { value: string; label: string };

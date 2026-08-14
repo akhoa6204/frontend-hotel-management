@@ -1,9 +1,9 @@
-import { SearchFilter } from "@constant/internal/SearchFilter";
-import { ApiResponse } from "@constant/response/ApiResponse";
-import { PromotionResponse } from "@constant/response/PromotionResponse";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
+import type { ApiResponse } from "@constant/response/ApiResponse";
+import type { PromotionResponse } from "@constant/response/PromotionResponse";
 import httpClient from "..";
-import { PromotionCreationRequest } from "@constant/request/PromotionCreationRequest";
-import { PromotionUpdateRequest } from "@constant/request/PromotionUpdateRequest";
+import type { PromotionCreationRequest } from "@constant/request/PromotionCreationRequest";
+import type { PromotionUpdateRequest } from "@constant/request/PromotionUpdateRequest";
 
 const BASE_URL = "/staff/promotions";
 

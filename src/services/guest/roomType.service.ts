@@ -1,7 +1,7 @@
-import { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
-import { SearchFilter } from "@constant/internal/SearchFilter";
-import { ApiResponse } from "@constant/response/ApiResponse";
-import { RoomTypeResponse } from "@constant/response/RoomTypeResponse";
+import type { SearchBookingFilter } from "@constant/internal/SearchBookingFilter";
+import type { SearchFilter } from "@constant/internal/SearchFilter";
+import type { ApiResponse } from "@constant/response/ApiResponse";
+import type { RoomTypeResponse } from "@constant/response/RoomTypeResponse";
 import httpPublic from "..";
 
 const BASE_URL = "/public/room-types";

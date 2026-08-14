@@ -1,5 +1,5 @@
 import { RoomCard, RoomCardSkeleton } from "@components";
-import { RoomTypeGuest } from "@constant/types";
+import type { RoomTypeGuest } from "@constant/types";
 import { Box, Grid, Stack, Skeleton } from "@mui/material";
 import { useTranslation } from "react-i18next";
 

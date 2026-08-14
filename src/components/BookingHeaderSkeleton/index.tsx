@@ -1,11 +1,9 @@
 import { ArrowBack } from "@mui/icons-material";
 import {
-  Box,
   Divider,
   IconButton,
   Skeleton,
   Stack,
-  Typography,
 } from "@mui/material";
 
 const BookingHeaderSkeleton = () => {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Errors } from "@constant/types";
+import type { Errors } from "@constant/types";
 
 type ValidateFn<T> = (form: T) => Errors<T>;
 type Callback<T> = (form: T) => void;

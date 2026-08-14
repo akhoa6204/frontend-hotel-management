@@ -1,5 +1,5 @@
-import { HousekeepingTaskStatus } from "@enums/HousekeepingTaskStatus";
-import { HousekeepingTaskType } from "@enums/HousekeepingTaskType";
+import type { HousekeepingTaskStatus } from "@enums/HousekeepingTaskStatus";
+import type { HousekeepingTaskType } from "@enums/HousekeepingTaskType";
 
 export type HousekeepingUpdateRequest = {
   id: number;

@@ -5,8 +5,9 @@ import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs, { Dayjs } from "dayjs";
-import { SearchState } from "@constant/types";
+import dayjs from "dayjs";
+import type { Dayjs } from "dayjs";
+import type { SearchState } from "@constant/types";
 import { useTranslation } from "react-i18next";
 
 type Props = {

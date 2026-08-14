@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import { SortKey } from "../../interface";
+import type { SortKey } from "../../interface";
 import { useTranslation } from "react-i18next";
 
 interface Props {
